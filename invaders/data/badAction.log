@@ -1,0 +1,52 @@
+--------------
+IPA:
+POST:
+Array
+(
+)
+
+GET:
+Array
+(
+    [action] => foo
+)
+
+--------------
+IPA:127.0.0.1
+POST:
+Array
+(
+)
+
+GET:
+Array
+(
+    [action] => foo
+)
+
+--------------
+IPA:127.0.0.1
+POST:
+Array
+(
+)
+
+GET:
+Array
+(
+    [action] => foo
+)
+
+--------------
+IPA:185.25.49.183
+POST:
+Array
+(
+)
+
+GET:
+Array
+(
+    [action] => 
+)
+

@@ -1,0 +1,149 @@
+p{ text-align:justify; }
+a{ text-decoration:none; color: #FEA }
+a:visited{ text-decoration:none; color: #FEA }
+a:active{ text-decoration:none; color: #FEA }
+a:hover{ text-decoration:none; color: #FEA }
+body{
+	background-color: #000;
+	/*background-image: url(images/backTexture.png);*/
+	background-image: url(images/scratchedmetal.png);
+	font-family: 'Special Elite', cursive;
+	font-size: 24px;
+	color : #FFF;
+	text-align:center;
+}
+h1{
+	font-size: 60px;
+	line-height: 70px;
+	height: 70px;
+	margin-top: 40px;
+	margin-bottom: 0;
+}
+
+div.menuButton{
+	font-size: 48px;
+	line-height: 56px;
+	margin: auto;
+	padding : 0;
+	cursor:pointer;
+	color: #CCC;
+	display: inline-block;
+	padding: 5px;
+	padding: 0 .5em;
+}
+
+div.menuButton:hover{
+	color: #FFF;
+}
+
+div.menuOption{
+	font-size: 48px;
+	line-height: 56px;
+	margin: auto;
+	padding : 0;
+	cursor:pointer;
+	color: #CCC;
+}
+
+div.menuOption:hover{
+	font-weight: bold;
+	color: #FFF;
+}
+
+div.menuSelected{
+	font-weight: bold;
+	color: #FFF;
+}
+
+#canvas{
+	width: 100%;
+	height: 819px;
+	position: absolute;
+	top: 0;
+	left: 0;
+	background-image: url(images/hexgrid3.png);
+	margin-top: -42px;
+}
+#canvasOverlay{
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	top: 0;
+	left: 0;
+	background-image: url(images/overlay1.png);
+}
+#canvaswrapper{
+	width: 640px;
+	height: 777px;
+	overflow:hidden;
+	position: relative;
+	background-image: url(images/rust.png);
+}
+#gameWrapper{
+	margin:auto;
+	width: 900px;
+	/*border: 1px solid #000;*/
+}
+#previewWrapper{
+	width: 222px;
+	height: 222px;
+	background-image: url(images/rust.png);
+	float:right;
+	margin: 0 10px;
+	position: relative;
+}
+#preview{
+	width: 100%;
+	height: 100%;
+	background-image: url(images/hexgrid3.png);
+	position: absolute;
+	top:0;
+	left:0;
+}
+#previewOverlay{
+	width: 100%;
+	height: 100%;
+	background-image: url(images/preview_overlay.png);
+	position: absolute;
+	top:0;
+	left:0;
+}
+#laser{
+	position: absolute;
+	height: 2px;
+	width: 100%;
+	background-image: url(images/laser.png);
+	top: 94px;
+	left: 0;
+}
+
+#laserguns{
+	position: absolute;
+	height: 49px;
+	width: 100%;
+	background-image: url(images/laserguns.png);
+	top: 94px;
+	margin-top: -24px;
+	left: 0;
+}
+#menu{
+	margin-top: 2em;
+}
+
+#loading{
+	font-size: 48px;
+	margin-top: 200px;
+}
+
+#loadingBar{
+	display: inline-block;
+	margin: auto;
+	width: 100%;
+	text-align:center;
+	font-size: 24px;
+	overflow: hidden;
+	height: 8em;
+	margin-top: 0.5em;
+	line-height: 1.5em;
+	color: #A99;
+}

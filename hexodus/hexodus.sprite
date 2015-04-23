@@ -1,0 +1,54 @@
+image:images/moretiles.png;
+frameWidth: 48;
+frameHeight: 42;
+frameRate: 100;
+
+frame: name=yellow_0, x=0, y = 0;
+frame: name=yellow_1, x=1, y = 0;
+frame: name=yellow_2, x=2, y = 0;
+frame: name=yellow_3, x=3, y = 0;
+frame: name=yellow_4, x=4, y = 0;
+frame: name=yellow_5, x=5, y = 0;
+
+frame: name=green_0, x=0, y = 3;
+frame: name=green_1, x=1, y = 3;
+frame: name=green_2, x=2, y = 3;
+frame: name=green_3, x=3, y = 3;
+frame: name=green_4, x=4, y = 3;
+frame: name=green_5, x=5, y = 3;
+
+frame: name=purple_0, x=0, y = 1;
+frame: name=purple_1, x=1, y = 1;
+frame: name=purple_2, x=2, y = 1;
+frame: name=purple_3, x=3, y = 1;
+frame: name=purple_4, x=4, y = 1;
+frame: name=purple_5, x=5, y = 1;
+
+frame: name=blue_0, x=0, y = 5;
+frame: name=blue_1, x=1, y = 5;
+frame: name=blue_2, x=2, y = 5;
+frame: name=blue_3, x=3, y = 5;
+frame: name=blue_4, x=4, y = 5;
+frame: name=blue_5, x=5, y = 5;
+
+frame: name=cyan_0, x=0, y = 4;
+frame: name=cyan_1, x=1, y = 4;
+frame: name=cyan_2, x=2, y = 4;
+frame: name=cyan_3, x=3, y = 4;
+frame: name=cyan_4, x=4, y = 4;
+frame: name=cyan_5, x=5, y = 4;
+
+frame: name=red_0, x=0, y = 2;
+frame: name=red_1, x=1, y = 2;
+frame: name=red_2, x=2, y = 2;
+frame: name=red_3, x=3, y = 2;
+frame: name=red_4, x=4, y = 2;
+frame: name=red_5, x=5, y = 2;
+
+sequence: name=dissolve_red, frames = red_0 red_1 red_2 red_3 red_4 red_5 red_c;
+sequence: name=dissolve_green, frames = green_0 green_1 green_2 green_3 green_4 green_5 green_c;
+sequence: name=dissolve_blue, frames = blue_0 blue_1 blue_2 blue_3 blue_4 blue_5 blue_c;
+sequence: name=dissolve_yellow, frames = yellow_0 yellow_1 yellow_2 yellow_3 yellow_4 yellow_5 yellow_c;
+sequence: name=dissolve_cyan, frames = cyan_0 cyan_1 cyan_2 cyan_3 cyan_4 cyan_5 cyan_c;
+sequence: name=dissolve_purple, frames = purple_0 purple_1 purple_2 purple_3 purple_4 purple_5 purple_c;
+

@@ -1,0 +1,23 @@
+image:images/clips.png;
+frameWidth: 1;
+frameHeight: 1;
+
+frame: name=horse_1, x = 0, y = 0, width = 240, height = 172;
+frame: name=horse_2, x = 240, y = 0, width = 196, height = 172;
+frame: name=swan, x = 436, y = 0, width = 160, height = 158;
+frame: name=giraffe, x = 596, y = 0, width = 91, height = 199;
+
+frame: name=camel, x = 0, y = 199, width = 271, height = 160;
+frame: name=duck, x = 271, y = 199, width = 160, height = 149;
+frame: name=mushroom, x = 431, y = 199, width = 120, height = 113;
+frame: name=bug, x = 551, y = 199, width = 140, height = 64;
+
+frame: name=raven, x = 0, y = 359, width = 303, height = 150;
+frame: name=turtle, x = 303, y = 359, width = 140, height = 129;
+frame: name=bison_skull, x = 443, y = 359, width = 160, height = 118;
+frame: name=3dplus, x = 603, y = 359, width = 167, height = 160;
+
+frame: name=raptor, x = 0, y = 519, width = 289, height = 140;
+frame: name=jellyfish, x = 289, y = 519, width = 117, height = 120;
+frame: name=gecko, x = 406, y = 519, width = 131, height = 161;
+frame: name=octopus, x = 537, y = 519, width = 213, height = 160;

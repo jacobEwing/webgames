@@ -1,0 +1,11 @@
+image: sprites/shots.png;
+frameWidth: 16;
+frameHeight: 32;
+centerx: 8;
+centery: 16;
+
+frame:name=normal, x=0, y=0;
+frame:name=fast, x = 0, y = 0, xoffset = 18, width = 12, height = 25, centerx = 6, centery = 6;
+frame:name=leftbank, width = 20, height = 30, x = 0, y = 0, xoffset = 32, yofset = 0, centerx = 7, centery = 8;
+frame:name=rightbank, width = 20, height = 30, x = 0, y = 0, xoffset = 52, yofset = 0, centerx = 12, centery = 7;
+frame:name=bfg, width = 20, height=43, x = 0, y = 0, xoffset = 72, yoffset = 0, centerx = 8, centery = 8;

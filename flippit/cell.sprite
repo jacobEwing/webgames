@@ -1,0 +1,33 @@
+image: images/tiles.png;
+frameWidth: 64;
+frameHeight: 64;
+frameRate: 28;
+frame:name=0, x=0, y=0;
+frame:name=1, x=1, y=0;
+frame:name=2, x=2, y=0;
+frame:name=3, x=3, y=0;
+frame:name=4, x=4, y=0;
+frame:name=5, x=5, y=0;
+
+frame:name=6, x=0, y=1;
+frame:name=7, x=1, y=1;
+frame:name=8, x=2, y=1;
+frame:name=9, x=3, y=1;
+frame:name=10, x=4, y=1;
+frame:name=11, x=5, y=1;
+
+frame:name=12, x=0, y=2;
+frame:name=13, x=1, y=2;
+frame:name=14, x=2, y=2;
+frame:name=15, x=3, y=2;
+frame:name=16, x=4, y=2;
+frame:name=17, x=5, y=2;
+
+frame:name=18, x=0, y=3;
+frame:name=19, x=1, y=3;
+frame:name=20, x=2, y=3;
+frame:name=21, x=3, y=3;
+
+sequence: name = on, frames = 1 2 3 4 5 6 7 8 9 10 11;
+sequence: name = off, frames = 12 13 14 15 16 17 18 19 20 21 0;
+sequence: name = flip, frames = 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 0;

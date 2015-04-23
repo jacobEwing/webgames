@@ -1,0 +1,40 @@
+image: sprites/spikey.png;
+frameWidth: 48;
+frameHeight: 48;
+centerx: 24;
+centery: 24;
+
+frame:name=0, x=0, y=0;
+frame:name=1, x=1, y=0;
+frame:name=2, x=2, y=0;
+frame:name=3, x=3, y=0;
+frame:name=4, x=4, y=0;
+frame:name=5, x=5, y=0;
+frame:name=6, x=6, y=0;
+frame:name=7, x=0, y=1;
+frame:name=8, x=1, y=1;
+frame:name=9, x=2, y=1;
+frame:name=10, x=3, y=1;
+frame:name=11, x=4, y=1;
+frame:name=12, x=5, y=1;
+frame:name=13, x=6, y=1;
+frame:name=14, x=0, y=2;
+frame:name=15, x=1, y=2;
+frame:name=16, x=2, y=2;
+frame:name=17, x=3, y=2;
+frame:name=18, x=4, y=2;
+frame:name=19, x=5, y=2;
+frame:name=20, x=6, y=2;
+frame:name=21, x=0, y=3;
+frame:name=22, x=1, y=3;
+frame:name=23, x=2, y=3;
+frame:name=24, x=3, y=3;
+frame:name=25, x=4, y=3;
+frame:name=26, x=5, y=3;
+frame:name=27, x=6, y=3;
+frame:name=28, x=0, y=4;
+frame:name=29, x=1, y=4;
+frame:name=30, x=2, y=4;
+frame:name=31, x=3, y=4;
+
+sequence: name=animate, frames = 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31

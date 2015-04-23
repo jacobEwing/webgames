@@ -1,0 +1,41 @@
+image: sprites/ship.png;
+frameWidth: 72;
+frameHeight: 72;
+centerx: 36;
+centery: 42;
+
+frame:name=bfg_1, x=0, y=0;
+frame:name=bfg_2, x=1, y=0;
+frame:name=bfg_3, x=2, y=0;
+frame:name=bfg_4, x=3, y=0;
+frame:name=bfg_5, x=4, y=0;
+
+frame:name=double_1, x=0, y=1;
+frame:name=double_2, x=1, y=1;
+frame:name=double_3, x=2, y=1;
+frame:name=double_4, x=3, y=1;
+frame:name=double_5, x=4, y=1;
+
+frame:name=electric_1, x=0, y=2;
+frame:name=electric_2, x=1, y=2;
+frame:name=electric_3, x=2, y=2;
+frame:name=electric_4, x=3, y=2;
+frame:name=electric_5, x=4, y=2;
+
+frame:name=fast_1, x=0, y=3;
+frame:name=fast_2, x=1, y=3;
+frame:name=fast_3, x=2, y=3;
+frame:name=fast_4, x=3, y=3;
+frame:name=fast_5, x=4, y=3;
+
+frame:name=normal_1, x=0, y=4;
+frame:name=normal_2, x=1, y=4;
+frame:name=normal_3, x=2, y=4;
+frame:name=normal_4, x=3, y=4;
+frame:name=normal_5, x=4, y=4;
+
+frame:name=spread_1, x=0, y=5;
+frame:name=spread_2, x=1, y=5;
+frame:name=spread_3, x=2, y=5;
+frame:name=spread_4, x=3, y=5;
+frame:name=spread_5, x=4, y=5;

@@ -1,0 +1,7 @@
+image: flies.png;
+frameWidth: 24;
+frameHeight: 20;
+centerx: 12;
+centery: 10;
+frame: name=0, x = 0, y = 0;
+frame: name=1, x = 0, y = 1;

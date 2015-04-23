@@ -1,0 +1,20 @@
+image: sprites/highlight.png;
+frameWidth: 64;
+frameHeight: 64;
+centerx: 32;
+centery: 32:
+
+frame:name=0, x=0, y=0;
+frame:name=1, x=1, y=0;
+frame:name=2, x=2, y=0;
+frame:name=3, x=3, y=0;
+frame:name=4, x=0, y=1;
+frame:name=5, x=1, y=1;
+frame:name=6, x=2, y=1;
+frame:name=7, x=3, y=1;
+frame:name=8, x=0, y=2;
+frame:name=9, x=1, y=2;
+frame:name=10, x=2, y=2;
+frame:name=11, x=3, y=2;
+
+sequence: name=animate, frames = 0 1 2 3 4 5 6 7 8 9 10 11;

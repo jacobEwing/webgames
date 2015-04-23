@@ -1,0 +1,14 @@
+image: sprites/explosions.png;
+frameWidth: 36;
+frameHeight: 43;
+centerx: 18;
+centery: 22;
+
+frame:name=0, x=0, y=0;
+frame:name=1, x=0, y=1;
+frame:name=2, x=1, y=0;
+frame:name=3, x=1, y=1;
+frame:name=4, x=2, y=0;
+frame:name=5, x=2, y=1;
+frame:name=6, x=3, y=0;
+frame:name=7, x=3, y=1;

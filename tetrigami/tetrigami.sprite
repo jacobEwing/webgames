@@ -1,0 +1,45 @@
+image:images/pieces.png;
+frameWidth: 32;
+frameHeight: 32;
+frame: name=J_0, x = 0, y = 0, width = 64, height = 96, centerx = 0, centery = 32;
+frame: name=J_1, x = 2, y = 0, width = 96, height = 64, centerx = 32, centery = 0;
+frame: name=J_2, x = 5, y = 0, width = 64, height = 96, centerx = 32, centery = 32;
+frame: name=J_3, x = 7, y = 0, width = 96, height = 64, centerx = 32, centery = 32;
+
+frame: name=Z_0, x = 0, y = 3, width = 96, height = 64, centerx = 32, centery = 0;
+frame: name=Z_1, x = 3, y = 3, width = 64, height = 96, centerx = 0, centery = 32;
+frame: name=Z_2, x = 5, y = 3, width = 96, height = 64, centerx = 32, centery = 0;
+frame: name=Z_3, x = 8, y = 3, width = 64, height = 96, centerx = 0, centery = 32;
+
+frame: name=square_0, x = 0, y = 6, width = 64, height = 64, centerx = 32, centery = 32;
+frame: name=square_1, x = 2, y = 6, width = 64, height = 64, centerx = 32, centery = 32;
+frame: name=square_2, x = 4, y = 6, width = 64, height = 64, centerx = 32, centery = 32;
+frame: name=square_3, x = 6, y = 6, width = 64, height = 64, centerx = 32, centery = 32;
+
+frame: name=L_0, x = 0, y = 8, width = 64, height = 96, centerx = 0, centery = 32;
+frame: name=L_1, x = 2, y = 8, width = 96, height = 64, centerx = 32, centery = 0;
+frame: name=L_2, x = 5, y = 8, width = 64, height = 96, centerx = 32, centery = 32;
+frame: name=L_3, x = 7, y = 8, width = 96, height = 64, centerx = 32, centery = 32;
+
+frame: name=T_0, x = 10, y = 0, width = 96, height = 64, centerx = 32, centery = 0;
+frame: name=T_1, x = 10, y = 2, width = 64, height = 96, centerx = 32, centery = 32;
+frame: name=T_2, x = 10, y = 5, width = 96, height = 64, centerx = 32, centery = 32;
+frame: name=T_3, x = 10, y = 7, width = 64, height = 96, centerx = 0, centery = 32;
+
+frame: name=S_0, x = 13, y = 0, width = 96, height = 64, centerx = 32, centery = 0;
+frame: name=S_1, x = 13, y = 2, width = 64, height = 96, centerx = 0, centery = 32;
+frame: name=S_2, x = 13, y = 5, width = 96, height = 64, centerx = 32, centery = 0;
+frame: name=S_3, x = 13, y = 7, width = 64, height = 96, centerx = 0, centery = 32;
+
+frame: name=long_0, x = 16, y = 0, width = 128, height = 32, centerx = 32, centery = 0;
+frame: name=long_1, x = 16, y = 1, width = 32, height = 128, centerx = 0, centery = 32;
+frame: name=long_2, x = 16, y = 5, width = 128, height = 32, centerx = 32, centery = 0;
+frame: name=long_3, x = 16, y = 6, width = 32, height = 128, centerx = 0, centery = 32;
+
+frame: name=long_cell, x = 19, y = 7, width = 32, height = 32;
+frame: name=J_cell, x = 18, y = 8, width = 32, height = 32;
+frame: name=Z_cell, x = 19, y = 8, width = 32, height = 32;
+frame: name=L_cell, x = 18, y = 9, width = 32, height = 32;
+frame: name=square_cell, x = 19, y = 9, width = 32, height = 32;
+frame: name=S_cell, x = 18, y = 10, width = 32, height = 32;
+frame: name=T_cell, x = 19, y = 10, width = 32, height = 32;

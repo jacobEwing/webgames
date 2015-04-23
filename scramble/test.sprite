@@ -1,0 +1,16 @@
+image: images/text.png;
+frameWidth: 16;
+frameHeight: 18;
+frame:name=0, x=0, y=0;
+frame:name=1, x=1, y=0;
+frame:name=2, x=2, y=0;
+frame:name=3, x=3, y=0;
+frame:name=4, x=4, y=0;
+frame:name=5, x=5, y=0;
+frame:name=6, x=6, y=0;
+frame:name=7, x=7, y=0;
+frame:name=8, x=8, y=0;
+frame:name=9, x=9, y=0;
+frame:name=enum, x = 0, y = 0, xoffset = 0, yoffset = 18, width = 86, height = 21;
+frame:name=size, x = 0, y = 0, xoffset = 0, yoffset = 39, width = 42, height = 21;
+sequence: name=count, frames=0 1 2 3 4 5 6 7 8 9;

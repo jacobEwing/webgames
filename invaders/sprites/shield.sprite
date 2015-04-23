@@ -1,0 +1,12 @@
+image: sprites/shield.png;
+frameWidth: 81;
+frameHeight: 81;
+centerx: 40;
+centery: 44;
+
+frame:name=0, x=0, y=0;
+frame:name=1, x=1, y=0;
+frame:name=2, x=2, y=0;
+frame:name=3, x=3, y=0;
+
+sequence: name=animate, frames = 0 1 2 3;

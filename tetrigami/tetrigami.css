@@ -1,0 +1,190 @@
+@font-face {
+	  font-family: 'Fredericka the Great';
+	  font-style: normal;
+	  font-weight: 400;
+	  src: local('Fredericka the Great'), local('FrederickatheGreat'), url(frederickathegreat.woff) format('woff');
+}
+@font-face {
+	font-family: 'Schoolbell';
+	font-style: normal;
+	font-weight: 400;
+	src: local('Schoolbell'), url(schoolbell.woff) format('woff');
+}
+p{ text-align:justify; }
+a{ text-decoration:none; color: #47321e }
+a:visited{ text-decoration:none; color: #47321e }
+a:active{ text-decoration:none; color: #47321e }
+a:hover{ text-decoration:none; color: #47321e }
+body{
+	background-color: #e5e8de;
+	background-image: url(images/grainypaper.jpg);
+	font-family: 'Fredericka the Great', cursive;
+	font-size: 24px;
+	color : #47321e;
+	text-align:center;
+}
+h1{
+	font-size: 60px;
+	font-weight: normal;
+	color: #000;
+	line-height: 70px;
+	height: 70px;
+	margin-top: 40px;
+	margin-bottom: 0;
+}
+
+.textContent{
+	font-family: 'Schoolbell';
+	font-size: 16px;
+}
+
+div.menuButton{
+	font-size: 24px;
+	line-height: 36px;
+	margin: auto;
+	padding : 0;
+	cursor:pointer;
+	color: #47321e;
+	display: inline-block;
+	padding: 5px;
+	padding: 0 .5em;
+}
+
+div.menuButton:hover{
+	color: #000;
+}
+
+div.menuOption{
+	font-size: 36px;
+	line-height: 56px;
+	margin: auto;
+	padding : 0;
+	cursor:pointer;
+	color: #47321e;
+}
+
+div.menuOption:hover{
+	color: #000;
+}
+
+div.menuSelected{
+	color: #000;
+}
+
+#canvas{
+	width: 320px;
+	height: 640px;
+	position: absolute;
+	top: 13px;
+	left: 20px;
+}
+
+#canvasHideBorder{
+	width: 353px;
+	height: 680px;
+	position: absolute;
+	top: 12px;
+	left: 0px;
+	overflow: hidden;
+}
+
+#canvaswrapper{
+	width: 353px;
+	height: 680px;
+	background-image: url(images/playareabackdrop.png);
+	margin: auto;
+	position: relative;
+	overflow: hidden;
+}
+
+#canvasOverlay{
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 353px;
+	height: 680px;
+	background-image: url(images/playareaoverlay.png);
+}
+
+#previewArea{
+	background-image: url(images/previewareabackdrop.png);
+	width: 192px;
+	height: 192px;
+	position: absolute;
+	top: 10px;
+	left: 580px;
+}
+
+#infoArea{
+	background-image: url(images/infoareabackdrop.png);
+	width: 192px;
+	height: 192px;
+	position: absolute;
+	top: 222px;
+	left: 580px;
+	font-size : 20px;
+}
+
+#eyecandy{
+	position: absolute;
+	top: 432px;
+	left: 590px;
+}
+
+#infoInset{
+	height: 152px;
+	width: 152px;
+	position: relative;
+	margin: 20px;
+	text-align: left;
+}
+
+span.stat{
+	margin-left: 1em;
+}
+
+#helpWrapper p {
+	text-align: center;
+}
+
+#helpWrapper a {
+	font-weight: bold;
+}
+
+#helpWrapper{
+	width: 512px;
+	margin: auto;
+	text-align: center;
+	position: relative;
+}
+
+#gameWrapper{
+	margin:auto;
+	width: 900px;
+}
+
+#menu{
+	margin-top: 2em;
+	position:relative;
+}
+
+#loading{
+	margin-top: 100px;
+}
+
+#loadingMessage{
+	font-family: "Schoolbell";
+	font-size: 18px;
+	margin-top: 200px;
+}
+
+#gameContent{
+	width: 780px;
+	position: relative;
+	margin: auto;
+	margin-top: 10px;
+}
+
+#mainContent{
+	visibility: hidden;
+}

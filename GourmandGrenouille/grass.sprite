@@ -1,0 +1,6 @@
+image:grass.png;
+frameWidth: 12;
+frameHeight: 24;
+
+frame:name=blade, x = 0, y = 0, width = 12, height = 120, centerx = 6, centery = 119;
+frame:name=tip, x = 1, y = 0, width = 12, height = 120, centerx = 6, centery = 119;

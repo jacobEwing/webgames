@@ -1,0 +1,19 @@
+image: sprites/labels.png;
+frameWidth: 13;
+frameHeight: 18;
+
+frame:name=powerups,x=0,y=0,width=95;
+frame:name=lives,x=0,y=1,width=50;
+frame:name=score,x=0,y=2,width=55;
+frame:name=quit,x = 4, y = 4, width=40;
+frame:name=pause, x = 3, y = 5, width=55;
+frame:name=0, x=0, y=3;
+frame:name=1, x=1, y=3;
+frame:name=2, x=2, y=3;
+frame:name=3, x=3, y=3;
+frame:name=4, x=0, y=4;
+frame:name=5, x=1, y=4;
+frame:name=6, x=2, y=4;
+frame:name=7, x=3, y=4;
+frame:name=8, x=0, y=5;
+frame:name=9, x=1, y=5;

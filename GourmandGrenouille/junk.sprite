@@ -1,0 +1,6 @@
+image: junk.png;
+frameWidth: 1;
+frameHeight: 1;
+frame: name=boot,x=0,y=0,width=80,height=81,centerx=40,centery=40;
+frame: name=can,x=80,y=0,width=58,height=81,centerx=29,centery=40;
+frame: name=boat,x=0,y=81,width=100,height=50,centerx=40,centery=45;
