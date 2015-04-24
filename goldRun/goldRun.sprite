@@ -129,7 +129,7 @@ frame: name=lefthinge_5, x = 8, y = 7;
 sequence: name = dissolvebrick, frames = brick2 brick3 brick4 empty, framerate = 80;
 sequence: name = regrowbrick, frames = brick4 brick3 brick2 brick, framerate = 100;
 sequence: name = waterwave, frames = water1 water2 water3 water4 water5 water6 water7 water8 water9 water10 water11;
-sequence: name = firewave1, frames = fire1 fire5 fire2 fire6 fire3s fire7 fire4;
+sequence: name = firewave1, frames = fire1 fire5 fire2 fire6 fire3 fire7 fire4;
 sequence: name = firewave2, frames = fire4 fire7 fire3 fire6 fire2s fire5 fire1;
 sequence: name = meltice, frames = ice_2 ice_3 empty, framerate = 80;
 
