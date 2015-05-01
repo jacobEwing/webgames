@@ -5,7 +5,6 @@ function trim(stringToTrim) {
 }
 
 var spriteClass = function(set){
-
 	this.set = set;
 	this.frame = null;
 	this.image = $('<img src="' + set.image + '">');
@@ -16,15 +15,12 @@ var spriteClass = function(set){
 	this.currentFrame = null;
 	this.currentSequence = null;
 
-
 	this.image.css({
 		'position': 'absolute',
 		'left': this.y,
 		'top': this.x
 	});
-
 	this.element.append(this.image);
-
 	this.element.css({
 		'position':'absolute',
 		'width': this.width + 'px',
@@ -33,8 +29,6 @@ var spriteClass = function(set){
 		'top': this.y + 'px',
 		'overflow': 'hidden'
 	});
-
-	// finally, some initialization
 	this.setFrameSize(this.set.frameWidth, this.set.frameHeight);
 };
 
