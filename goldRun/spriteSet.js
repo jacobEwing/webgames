@@ -38,7 +38,7 @@ spriteClass.prototype.remove = function(){
 	this.element.remove();
 };
 
-spriteclass.prototype.setFrame = function(framename){
+spriteClass.prototype.setFrame = function(framename){
 	framename = trim(framename).toLowerCase();
 
 	if(this.set.frames[framename] != undefined){
@@ -51,7 +51,7 @@ spriteclass.prototype.setFrame = function(framename){
 
 // draw a particular frame at a particular location (if specified).  That frame and it's contents are not managed by the sprite
 // returns the wrapping element of the drawn frame
-spriteclass.prototype.drawFrame = function(target, framename, drawx, drawy){
+spriteClass.prototype.drawFrame = function(target, framename, drawx, drawy){
 	if(this.set.frames[framename] == undefined) return false;
 	var frame = this.set.frames[framename];
 	var style = {
@@ -128,7 +128,7 @@ spriteClass.prototype.refreshImage = function(){
 	this.setScale(this.scale);
 };
 
-spriteClass.prototype.draw = this.appendTo = function(target){
+spriteClass.prototype.draw = spriteClass.prototype.appendTo = function(target){
 	target.append(this.element);
 };
 
@@ -288,7 +288,6 @@ spriteClass.prototype.doSequenceStep = function(params){
 
 /// a spriteSet is a template from which the sprite instances above are loaded
 var spriteSet = function(){
-	var me = this;
 	this.frames = [];
 	this.sequences = {};
 	this.defaultFrameRate = 40;
@@ -297,17 +296,18 @@ var spriteSet = function(){
 };
 
 spriteSet.prototype.load = function(fileName, callback){
+	var me = this;
 	$.get(fileName, {}, function(result){
 		try{
 			data = JSON.parse(result);
-			this.loadJSON(data, callback);
-		}catch{
-			this.loadSimpletext(data, callback);
+			me.loadJSON(data, callback);
+		}catch(e){
+			me.loadSimpletext(result, callback);
 		}
-	});
+	}, "html");
 };
 
-spriteSet.prototype.loadSimpletext = function(data, callback){
+spriteSet.prototype.loadSimpletext = function(result, callback){
 	var lines = result.split(';');
 	var parts, n, m;
 	for(n in lines){
@@ -315,28 +315,28 @@ spriteSet.prototype.loadSimpletext = function(data, callback){
 			parts = lines[n].split(':');
 			switch(trim(parts[0]).toLowerCase()){
 				case 'image':
-					me.setImage(parts[1]);
+					this.setImage(parts[1]);
 					break;
 				case 'framewidth':
-					me.frameWidth = 1 * trim(parts[1]);
+					this.frameWidth = 1 * trim(parts[1]);
 					break;
 				case 'frameheight':
-					me.frameHeight = 1 * trim(parts[1]);
+					this.frameHeight = 1 * trim(parts[1]);
 					break;
 				case 'frame':
-					me.loadFrame(parts[1]);
+					this.loadFrame(parts[1]);
 					break;
 				case 'sequence':
-					me.loadSequence(parts[1]);
+					this.loadSequence(parts[1]);
 					break;
 				case 'framerate':
-					me.defaultFrameRate = 1 * trim(parts[1]);
+					this.defaultFrameRate = 1 * trim(parts[1]);
 					break;
 				case 'centerx': case 'cx':
-					me.centerx = 1 * trim(parts[1]);
+					this.centerx = 1 * trim(parts[1]);
 					break;
 				case 'centery': case 'cy':
-					me.centery = 1 * trim(parts[1]);
+					this.centery = 1 * trim(parts[1]);
 					break;
 			}
 		}
@@ -404,7 +404,7 @@ spriteSet.prototype.loadSequence = function(datastr){
 	var sequenceName = undefined;
 	var newSequence = {
 		'frames':[],
-		'frameRate': me.defaultFrameRate
+		'frameRate': this.defaultFrameRate
 	};
 	var params = datastr.split(',');
 	var parts, arg, val, n, m;
@@ -509,7 +509,7 @@ spriteSet.prototype.setImage = function(file){
 	$('body').append(cacheDiv);
 	var imgElement = $('<img src="' + file + '">');
 	imgElement.load(function(){
-		me.loadingImage = false;
+		this.loadingImage = false;
 	});
 	cacheDiv.append(imgElement);
 
