@@ -298,44 +298,63 @@ var spriteSet = function(){
 
 spriteSet.prototype.load = function(fileName, callback){
 	$.get(fileName, {}, function(result){
-		var lines = result.split(';');
-		var parts, n, m;
-		for(n in lines){
-			if(trim(lines[n]).length){
-				parts = lines[n].split(':');
-				switch(trim(parts[0]).toLowerCase()){
-					case 'image':
-						me.setImage(parts[1]);
-						break;
-					case 'framewidth':
-						me.frameWidth = 1 * trim(parts[1]);
-						break;
-					case 'frameheight':
-						me.frameHeight = 1 * trim(parts[1]);
-						break;
-					case 'frame':
-						me.loadFrame(parts[1]);
-						break;
-					case 'sequence':
-						me.loadSequence(parts[1]);
-						break;
-					case 'framerate':
-						me.defaultFrameRate = 1 * trim(parts[1]);
-						break;
-					case 'centerx': case 'cx':
-						me.centerx = 1 * trim(parts[1]);
-						break;
-					case 'centery': case 'cy':
-						me.centery = 1 * trim(parts[1]);
-						break;
-				}
-			}
-		}
-		
-		if(callback != undefined){
-			callback(result);
+		try{
+			data = JSON.parse(result);
+			this.loadJSON(data, callback);
+		}catch{
+			this.loadSimpletext(data, callback);
 		}
 	});
+};
+
+spriteSet.prototype.loadSimpletext = function(data, callback){
+	var lines = result.split(';');
+	var parts, n, m;
+	for(n in lines){
+		if(trim(lines[n]).length){
+			parts = lines[n].split(':');
+			switch(trim(parts[0]).toLowerCase()){
+				case 'image':
+					me.setImage(parts[1]);
+					break;
+				case 'framewidth':
+					me.frameWidth = 1 * trim(parts[1]);
+					break;
+				case 'frameheight':
+					me.frameHeight = 1 * trim(parts[1]);
+					break;
+				case 'frame':
+					me.loadFrame(parts[1]);
+					break;
+				case 'sequence':
+					me.loadSequence(parts[1]);
+					break;
+				case 'framerate':
+					me.defaultFrameRate = 1 * trim(parts[1]);
+					break;
+				case 'centerx': case 'cx':
+					me.centerx = 1 * trim(parts[1]);
+					break;
+				case 'centery': case 'cy':
+					me.centery = 1 * trim(parts[1]);
+					break;
+			}
+		}
+	}
+	
+	if(callback != undefined){
+		callback(result);
+	}
+};
+
+spriteSet.prototype.loadJSON = function(data, callback){
+	/*************
+	WRITE ME!  This should load the sprite up in the same manner as the
+	loadSimpletext function above, but reading it as a JSON object
+	*************/
+	if(callback != undefined){
+		callback(result);
+	}
 };
 
 spriteSet.prototype.setFrameSize = function(w, h){
