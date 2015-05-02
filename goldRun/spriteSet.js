@@ -348,10 +348,6 @@ spriteSet.prototype.loadSimpletext = function(result, callback){
 };
 
 spriteSet.prototype.loadJSON = function(data, callback){
-	/*************
-	WRITE ME!  This should load the sprite up in the same manner as the
-	loadSimpletext function above, but reading it as a JSON object
-	*************/
 	for(var key in data){
 		switch(key){
 			case 'image':
