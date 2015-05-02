@@ -352,6 +352,35 @@ spriteSet.prototype.loadJSON = function(data, callback){
 	WRITE ME!  This should load the sprite up in the same manner as the
 	loadSimpletext function above, but reading it as a JSON object
 	*************/
+	for(var key in data){
+		switch(key){
+			case 'image':
+				this.setImage(data[key]);
+				break;
+			case 'frameWidth': case 'framewidth':
+				this.frameWidth = 1 * data[key];
+				break;
+			case 'frameHeight': case 'frameheight':
+				this.frameHeight = 1 * data[key];
+				break;
+			case 'centerx': case 'cx':
+				this.centerx = 1 * data[key];
+				break;
+			case 'centery': case 'cy':
+				this.centery = 1 * data[key];
+				break;
+			case 'framerate':
+				this.defaultFrameRate = 1 * data[key];
+				break;
+			case 'frames':
+				this.load_frames(data[key]);
+				break;
+			case 'sequences':
+				this.load_sequences(data[key]);
+				break;
+		}
+	}
+
 	if(callback != undefined){
 		callback(result);
 	}
@@ -399,7 +428,7 @@ spriteSet.prototype.addFrame = function(id, params){
 	}
 	this.frames[id] = newFrame;
 };
-
+// load animation sequences from a string (old method)
 spriteSet.prototype.loadSequence = function(datastr){
 	var sequenceName = undefined;
 	var newSequence = {
@@ -445,6 +474,33 @@ spriteSet.prototype.loadSequence = function(datastr){
 
 };
 
+// load animation sequences from a JSON object
+spriteSet.prototype.load_sequences = function(data){
+	var name, param, newSequence, n;
+
+	for(name in data){
+		newSequence = {
+			'name': name,
+			'frames':[],
+			'frameRate': this.defaultFrameRate
+		};
+		for(param in data[name]){
+			switch(param){
+				case 'frames':
+					for(n = 0; n < data[name][param].length; n++){
+						newSequence.frames[n] = data[name][param][n];
+					}
+					break;
+				case 'framerate': case 'frameRate':
+					newSequence.frameRate = 1 * data[name][param];
+					break;
+			}
+		}
+		this.sequences[newSequence.name] = newSequence;
+	}
+};
+
+// load frames from a raw string passed in (old method)
 spriteSet.prototype.loadFrame = function(datastr){
 	var params = datastr.split(',');
 	var parts, arg, val, n;
@@ -490,6 +546,47 @@ spriteSet.prototype.loadFrame = function(datastr){
 	}
 	if(frameName != undefined){
 		this.frames[frameName] = newFrame;
+	}
+};
+
+// load frames from a JSON object passed in
+spriteSet.prototype.load_frames = function(data){
+	var name, arg;
+	for(name in data){
+		this.frames[name] = {
+			'x': 0,
+			'y': 0,
+			'width': this.frameWidth,
+			'height': this.frameHeight,
+			'centerx': this.centerx,
+			'centery': this.centery
+		};
+		for(arg in data[name]){
+			switch(arg){
+				case 'width': case 'height':
+					this.frames[name][arg] = 1 * data[name][arg];
+					break;
+				case 'x':
+					this.frames[name]['x'] += this.frameWidth * data[name][arg];
+					break;
+				case 'xoffset':
+					this.frames[name]['x'] += 1 * data[name][arg];
+					break;
+				case 'y':
+					this.frames[name]['y'] += this.frameHeight * data[name][arg];
+					break;
+				case 'yoffset':
+					this.frames[name]['y'] += 1 * data[name][arg];
+					break;
+				case 'centerx': case 'cx':
+					this.frames[name]['centerx'] = 1 * data[name][arg];
+					break;
+				case 'centery': case 'cy':
+					this.frames[name]['centery'] = 1 * data[name][arg];
+					break;
+				
+			}
+		}
 	}
 };
 
