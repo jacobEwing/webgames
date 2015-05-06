@@ -118,37 +118,38 @@ var brickManagerClass = function(){
 	this.numBricks = 0;
 	this.brick = [];
 
-	this.add = function(x, y){
-		this.brick[this.numBricks] = {
-			'x':x, 'y':y, 'count': BRICK_REGROW_PERIOD
-		};
-		map[x][y] = characterMap['empty'];
-		this.numBricks++;
-	}
+};
 
-	this.cycle = function(){
-		var n, m;
-		for(n = 0; n < this.numBricks; n++){
-			this.brick[n].count --;
-			if(this.brick[n].count <= 0){
-				function restoreBrick(x, y){
-					map[x][y] = characterMap['brick'];
-					killat(x, y);
-				}
-				var bobj = this.brick[n];
-				spriteMap[this.brick[n].x][this.brick[n].y].startSequence('regrowbrick', {'callback':function(){
-					restoreBrick(bobj.x, bobj.y);
-				}});
-				for(m = n + 1; m < this.numBricks; m++){
-					this.brick[m - 1] = this.brick[m];
-				}
-				this.brick[m] = undefined;
-				this.numBricks--;
-				n--;
+brickManagerClass.prototype.add = function(x, y){
+	this.brick[this.numBricks] = {
+		'x':x, 'y':y, 'count': BRICK_REGROW_PERIOD
+	};
+	map[x][y] = characterMap['empty'];
+	this.numBricks++;
+};
+
+brickManagerClass.prototype.cycle = function(){
+	var n, m;
+	for(n = 0; n < this.numBricks; n++){
+		this.brick[n].count --;
+		if(this.brick[n].count <= 0){
+			function restoreBrick(x, y){
+				map[x][y] = characterMap['brick'];
+				killat(x, y);
 			}
+			var bobj = this.brick[n];
+			spriteMap[this.brick[n].x][this.brick[n].y].startSequence('regrowbrick', {'callback':function(){
+				restoreBrick(bobj.x, bobj.y);
+			}});
+			for(m = n + 1; m < this.numBricks; m++){
+				this.brick[m - 1] = this.brick[m];
+			}
+			this.brick[m] = undefined;
+			this.numBricks--;
+			n--;
 		}
 	}
-}
+};
 
 // a class for representing a player
 var playerClass = function(playerType){
@@ -167,205 +168,207 @@ var playerClass = function(playerType){
 	}else{
 		this.sprite.setFrame('player_1');
 	}
+};
 
-	this.setPos = function(x, y){
-		this.x = x;
-		this.y = y;
-		this.drawx = x * cellWidth;
-		this.drawy = y * cellHeight;
+playerClass.prototype.setPos = function(x, y){
+	this.x = x;
+	this.y = y;
+	this.drawx = x * cellWidth;
+	this.drawy = y * cellHeight;
+	this.sprite.position(this.drawx, this.drawy);
+//	this.sprite.draw();
+};
+
+playerClass.prototype.stepping = function(){
+	return this.currentStep.deltax != 0 || this.currentStep.deltay != 0 ;
+};
+
+playerClass.prototype.doStep = function(){
+	var deltax = 0, deltay = 0;
+	if(this.currentStep.deltax){
+		deltax = Math.floor(cellWidth / 3);
+		if(this.currentStep.deltax < 0){
+			this.currentStep.deltax += deltax;
+			if(this.currentStep.deltax >= 0){
+				deltax += this.currentStep.deltax;
+				this.currentStep.deltax = 0;
+				this.x--;
+			}
+			deltax *= -1;
+		}else{
+			this.currentStep.deltax -= deltax;
+			if(this.currentStep.deltax <= 0){
+				deltax += this.currentStep.deltax;
+				this.currentStep.deltax = 0;
+				this.x++;
+			}
+		}
+		this.drawx += deltax;
+	}
+
+	if(this.currentStep.deltay){
+		deltay = Math.floor(cellHeight / 3);
+		if(this.currentStep.deltay < 0){
+			this.currentStep.deltay += deltay;
+			if(this.currentStep.deltay >= 0){
+				deltay += this.currentStep.deltay;
+				this.currentStep.deltay = 0;
+				this.y--;
+			}
+			deltay *= -1;
+		}else{
+			this.currentStep.deltay -= deltay;
+			if(this.currentStep.deltay <= 0){
+				deltay += this.currentStep.deltay;
+				this.currentStep.deltay = 0;
+				this.y++;
+			}
+		}
+		this.drawy += deltay;
+	}
+
+	if(deltax || deltay){
 		this.sprite.position(this.drawx, this.drawy);
-//		this.sprite.draw();
 	}
+};
 
-	this.stepping = function(){ return this.currentStep.deltax != 0 || this.currentStep.deltay != 0 }
+playerClass.prototype.die = function(){
+	this.animcycle = 0;
+	this.currentStep.deltax = this.currentStep.deltay = 0;
+};
 
-	this.doStep = function(){
-		var deltax = 0, deltay = 0;
-		if(this.currentStep.deltax){
-			deltax = Math.floor(cellWidth / 3);
-			if(this.currentStep.deltax < 0){
-				this.currentStep.deltax += deltax;
-				if(this.currentStep.deltax >= 0){
-					deltax += this.currentStep.deltax;
-					this.currentStep.deltax = 0;
-					this.x--;
+playerClass.prototype.seek = function(){
+	// let's see if we're slipping on ice
+	var slipping = false;
+	if(this.y < mapHeight - 1 && this.currentStep.directionx == 1){
+		if(map[this.x][this.y + 1] == characterMap['ice']){
+			var stoppables = {'ladder':1, 'bar':1, 'elevator_up':1, 'elevator_down':1};
+			if(stoppables[characterMap[map[this.x][this.y]]] == undefined){
+				if(allowRightwardMotion(this)){
+					this.currentStep.deltax = cellWidth;
 				}
-				deltax *= -1;
-			}else{
-				this.currentStep.deltax -= deltax;
-				if(this.currentStep.deltax <= 0){
-					deltax += this.currentStep.deltax;
-					this.currentStep.deltax = 0;
-					this.x++;
-				}
+				slipping = true;
 			}
-			this.drawx += deltax;
 		}
-
-		if(this.currentStep.deltay){
-			deltay = Math.floor(cellHeight / 3);
-			if(this.currentStep.deltay < 0){
-				this.currentStep.deltay += deltay;
-				if(this.currentStep.deltay >= 0){
-					deltay += this.currentStep.deltay;
-					this.currentStep.deltay = 0;
-					this.y--;
+	}
+	else if(this.y < mapHeight -1 && this.currentStep.directionx == -1){
+		if(map[this.x][this.y + 1] == characterMap['ice']){
+			var stoppables = {'ladder':1, 'bar':1, 'elevator_up':1, 'elevator_down':1};
+			if(stoppables[characterMap[map[this.x][this.y]]] == undefined){
+				if(allowLeftwardMotion(this)){
+					this.currentStep.deltax = -cellWidth;
 				}
-				deltay *= -1;
-			}else{
-				this.currentStep.deltay -= deltay;
-				if(this.currentStep.deltay <= 0){
-					deltay += this.currentStep.deltay;
-					this.currentStep.deltay = 0;
-					this.y++;
-				}
+				slipping = true;
 			}
-			this.drawy += deltay;
-		}
-
-		if(deltax || deltay){
-			this.sprite.position(this.drawx, this.drawy);
 		}
 	}
-
-	this.die = function(){
-		this.animcycle = 0;
-		this.currentStep.deltax = this.currentStep.deltay = 0;
+	if(slipping){
+		this.sprite.stopSequence();
+		this.sprite.setFrame('badguy_9');
+		return;
 	}
 
-	this.seek = function(){
-		// let's see if we're slipping on ice
-		var slipping = false;
-		if(this.y < mapHeight - 1 && this.currentStep.directionx == 1){
-			if(map[this.x][this.y + 1] == characterMap['ice']){
-				var stoppables = {'ladder':1, 'bar':1, 'elevator_up':1, 'elevator_down':1};
-				if(stoppables[characterMap[map[this.x][this.y]]] == undefined){
-					if(allowRightwardMotion(this)){
-						this.currentStep.deltax = cellWidth;
+	// ok, let's try moving under our own volition:
+	this.currentStep = {
+		deltax : 0,
+		deltay : 0,
+		directionx : 0,
+		directiony : 0
+	};
+	// determine their direction of movement if any
+	var targetX;
+	var direction, xdirection = 0, ydirection = 0;
+	var canGoUp = allowUpwardMotion(this);
+	var canGoDown = allowDownwardMotion(this);
+	var canGoRight = allowRightwardMotion(this);
+	var canGoLeft = allowLeftwardMotion(this);
+	if(player.y < this.y) ydirection = -1;
+	if(player.y > this.y) ydirection = 1;
+	if(player.x < this.x) xdirection = -1;
+	if(player.x > this.x) xdirection = 1;
+
+	if(shouldFall(this.x, this.y)){
+		direction = {'x':0, 'y':1};
+	}else{
+		direction = getForcedDirection(this.x, this.y);
+		if(direction.x == 0 && direction.y == 0){
+			if(ydirection == -1 && canGoUp){
+				direction = {'x':0, 'y':-1};
+			}else if(ydirection == 1 && canGoDown){
+				direction = {'x':0, 'y':1};
+			}
+			if(direction.y == 0){
+				if(player.y == this.y){
+					if(xdirection == -1 && canGoLeft){
+						direction = {'x':-1, 'y':0};
+					}else if(xdirection == 1 && canGoRight){
+						direction = {'x':1, 'y':0};
 					}
-					slipping = true;
-				}
-			}
-		}
-		else if(this.y < mapHeight -1 && this.currentStep.directionx == -1){
-			if(map[this.x][this.y + 1] == characterMap['ice']){
-				var stoppables = {'ladder':1, 'bar':1, 'elevator_up':1, 'elevator_down':1};
-				if(stoppables[characterMap[map[this.x][this.y]]] == undefined){
-					if(allowLeftwardMotion(this)){
-						this.currentStep.deltax = -cellWidth;
-					}
-					slipping = true;
-				}
-			}
-		}
-		if(slipping){
-			this.sprite.stopSequence();
-			this.sprite.setFrame('badguy_9');
-			return;
-		}
-
-		// ok, let's try moving under our own volition:
-		this.currentStep = {
-			deltax : 0,
-			deltay : 0,
-			directionx : 0,
-			directiony : 0
-		};
-		// determine their direction of movement if any
-		var targetX;
-		var direction, xdirection = 0, ydirection = 0;
-		var canGoUp = allowUpwardMotion(this);
-		var canGoDown = allowDownwardMotion(this);
-		var canGoRight = allowRightwardMotion(this);
-		var canGoLeft = allowLeftwardMotion(this);
-		if(player.y < this.y) ydirection = -1;
-		if(player.y > this.y) ydirection = 1;
-		if(player.x < this.x) xdirection = -1;
-		if(player.x > this.x) xdirection = 1;
-
-		if(shouldFall(this.x, this.y)){
-			direction = {'x':0, 'y':1};
-		}else{
-			direction = getForcedDirection(this.x, this.y);
-			if(direction.x == 0 && direction.y == 0){
-				if(ydirection == -1 && canGoUp){
-					direction = {'x':0, 'y':-1};
-				}else if(ydirection == 1 && canGoDown){
-					direction = {'x':0, 'y':1};
-				}
-				if(direction.y == 0){
-					if(player.y == this.y){
-						if(xdirection == -1 && canGoLeft){
-							direction = {'x':-1, 'y':0};
-						}else if(xdirection == 1 && canGoRight){
-							direction = {'x':1, 'y':0};
-						}
+				}else{
+					if(ydirection < 0){
+						// find the nearest ladder we can climb
+						targetX = get_nearest_upmotion_spot(this.x, this.y);
 					}else{
-						if(ydirection < 0){
-							// find the nearest ladder we can climb
-							targetX = get_nearest_upmotion_spot(this.x, this.y);
-						}else{
-							// find the nearest place we can go downward
-							targetX = get_nearest_downmotion_spot(this.x, this.y);
-						}
+						// find the nearest place we can go downward
+						targetX = get_nearest_downmotion_spot(this.x, this.y);
+					}
 
-						if(targetX >= 0 && targetX < this.x && canGoLeft){
-							direction = {'x':-1, 'y':0};
-						}else if(targetX > this.x && canGoRight){
-							direction = {'x':1, 'y':0};
-						}else if(xdirection == -1 && canGoLeft){
-							direction = {'x':-1, 'y':0};
-						}else if(xdirection == 1 && canGoRight){
-							direction = {'x':1, 'y':0};
-						}
+					if(targetX >= 0 && targetX < this.x && canGoLeft){
+						direction = {'x':-1, 'y':0};
+					}else if(targetX > this.x && canGoRight){
+						direction = {'x':1, 'y':0};
+					}else if(xdirection == -1 && canGoLeft){
+						direction = {'x':-1, 'y':0};
+					}else if(xdirection == 1 && canGoRight){
+						direction = {'x':1, 'y':0};
 					}
 				}
 			}
 		}
-
-		// work out what animation the sprite should be doing
-		var spriteName = null;
-		if(direction.x < 0){
-			if(characterMap[map[this.x][this.y]] == 'bar'){
-				spriteName = 'badguyhangleft';
-			}else{
-				spriteName = 'badguywalkleft';
-			}
-		}else if(direction.x > 0){
-			if(characterMap[map[this.x][this.y]] == 'bar'){
-				spriteName = 'badguyhangright';
-			}else{
-				spriteName = 'badguywalkright';
-			}
-		}else if(direction.y != 0 && characterMap[map[this.x][this.y]] == 'ladder'){
-			spriteName = 'badguyclimb';
-		}else if(/*falling*/false){
-			this.sprite.stopSequence();
-			this.sprite.setFrame('badguy_5');
-		}else{
-			this.sprite.stopSequence();
-			this.sprite.setFrame('badguy_9');
-		}
-
-		if(spriteName != null){
-			this.sprite.startSequence(
-				spriteName,
-				{
-					'iterations' : 0,
-					'method' : 'manual',
-					'startframe' : this.sprite.currentSequence.currentFrame
-				}
-			);
-		}
-
-		if(direction.x || direction.y){
-			this.currentStep.deltax = direction.x * cellWidth;
-			this.currentStep.deltay = direction.y * cellHeight;
-			this.currentStep.directionx = direction.x;
-			this.currentStep.directiony = direction.y;
-		}
 	}
-}
+
+	// work out what animation the sprite should be doing
+	var spriteName = null;
+	if(direction.x < 0){
+		if(characterMap[map[this.x][this.y]] == 'bar'){
+			spriteName = 'badguyhangleft';
+		}else{
+			spriteName = 'badguywalkleft';
+		}
+	}else if(direction.x > 0){
+		if(characterMap[map[this.x][this.y]] == 'bar'){
+			spriteName = 'badguyhangright';
+		}else{
+			spriteName = 'badguywalkright';
+		}
+	}else if(direction.y != 0 && characterMap[map[this.x][this.y]] == 'ladder'){
+		spriteName = 'badguyclimb';
+	}else if(/*falling*/false){
+		this.sprite.stopSequence();
+		this.sprite.setFrame('badguy_5');
+	}else{
+		this.sprite.stopSequence();
+		this.sprite.setFrame('badguy_9');
+	}
+
+	if(spriteName != null){
+		this.sprite.startSequence(
+			spriteName,
+			{
+				'iterations' : 0,
+				'method' : 'manual',
+				'startframe' : this.sprite.currentSequence.currentFrame
+			}
+		);
+	}
+
+	if(direction.x || direction.y){
+		this.currentStep.deltax = direction.x * cellWidth;
+		this.currentStep.deltay = direction.y * cellHeight;
+		this.currentStep.directionx = direction.x;
+		this.currentStep.directiony = direction.y;
+	}
+};
 
 function get_nearest_upmotion_spot(x, y){
 	if(y <= 0) return -1;
@@ -1049,12 +1052,11 @@ function shouldMeltToWater(x, y){
 }
 
 function canHoldWater(x, y){
-	rval = true;
-	switch(characterMap[map[x][y]]){
-		case 'empty': case 'ladder': case 'hidderladder': case 'bar': case 'fire': case 'elevator_up': case 'elevator_down': case 'floorspike': case 'ceilingspike': case 'blades': case 'teleporter': case 'righthinge': case 'righthinge':
-			rval = false;
-	}
-	return rval;
+	return {
+		'empty': 0, 'ladder': 0, 'hidderladder': 0, 'bar': 0, 'fire': 0, 
+		'elevator_up': 0, 'elevator_down': 0, 'floorspike': 0, 'ceilingspike': 0, 
+		'blades': 0, 'teleporter': 0, 'righthinge': 0, 'lefthinge': 0
+	}[characterMap[map[x][y]]] != undefined;
 }
 
 function shouldFall(x, y){
