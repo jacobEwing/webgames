@@ -1,0 +1,150 @@
+{
+	"image" : "images/tiles.png",
+	"frameWidth" : 64,
+	"frameHeight" : 64,
+	"frameRate" : 24,
+	"centerx" : 32,
+	"centery" : 32,
+	"frames" : {
+		"blue" : {"x" : 0, "y" : 0},
+
+		"blue_rot1" : {"x" : 1, "y" : 0},
+		"blue_rot2" : {"x" : 2, "y" : 0},
+		"blue_rot3" : {"x" : 3, "y" : 0},
+		"blue_rot4" : {"x" : 4, "y" : 0},
+		"blue_rot5" : {"x" : 5, "y" : 0},
+		"blue_rot6" : {"x" : 6, "y" : 0},
+		"blue_rot7" : {"x" : 7, "y" : 0},
+		"blue_rot8" : {"x" : 8, "y" : 0},
+		"blue_rot9" : {"x" : 9, "y" : 0},
+		"blue_rot10" : {"x" : 10, "y" : 0},
+		"blue_rot11" : {"x" : 0, "y" : 1},
+
+		"blue2black1" : {"x" : 1, "y" : 1},
+		"blue2black2" : {"x" : 2, "y" : 1},
+		"blue2black3" : {"x" : 3, "y" : 1},
+		"blue2black4" : {"x" : 4, "y" : 1},
+		"blue2black5" : {"x" : 5, "y" : 1},
+		"blue2black6" : {"x" : 6, "y" : 1},
+		"blue2black7" : {"x" : 7, "y" : 1},
+		"blue2black8" : {"x" : 8, "y" : 1},
+		"blue2black9" : {"x" : 9, "y" : 1},
+		"blue2black10" : {"x" : 10, "y" : 1},
+		"blue2black11" : {"x" : 0, "y" : 2},
+
+		"black" : {"x" : 1, "y" : 2},
+
+		"black_rot1" : {"x" : 2, "y" : 2},
+		"black_rot2" : {"x" : 3, "y" : 2},
+		"black_rot3" : {"x" : 4, "y" : 2},
+		"black_rot4" : {"x" : 5, "y" : 2},
+		"black_rot5" : {"x" : 6, "y" : 2},
+		"black_rot6" : {"x" : 7, "y" : 2},
+		"black_rot7" : {"x" : 8, "y" : 2},
+		"black_rot8" : {"x" : 9, "y" : 2},
+		"black_rot9" : {"x" : 10, "y" : 2},
+		"black_rot10" : {"x" : 0, "y" : 3},
+		"black_rot11" : {"x" : 1, "y" : 3},
+
+		"black2blue1" : {"x" : 2, "y" : 3},
+		"black2blue2" : {"x" : 3, "y" : 3},
+		"black2blue3" : {"x" : 4, "y" : 3},
+		"black2blue4" : {"x" : 5, "y" : 3},
+		"black2blue5" : {"x" : 6, "y" : 3},
+		"black2blue6" : {"x" : 7, "y" : 3},
+		"black2blue7" : {"x" : 8, "y" : 3},
+		"black2blue8" : {"x" : 9, "y" : 3},
+		"black2blue9" : {"x" : 10, "y" : 3},
+		"black2blue10" : {"x" : 0, "y" : 4},
+		"black2blue11" : {"x" : 0, "y" : 0},
+
+		"gold" : {"x" : 1, "y" : 4},
+
+		"gold_rot1" : {"x" : 2, "y" : 4},
+		"gold_rot2" : {"x" : 3, "y" : 4},
+		"gold_rot3" : {"x" : 4, "y" : 4},
+		"gold_rot4" : {"x" : 5, "y" : 4},
+		"gold_rot5" : {"x" : 6, "y" : 4},
+		"gold_rot6" : {"x" : 7, "y" : 4},
+		"gold_rot7" : {"x" : 8, "y" : 4},
+		"gold_rot8" : {"x" : 9, "y" : 4},
+		"gold_rot9" : {"x" : 10, "y" : 4},
+		"gold_rot10" : {"x" : 0, "y" : 5},
+		"gold_rot11" : {"x" : 1, "y" : 5},
+
+		"gold2black1" : {"x" : 2, "y" : 5},
+		"gold2black2" : {"x" : 3, "y" : 5},
+		"gold2black3" : {"x" : 4, "y" : 5},
+		"gold2black4" : {"x" : 5, "y" : 5},
+		"gold2black5" : {"x" : 6, "y" : 5},
+		"gold2black6" : {"x" : 7, "y" : 5},
+		"gold2black7" : {"x" : 8, "y" : 5},
+		"gold2black8" : {"x" : 9, "y" : 5},
+		"gold2black9" : {"x" : 10, "y" : 5},
+		"gold2black10" : {"x" : 0, "y" : 6},
+		"gold2black11" : {"x" : 1, "y" : 6},
+
+		"black2gold1" : {"x" : 3, "y" : 7},
+		"black2gold2" : {"x" : 4, "y" : 7},
+		"black2gold3" : {"x" : 5, "y" : 7},
+		"black2gold4" : {"x" : 6, "y" : 7},
+		"black2gold5" : {"x" : 7, "y" : 7},
+		"black2gold6" : {"x" : 8, "y" : 7},
+		"black2gold7" : {"x" : 9, "y" : 7},
+		"black2gold8" : {"x" : 10, "y" : 7},
+		"black2gold0" : {"x" : 0, "y" : 8},
+		"black2gold10" : {"x" : 1, "y" : 8},
+		"black2gold11" : {"x" : 2, "y" : 8}
+	},
+	"sequences" : {
+		"blue2black" : {
+			"frames" : [
+				"blue2black1", "blue2black2", "blue2black3", "blue2black4", 
+				"blue2black5", "blue2black6", "blue2black7", "blue2black8",
+				"blue2black9", "blue2black10", "blue2black11", "black"
+			]
+		},
+		"black2blue" : {
+			"frames" : [
+				"black2blue1", "black2blue2", "black2blue3", "black2blue4",
+				"black2blue5", "black2blue6", "black2blue7", "black2blue8",
+				"black2blue9", "black2blue10", "black2blue11", "blue"
+			]
+		},
+		"gold2black" : {
+			"frames" : [
+				"gold2black1", "gold2black2", "gold2black3", "gold2black4",
+				"gold2black5", "gold2black6", "gold2black7", "gold2black8",
+				"gold2black9", "gold2black10", "gold2black11", "black"
+			]
+		},
+		"black2gold" : {
+			"frames" : [
+				"black2gold1", "black2gold2", "black2gold3", "black2gold4",
+				"black2gold5", "black2gold6", "black2gold7", "black2gold8",
+				"black2gold9", "black2gold10", "black2gold11", "gold"
+			]
+		},
+		"rotblue" : {
+			"frames" : [
+				"blue_rot1", "blue_rot2", "blue_rot3", "blue_rot4",
+				"blue_rot5", "blue_rot6", "blue_rot7", "blue_rot8",
+				"blue_rot9", "blue_rot10", "blue_rot11", "blue"
+			]
+		},
+		"rotgold" : {
+			"frames" : [
+				"gold_rot1", "gold_rot2", "gold_rot3", "gold_rot4",
+				"gold_rot5", "gold_rot6", "gold_rot7", "gold_rot8",
+				"gold_rot9", "gold_rot10", "gold_rot11", "gold"
+			]
+		},
+		"rotblack" : {
+			"frames" : [
+				"black_rot1", "black_rot2", "black_rot3", "black_rot4",
+				"black_rot5", "black_rot6", "black_rot7", "black_rot8",
+				"black_rot9", "black_rot10", "black_rot11", "black"
+			]
+		}
+	}
+}

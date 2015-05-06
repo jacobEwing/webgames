@@ -1,0 +1,193 @@
+body{
+	background-color: #2b2925;
+	background-image:url(images/backdrop2.jpg);
+	margin:0px;
+	font-family: 'Coming Soon', cursive;
+}
+.anchor{
+	cursor:pointer;cursor:hand; /* <- 'cause ie sucks */
+}
+
+img.embed{ margin: 10px; }
+
+#debug{
+	color: #8F4;
+	background-color:#000;
+	font-size:8px;
+	position: absolute;
+	top:0px;
+	left: 70%;
+	width: 30%;
+
+}
+
+#gameWrapper{
+	text-align:center;
+}
+
+#content{
+	position:relative;
+	width:571px;
+	height:637px;
+	overflow:hidden;
+	background-image: url(images/hexgrid.png);
+	margin:auto;
+}
+#swix{
+	position:absolute;
+	top:-75px;
+	left:35px;
+}
+#stepstaken{
+	position:absolute;
+	top: 34px;
+	left: 414px;
+}
+#stepstitle{
+	position:absolute;
+	top:0px;
+	left:360px;
+}
+#beststeps{
+	position:absolute;
+	top:90px;
+	left:512px;
+}
+#beststepstitle{
+	position:absolute;
+	top:62px;
+	left:475px;
+}
+#centering{
+	position:relative;
+	top: 6em;
+	width:600px;
+	height:637px;
+	margin:auto;
+}
+#exitButton{
+	position:absolute;
+	left: 536px;
+	top: 502px;
+}
+#resetButton{
+	position:absolute;
+	left: 330px;
+	top: 610px;
+}
+#skipButton{
+	position:absolute;
+	left: 442;
+	top: 565px;
+}
+#tools{
+	position:absolute;
+	top:0px;
+	left:0px;
+}
+#copyright{
+	position:absolute;
+	top:525px;
+	left:65px;
+}
+#titleDivWrapper{
+	position:absolute;
+	top:0px;
+	left:0px;
+	width:100%;
+	text-align:center;
+}
+
+#titleDiv{
+	display:none;
+	width: 100%;
+	height: 60px;
+	line-height:60px;
+	position:relative;
+	top: 280px;
+	margin:auto;
+	font-size: 30px;
+	color: #FFF;
+	font-family: 'Coming Soon', cursive;
+
+}
+.customcheck{
+	background-color: #666;
+}
+
+div.disableHints{
+	width:50%;
+	text-align:right;
+	position:absolute;
+	left:50%;
+	top:50%;
+	line-height:1em;
+	color: #888;
+	font-size: 11px;
+}
+
+div.screenOverlay{
+	width: 100%;
+	height: 100%;
+	position: absolute; 
+	top: 0px;
+	left: 0px;
+	text-align:center;
+
+}
+
+div.promptWrapper{
+	font-family: 'Coming Soon', cursive;
+	text-align:left;
+	position: relative;
+	color: #4b4844;
+	border-width: 10px;
+	border-color: #4b4844;
+	border: solid;
+	background-color: #212121;
+	width: 400px;
+	margin:auto;
+	border-radius: 5px 25px;
+}
+
+div.promptWrapper p{
+	font-family: verdana;
+}
+
+
+div.promptBox{
+	position:relative;
+	margin:auto;
+	color: #FFF;
+	margin: 1em;
+	font-size: 12px;
+}
+
+.promptButton{
+	color:#FFF;
+	background-color: #212121;
+	border-color: #333 #111 #111 #333;
+}
+
+h3{
+	font-weight:normal;
+
+}
+
+h2{
+	font-size: 14px;
+	font-weight:bold;
+}
+
+#contentWrapper{
+	/*display:none;*/
+}
+
+#loadingPrompt{
+	color: #888;
+	font-size: 40px;
+	text-align: center;
+	position: absolute;
+	width: 100%;
+	top: 160px;
+}
