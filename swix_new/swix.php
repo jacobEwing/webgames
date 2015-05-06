@@ -5,19 +5,8 @@
 	<link rel="stylesheet" type="text/css" href="swix.css" />
 	<script type="text/javascript" src="jquery.js"></script>
 	<script type="text/javascript" src="spriteSet.js"></script>
+	<script type="text/javascript" src="swix.js"></script>
 	<script type="text/javascript">
-		var cellSprite, cell;
-		$().ready(function(){
-			cellSprite = new spriteSet('tiles.sprite', function(){
-				cell = new spriteClass(cellSprite);
-				//cell.drawFrame($('#spriteTest'), 'blue', 50, 50);
-				cell.setFrame('gold');
-				cell.position(100, 100);
-				cell.draw($('#spriteTest'));
-				cell.startSequence('rotgold');
-			});
-
-		});
 	</script>
 </head>
 <body>
