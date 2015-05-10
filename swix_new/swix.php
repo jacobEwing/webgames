@@ -17,7 +17,7 @@
 					'blue2black', 'black2blue', 'gold2black', 'black2gold', 'rotblue', 'rotgold', 'rotblack'
 				);
 				foreach($sequences as $sequence){
-					echo '<br/><a href="#" onclick="cell.startSequence(\'' . $sequence . '\'); return false;">' . $sequence . '</a>';
+					echo '<br/><a href="#" onclick="cells[0].sprite.startSequence(\'' . $sequence . '\'); return false;">' . $sequence . '</a>';
 				}
 			?>
 		</div>

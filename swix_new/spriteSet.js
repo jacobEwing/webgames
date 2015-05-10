@@ -261,7 +261,7 @@ spriteClass.prototype.doSequenceStep = function(params){
 	}
 
 	this.setFrame(params.frames[params.currentFrame]);
-	params.stepCallback();
+	params.stepCallback(params.currentFrame);
 	params.currentFrame++;
 	
 	if(params.currentFrame == params.frames.length){
