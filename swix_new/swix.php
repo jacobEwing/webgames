@@ -207,7 +207,7 @@ function local_json_encode($a = false){
 <!DOCTYPE html>
 <html>
 <head>
-	<link href='http://fonts.googleapis.com/css?family=Coming+Soon' rel='stylesheet' type='text/css'>
+	<link href='http://fonts.googleapis.com/css?family=Loved+by+the+King' rel='stylesheet' type='text/css'>
 	<link rel="stylesheet" type="text/css" href="swix.css" />
 	<script type="text/javascript" src="jquery.js"></script>
 	<script type="text/javascript" src="spriteSet.js"></script>
@@ -260,14 +260,14 @@ function local_json_encode($a = false){
 			<div id="contentWrapper"><!-- style="display:none"-->
 				<div id="swix"><img src="images/swix.png"/></div>
 				<img id="copyright" src="images/copyright.png"/>
-				<img id="stepstitle" src="images/moves.png"/>
-				<div id="stepstaken"></div>
-				<img id="beststepstitle" src="images/best.png"/>
-				<div id="beststeps"></div>
+				<div id="stepstitle" class="topRightEdge">Moves:</div>
+				<div id="stepstaken" class="topRightEdge">0</div>
+				<div id="beststepstitle" class="topRightEdge">Best:</div>
+				<div id="beststeps" class="topRightEdge">0</div>
 				<div id="content"></div>
-				<img id="resetButton" class="anchor" src="images/reset.png" onclick="restartLevel()"/>
-				<img id="exitButton" class="anchor" src="images/exit.png" onclick="exit()"/>
-				<img id="skipButton" class="anchor" src="images/skip.png" onclick="skipLevel()"/>
+				<a id="resetButton" class="actionButton" href="#" onclick="restartLevel(); return false">reset</a>
+				<a id="exitButton" class="actionButton" href="#"  onclick="exit(); return false;">exit</a>
+				<a id="skipButton" class="actionButton" href="#" onclick="skipLevel(); return false;">skip</a>
 				<div id="titleDivWrapper">
 					<div id="titleDiv"></div>
 				</div>

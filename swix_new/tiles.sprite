@@ -2,7 +2,7 @@
 	"image" : "images/tiles.png",
 	"frameWidth" : 64,
 	"frameHeight" : 64,
-	"frameRate" : 18,
+	"frameRate" : 22,
 	"centerx" : 32,
 	"centery" : 32,
 	"frames" : {

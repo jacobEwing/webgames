@@ -1,3 +1,6 @@
+a {
+	text-decoration: none;
+}
 body{
 	background-color: #2b2925;
 	background-image:url(images/backdrop2.jpg);
@@ -39,19 +42,32 @@ img.embed{ margin: 10px; }
 	left:35px;
 }
 #stepstaken{
+	transform-origin: 0 0;
 	position:absolute;
-	top: 34px;
-	left: 414px;
+	top: 20px;
+	left: 425px;
 }
+
+div.topRightEdge{
+	font-family: 'Loved by the King', cursive;
+	font-size: 28px;
+	-ms-transform: rotate(30deg); /* IE 9 */
+	-webkit-transform: rotate(30deg); /* Chrome, Safari, Opera */
+	transform: rotate(30deg);
+	outline : 0;
+	color : #666;
+}
+
 #stepstitle{
 	position:absolute;
 	top:0px;
 	left:360px;
 }
 #beststeps{
+	transform-origin: 0 0;
 	position:absolute;
-	top:90px;
-	left:512px;
+	top:78px;
+	left:529px;
 }
 #beststepstitle{
 	position:absolute;
@@ -65,6 +81,17 @@ img.embed{ margin: 10px; }
 	height:637px;
 	margin:auto;
 }
+
+a.actionButton{
+	font-family: 'Loved by the King', cursive;
+	font-size: 28px;
+	-ms-transform: rotate(-30deg); /* IE 9 */
+	-webkit-transform: rotate(-30deg); /* Chrome, Safari, Opera */
+	transform: rotate(-30deg);
+	outline : 0;
+	color : #DDD;
+}
+
 #exitButton{
 	position:absolute;
 	left: 536px;
@@ -72,13 +99,13 @@ img.embed{ margin: 10px; }
 }
 #resetButton{
 	position:absolute;
-	left: 330px;
-	top: 610px;
+	left: 340px;
+	top: 612px;
 }
 #skipButton{
 	position:absolute;
-	left: 442;
-	top: 565px;
+	left: 440px;
+	top: 555px;
 }
 #tools{
 	position:absolute;
@@ -108,7 +135,7 @@ img.embed{ margin: 10px; }
 	margin:auto;
 	font-size: 30px;
 	color: #FFF;
-	font-family: 'Coming Soon', cursive;
+	font-family: 'Loved by the King', cursive;
 
 }
 .customcheck{

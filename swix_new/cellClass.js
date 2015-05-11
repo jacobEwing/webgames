@@ -112,6 +112,8 @@ cellClass.prototype.flipNeighbours = function(){
 	for(n = 0; n < neighbourList.length; n++){
 		neighbourList[n].flip();
 	}
+	stepsTaken ++;
+	$('#stepstaken').html(stepsTaken);
 };
 
 cellClass.prototype.flip = function(){
@@ -241,6 +243,8 @@ cellClass.prototype.rotNeighbours = function(){
 				me.children[n].transformation = undefined;
 
 			}
+			stepsTaken ++;
+			$('#stepstaken').html(stepsTaken);
 		}
 	});
 

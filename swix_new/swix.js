@@ -2,7 +2,7 @@ var drawOffset, animationTally;
 var offTally;
 var gameState, currentLevel = 0;
 var cells;
-var stepCounter, bestCounter;
+var stepstaken, beststeps;
 var levelmap, testlevel;
 var levelQueue;
 var hint;
@@ -172,7 +172,8 @@ function clearLevel(callback){
 
 function finishClearLevel(callback){
 	animationTally = 0;
-	stepCounter.reset();
+	stepsTaken = 0;
+	$('#stepstaken').html('0');
 	offTally = 0;
 	drawOffset = {x:0, y:0};
 	cells = [];
@@ -189,8 +190,8 @@ function drawLevel(callback){
 	drawOffset = {'x':levelMap['offset'][0], 'y':levelMap['offset'][1]};
 	$('#titlebar').html(levelMap['title']);
 	animationTally = 0;
-	bestCounter.value = levelMap['best'];
-	bestCounter.draw();
+	beststeps = levelMap['best'];
+	$('#beststeps').html(beststeps);
 	testLevel = levelMap['testlevel'] != undefined;
 	offTally = testLevel ? 9999 : 0;
 	for(celltype in levelMap['cells']){
@@ -325,10 +326,6 @@ function startGame(step){
 	switch(step){
 		case 'init':
 			gameState = 'initializing';
-			stepCounter = new digiType();
-			stepCounter.setCanvas($('#stepstaken'));
-			bestCounter = new digiType();
-			bestCounter.setCanvas($('#beststeps'));
 			startGame('loadbg');
 			break;
 		case 'loadbg':
@@ -350,6 +347,7 @@ function startGame(step){
 				c = 160 + Math.floor(Math.random() * 96);
 				$('#loadingText').html(Math.random() < 0.5 ? '10@d1n6' : 'Loading');
 				$('#loadingText').css({
+					'font-family' : 'Loved by the King',
 					'padding-top' : xoffset,
 					'padding-left' : yoffset,
 					'color' : 'rgb(' + c + ', ' + c + ', ' + c + ')',
@@ -363,8 +361,8 @@ function startGame(step){
 			var imageList = [
 				'digits/6.png', 'digits/0.png', 'digits/2.png', 'digits/7.png',
 				'digits/5.png', 'digits/9.png', 'digits/3.png', 'digits/8.png', 'digits/4.png',
-				'digits/1.png', 'reset.png', 'exit.png', 'moves.png', 'bigBlueArrow.png',
-				'hexgrid.png', 'best.png', 'skip.png',
+				'digits/1.png', 'bigBlueArrow.png',
+				'hexgrid.png', 'best.png',
 				'bigBlueTile.png', 'copyright.png',
 				'tiles.png'
 			];
@@ -394,8 +392,8 @@ function startGame(step){
 			break;
 		case 'complete':
 			cellSprite = new spriteSet('tiles.sprite');
-			stepCounter.draw();
-			bestCounter.draw();
+			stepsTaken = 0;
+			beststeps = 0;
 			finishClearLevel();
 			getLevel(currentLevel);
 			break;
