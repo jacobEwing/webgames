@@ -7,99 +7,9 @@ var levelmap, testlevel;
 var levelQueue;
 var hint;
 var cellSprite;
+var disableHints = false;
 
 levelQueue = [];
-
-var digiType = function(objName){
-	var image;
-	var position;
-	var canvas;
-	var digit;
-	var value;
-
-	this.image = {
-		0:null, //new imgElement('images/digits/0.png'),
-		1:null, //new imgElement('images/digits/1.png'),
-		2:null, //new imgElement('images/digits/2.png'),
-		3:null, //new imgElement('images/digits/3.png'),
-		4:null, //new imgElement('images/digits/4.png'),
-		5:null, //new imgElement('images/digits/5.png'),
-		6:null, //new imgElement('images/digits/6.png'),
-		7:null, //new imgElement('images/digits/7.png'),
-		8:null, //new imgElement('images/digits/8.png'),
-		9:null, //new imgElement('images/digits/9.png')
-	};
-	this.position = {'x':0, 'y':0};
-	this.canvas = null;
-	this.digit = [];
-	this.value = 0;
-
-	this.setCanvas = function(newCanvas){
-		//this.canvas = newCanvas;
-	}
-
-	this.reset = function(newvalue){
-		/*
-		if(newvalue == undefined) newvalue = 0;
-		this.value = newvalue;
-		this.draw();
-		*/
-	}
-
-	this.increment = function(){
-		/*
-		this.value++;
-		this.draw();
-		*/
-	}
-
-	this.eraseDigits = function(){
-		/*
-		for(n in this.digit){
-			if(this.digit[n] != undefined){
-				this.digit[n].element.remove();
-				this.digit[n] = undefined;
-			}
-		}
-		*/
-	}
-
-	this.draw = function(numval){
-	/*
-		this.eraseDigits();
-		
-		if(numval == undefined) numval = this.value;
-		numval = Math.floor(numval);
-		numtext = '' + numval;
-		for(n = 0; n < numtext.length; n++){
-			this.drawDigit(numtext.substr(n, 1), n);
-		}
-	*/	
-	}
-
-	this.drawDigit = function(value, column){	
-	/*
-		if(this.canvas == null) return false;
-		if(this.digit[column] != undefined){
-			this.digit[column].element.remove();
-			this.digit[column] = undefined;
-		}
-		this.digit[column] = this.image[1 * value].copy();
-		this.digit[column].appendTo(this.canvas);
-		this.digit[column].setPosition(10 * column, 6 * column);
-	*/
-	}
-}
-
-function incAnimationTally(increment){
-	animationTally += increment;
-	if(animationTally == 0){
-		if(offTally == 0){
-			gameState = 'won';
-			setTimeout('finishLevel()', 600);
-		}
-	}
-}
 
 function checkForWin(){
 	var n;
@@ -181,8 +91,6 @@ function finishClearLevel(callback){
 	if(callback != undefined) callback()
 }
 
-var disableHints;
-disableHints = false;
 
 function drawLevel(callback){
 	var x, y, numCells = 0;
@@ -317,87 +225,86 @@ function skipLevel(){
 		clearLevel(function(){getLevel(currentLevel)});
 	}
 }
-var lodingTally;
-var loadingAnim;
-function startGame(step){
-	if(step == undefined){
-		step = 'init';
-	}
-	switch(step){
-		case 'init':
-			gameState = 'initializing';
-			startGame('loadbg');
-			break;
-		case 'loadbg':
-			$('<img src="images/backdrop2.jpg">').load(function(){
-				startGame('loadLogo');
-			});
-			break;
-		case 'loadLogo':
-			$('<img src="images/swix.png">').load(function(){
-				startGame('loadAnimation');
-			});
-			break;
-		case 'loadAnimation':
-			$('#loadingPrompt').append('<img src="images/swix.png"/><br/><span id="loadingText">Loading</span>');
-			loadingAnim = setInterval(function(){
-				var ang = Math.random() * 2 * Math.PI;
-				var xoffset = 2 * Math.sin(ang);
-				var yoffset = 2 * Math.cos(ang);
-				c = 160 + Math.floor(Math.random() * 96);
-				$('#loadingText').html(Math.random() < 0.5 ? '10@d1n6' : 'Loading');
-				$('#loadingText').css({
-					'font-family' : 'Loved by the King',
-					'padding-top' : xoffset,
-					'padding-left' : yoffset,
-					'color' : 'rgb(' + c + ', ' + c + ', ' + c + ')',
-					'font-size' : (Math.random() * 2 + 39) + 'px'
+
+var startGame = function(){
+	var loadingAnim;
+	return function(step){
+		if(step == undefined){
+			step = 'init';
+		}
+		switch(step){
+			case 'init':
+				gameState = 'initializing';
+				startGame('loadbg');
+				break;
+			case 'loadbg':
+				$('<img src="images/backdrop2.jpg">').load(function(){
+					startGame('loadLogo');
 				});
-			}, 20);
-			startGame('cache');
-			break;
-		case 'cache':
-			// cache the images for gameplay
-			var imageList = [
-				'digits/6.png', 'digits/0.png', 'digits/2.png', 'digits/7.png',
-				'digits/5.png', 'digits/9.png', 'digits/3.png', 'digits/8.png', 'digits/4.png',
-				'digits/1.png', 'bigBlueArrow.png',
-				'hexgrid.png', 'best.png',
-				'bigBlueTile.png', 'copyright.png',
-				'tiles.png'
-			];
-			loadingTally = imageList.length;
-			for(var n in imageList){
-				$('<img src="images/' + imageList[n] + '">').load(function(){ loadingTally--;});
-			}
-			setTimeout(function(){
-				startGame('finishCache');
-			}, 300);
-			break;
-		case 'finishCache':
-			if(loadingTally){
+				break;
+			case 'loadLogo':
+				$('<img src="images/swix.png">').load(function(){
+					startGame('loadAnimation');
+				});
+				break;
+			case 'loadAnimation':
+				$('#loadingPrompt').append('<img src="images/swix.png"/><br/><span id="loadingText">Loading</span>');
+				loadingAnim = setInterval(function(){
+					var ang = Math.random() * 2 * Math.PI;
+					var xoffset = 2 * Math.sin(ang);
+					var yoffset = 2 * Math.cos(ang);
+					c = 160 + Math.floor(Math.random() * 96);
+					$('#loadingText').html(Math.random() < 0.5 ? '10@d1n6' : 'Loading');
+					$('#loadingText').css({
+						'font-family' : 'Loved by the King',
+						'padding-top' : xoffset,
+						'padding-left' : yoffset,
+						'color' : 'rgb(' + c + ', ' + c + ', ' + c + ')',
+						'font-size' : (Math.random() * 2 + 39) + 'px'
+					});
+				}, 20);
+				startGame('cache');
+				break;
+			case 'cache':
+				// cache the images for gameplay
+				var imageList = [
+					'hexgrid.png',
+					'copyright.png',
+					'tiles.png'
+				];
+				loadingTally = imageList.length;
+				for(var n in imageList){
+					$('<img src="images/' + imageList[n] + '">').load(function(){ loadingTally--;});
+				}
 				setTimeout(function(){
 					startGame('finishCache');
 				}, 300);
-			}else{
-				startGame('fadeIn');
-			}
-			break;
-		case 'fadeIn':
-			$('#loadingPrompt').fadeTo('slow', 0);
-			$('#contentWrapper').fadeTo('slow', 1, function(){
-				clearInterval(loadingAnim);
-				startGame('complete');
-			});
-			break;
-		case 'complete':
-			cellSprite = new spriteSet('tiles.sprite');
-			stepsTaken = 0;
-			beststeps = 0;
-			finishClearLevel();
-			getLevel(currentLevel);
-			break;
-		default:
-			alert('invalid startGame step: "' + step + '"');
+				break;
+			case 'finishCache':
+				if(loadingTally){
+					setTimeout(function(){
+						startGame('finishCache');
+					}, 300);
+				}else{
+					startGame('fadeIn');
+				}
+				break;
+			case 'fadeIn':
+				$('#loadingPrompt').fadeTo('slow', 0);
+				$('#contentWrapper').fadeTo('slow', 1, function(){
+					clearInterval(loadingAnim);
+					startGame('complete');
+				});
+				break;
+			case 'complete':
+				cellSprite = new spriteSet('tiles.sprite');
+				stepsTaken = 0;
+				beststeps = 0;
+				finishClearLevel();
+				getLevel(currentLevel);
+				break;
+			default:
+				alert('invalid startGame step: "' + step + '"');
+		}
 	}
-}
+}();
