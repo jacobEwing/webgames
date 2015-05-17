@@ -207,7 +207,7 @@ h2{
 }
 
 #contentWrapper{
-	/*display:none;*/
+	display:none;
 }
 
 #loadingPrompt{
