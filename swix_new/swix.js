@@ -52,7 +52,6 @@ function getLevel(levelNum){
 }
 
 function loadLevel(levelNum, callback){
-
 	$.get('swix.php', {'action':'getLevel', 'id':levelNum}, function(resultstring){
 		eval('levelQueue["' + levelNum + '"] = ' + resultstring);
 		if(callback != undefined) callback();
@@ -268,8 +267,10 @@ var startGame = function(){
 			case 'cache':
 				// cache the images for gameplay
 				var imageList = [
-					'hexgrid.png',
+					'backdrop2.jpg',
 					'copyright.png',
+					'hexgrid.png',
+					'swix.png',
 					'tiles.png'
 				];
 				loadingTally = imageList.length;

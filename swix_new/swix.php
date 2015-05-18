@@ -262,16 +262,18 @@ function local_json_encode($a = false){
 	</script>
 </head>
 <body>
-	<div id="gameWrapper">
+	<div id="gameWrapper" class="noSelect">
 		<div id="centering">
 			<div id="loadingPrompt"></div>
 			<div id="contentWrapper"><!-- style="display:none"-->
-				<div id="swix"><img src="images/swix.png"/></div>
-				<img id="copyright" src="images/copyright.png"/>
-				<div id="stepstitle" class="topRightEdge">Moves:</div>
-				<div id="stepstaken" class="topRightEdge">0</div>
-				<div id="beststepstitle" class="topRightEdge">Best:</div>
-				<div id="beststeps" class="topRightEdge">0</div>
+				<div class="noSelect">
+					<div id="swix"><img src="images/swix.png"/></div>
+					<img id="copyright" src="images/copyright.png"/>
+					<div id="stepstitle" class="topRightEdge">Moves:</div>
+					<div id="stepstaken" class="topRightEdge">0</div>
+					<div id="beststepstitle" class="topRightEdge">Best:</div>
+					<div id="beststeps" class="topRightEdge">0</div>
+				</div>
 				<div id="content"></div>
 				<a id="resetButton" class="actionButton" href="#" onclick="restartLevel(); return false">reset</a>
 				<a id="exitButton" class="actionButton" href="#"  onclick="exit(); return false;">exit</a>
@@ -279,6 +281,9 @@ function local_json_encode($a = false){
 				<div id="titleDivWrapper">
 					<div id="titleDiv"></div>
 				</div>
+				<!-- soon
+				<div id="contentOverlay"></div>
+				-->
 			</div>
 		</div>
 	</div>
