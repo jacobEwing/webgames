@@ -45,15 +45,6 @@ img.embed{ margin: 10px; }
 	margin:auto;
 }
 
-#contentOverlay{
-	width: 100%;
-	height: 100%;
-	position: absolute;
-	border: 1px dashed #FFF;
-	top: 0;
-	left: 0;
-}
-
 #swix{
 	position:absolute;
 	top:-75px;
@@ -141,6 +132,7 @@ a.actionButton{
 	left:0px;
 	width:100%;
 	text-align:center;
+	pointer-events: none;
 }
 
 #titleDiv{
@@ -154,7 +146,7 @@ a.actionButton{
 	font-size: 30px;
 	color: #FFF;
 	font-family: 'Loved by the King', cursive;
-
+	pointer-events: none;
 }
 .customcheck{
 	background-color: #666;

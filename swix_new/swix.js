@@ -16,8 +16,8 @@ function checkForWin(){
 	for(n = 0; n < cells.length && cells[n].active; n++);
 	if(n >= cells.length){
 		// all cells are active!
-			gameState = 'won';
-			setTimeout('finishLevel()', 600);
+		gameState = 'won';
+		setTimeout('finishLevel()', 600);
 	}
 }	
 
@@ -139,7 +139,28 @@ function drawLevel(callback){
 	}
 
 }
-
+/*
+function handleOverlayClick(evt){
+	var realPos = function(x, y){ return {'x':48 * x - drawOffset.x, 'y': 27.5 * x + 55 * y + drawOffset.y}; };
+	var mapPos = function(x, y){
+		var mapx, mapy
+		mapx = Math.round((x + drawOffset.x) / 48);
+		mapy = Math.round(   (y - drawOffset.y) / 55  - (27.5 * mapx) / 55 );
+		return {
+			'x' : mapx,
+			'y' : mapy,
+		};
+	}
+	var parentPos = $('#centering').position();
+	var pos = {
+		x : evt.pageX - parentPos.left,
+		y : evt.pageY - parentPos.top
+	};
+	var mpos = mapPos(pos.x, pos.y);
+	$('#debug').html(mpos.x + ', ' + mpos.y + '<br/>');
+//	alert(evt.pageX - $(
+}
+*/
 function closeHint(){
 	colourBack.fadeTo(400, 0);
 	backing.fadeTo(400, 0, function(){
@@ -234,7 +255,12 @@ var startGame = function(){
 		switch(step){
 			case 'init':
 				gameState = 'initializing';
-				startGame('loadbg');
+				startGame('loadSprite');
+				break;
+			case 'loadSprite':
+				cellSprite = new spriteSet('tiles.sprite', function(){
+					startGame('loadbg');
+				});
 				break;
 			case 'loadbg':
 				$('<img src="images/backdrop2.jpg">').load(function(){
@@ -262,33 +288,22 @@ var startGame = function(){
 						'font-size' : (Math.random() * 2 + 39) + 'px'
 					});
 				}, 20);
-				startGame('cache');
+				startGame('loadCopyright');
 				break;
-			case 'cache':
-				// cache the images for gameplay
-				var imageList = [
-					'backdrop2.jpg',
-					'copyright.png',
-					'hexgrid.png',
-					'swix.png',
-					'tiles.png'
-				];
-				loadingTally = imageList.length;
-				for(var n in imageList){
-					$('<img src="images/' + imageList[n] + '">').load(function(){ loadingTally--;});
-				}
-				setTimeout(function(){
-					startGame('finishCache');
-				}, 300);
+			case 'loadCopyright':
+				$('<img src="images/copyright.png">').load(function(){
+					startGame('loadHexgrid');
+				});
 				break;
-			case 'finishCache':
-				if(loadingTally){
-					setTimeout(function(){
-						startGame('finishCache');
-					}, 300);
-				}else{
+			case 'loadHexgrid':
+				$('<img src="images/hexgrid.png">').load(function(){
+					startGame('loadTiles');
+				});
+				break;
+			case 'loadTiles':
+				$('<img src="images/tiles.png">').load(function(){
 					startGame('fadeIn');
-				}
+				});
 				break;
 			case 'fadeIn':
 				$('#loadingPrompt').fadeTo('slow', 0);
@@ -298,8 +313,6 @@ var startGame = function(){
 				});
 				break;
 			case 'complete':
-				cellSprite = new spriteSet('tiles.sprite');
-				stepsTaken = 0;
 				beststeps = 0;
 				finishClearLevel();
 				getLevel(currentLevel);
