@@ -9,9 +9,9 @@ $level = array(
 		),
 		'offset' => array(-156, 122),
 		'hint' => "<h2 style=\"text-align:center\">Objective</h2>
-		<img src=\"images/button1/button1_07.png\" style=\"float:right;margin:5px\"/>
+		<div style=\"float:right; margin:5px;\" class=\"cellSample\"></div>
 		<p>Each tile in the game has a <i>coloured active side</i> and a <i>dark inactive side</i>.  The goal is to flip all tiles to show their active side.</p><br/>
-		<img src=\"images/button1/button1_00.png\" style=\"float:left;margin:5px\"/>
+		<div style=\"float:left;margin:5px; background-position: -64px -128px\" class=\"cellSample\"></div>
 		<h3>Blue Switchers</h3>
 		<p>Clicking the blue switcher tile will cause all neighbouring tiles to be flipped (but not itself).</p>
 		"
@@ -125,7 +125,10 @@ $level = array(
 			'spin' => array(0,4,1,  2,3,1,  4,2,1,  6,1,1)
 		),
 		'offset' => array(-60, 66),
-		'hint' => "<h2 style=\"text-align:center\">Spinners</h2><img src=\"images/button2/button2_00.png\" style=\"float:left;margin:2em\"/><p>This is the spinner, which you might say adds a &quot;twist&quot; to the game.  Rather than switching the state of its neighbours, it instead rotates them clockwise around itself.</p>"
+		'hint' => "<h2 style=\"text-align:center\">Spinners</h2>
+		<div style=\"float:left;margin:2em; background-position: -64px -256px\" class=\"cellSample\"></div>
+		</p>
+		This is the spinner, which you might say adds a &quot;twist&quot; to the game.  Rather than switching the state of its neighbours, it instead rotates them clockwise around itself.</p>"
 	),
 	array(
 		'title' => 'Like a Record Baby',

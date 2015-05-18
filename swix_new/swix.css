@@ -218,3 +218,12 @@ h2{
 	width: 100%;
 	top: 160px;
 }
+
+div.cellSample{
+	position: relative;
+	width: 64px;
+	height: 64px;
+	overflow: hidden;
+	background-image: url(images/tiles.png);
+	display: inline;
+}
