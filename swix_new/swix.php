@@ -2,10 +2,10 @@
 /********
 TODO
 
- - Need to fix the opening intro so that the logo comes out on top of the play grid
- - Bug: sometimes the initial level doesn't display after the game loads
- - allow cell clicking while title is still hovering (perhaps with a click handling overlay)
  - Add undo functionality
+
+ Fixed?:
+ - Bug: sometimes the initial level doesn't display after the game loads
 
 ********/
 ini_set('display_errors', 1); 

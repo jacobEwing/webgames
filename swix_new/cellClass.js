@@ -15,6 +15,15 @@ var cellClass = function(){
 	this.position = {x : 0, y : 0};
 	this.children = [];
 	if(arguments.length == 1) this.initialize(arguments[0]);
+
+	this.toString = function(){
+		var rval = 
+			'{x:' + this.position.x 
+			+ ',y:' + this.position.y
+			+ ',a:' + this.active
+			+ ',t:"' + this.celltype + '"}';
+		return rval;
+	};
 };
 
 cellClass.prototype.initialize = function(params){
