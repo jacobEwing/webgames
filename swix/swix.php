@@ -129,7 +129,7 @@ function loadLevel($levelNum){
 
 			);
 			for($n = 2; $n < count($returnval['cells']['flipNeighbours']); $n += 3){
-				$returnval['cells']['flipNeighbours'][$n] = 0;
+				$returnval['cells']['flipNeighbours'][$n] = 1;
 			}
 			break;
 		case 'test_tiny': 
@@ -216,6 +216,8 @@ function local_json_encode($a = false){
 <!DOCTYPE html>
 <html>
 <head>
+	<meta property="og:image" content="http://www.weirdly.net/webgames/icons/Swix.png" />
+
 	<link href='http://fonts.googleapis.com/css?family=Loved+by+the+King' rel='stylesheet' type='text/css'>
 	<link rel="stylesheet" type="text/css" href="swix.css" />
 	<script type="text/javascript" src="jquery.js"></script>
