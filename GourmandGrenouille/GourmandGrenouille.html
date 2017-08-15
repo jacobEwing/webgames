@@ -746,9 +746,10 @@
 			setInterval(animate, 50);
 
 			gameCanvas.onmousemove = function(evt){
+
 				mousePos = {
-					x : evt.clientX - gameCanvas.offsetLeft - document.getElementById('gameWrapper').offsetLeft,
-					y : evt.clientY - gameCanvas.offsetTop - document.getElementById('gameWrapper').offsetTop
+					x : evt.pageX - $('#gameCanvas').offset().left,
+					y : evt.pageY - $('#gameCanvas').offset().top
 				};
 				var dx = mousePos.x - frog.position.x - 20;
 				var dy = mousePos.y - frog.position.y - 6;
