@@ -217,6 +217,7 @@ function local_json_encode($a = false){
 <html>
 <head>
 	<meta property="og:image" content="http://www.weirdly.net/webgames/icons/Swix.png" />
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 
 	<link href='http://fonts.googleapis.com/css?family=Loved+by+the+King' rel='stylesheet' type='text/css'>
 	<link rel="stylesheet" type="text/css" href="swix.css" />
