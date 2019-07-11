@@ -1,0 +1,222 @@
+<html>
+<head>
+	<style type="text/css">
+
+		#gameCanvas{
+			image-rendering: pixelated;
+			image-rendering: -moz-crisp-edges;
+			image-rendering: crisp-edges;
+			position: absolute;
+			top: 0;
+			left: 0;
+
+			padding: 0;
+			margin: 0;
+			display: block;
+			width: 100%;
+			height: 100%;
+			background-color: #000;
+
+		}
+	</style>
+	<script src="canvasSprite.js" type="text/javascript"></script>
+	<script src="geometry.js" type="text/javascript"></script>
+	<script type="text/javascript">
+		var sprites = {};
+		var gameCanvas, context;
+
+		var mouse = {
+			x : 0,
+			y : 0,
+			buttons : 0,
+			clicked : 0
+		};
+
+		var config = {
+			gun : {
+				maxTilt : 1,
+				vOffset : -9
+			},
+			scale : 2,
+			gravity : .5,
+			defaultRocketSpeed : 20,
+			rocketLaunchOffset : 25
+		};
+
+		config.rocketLaunchOffset *= config.scale;
+		config.gravity *= config.scale;
+		config.defaultRocketSpeed *= config.scale;
+
+		var state = {
+			gun : {
+				angle : 0,
+				buttons : 0,
+				clicked : 0
+			},
+			rockets : []
+		};
+
+		var sprites = {};
+
+		var rocketClass = function(){
+			this.x = 0;
+			this.y = 0;
+			this.velocity = {xi : 0, yi : 0};
+			this.angle = 0;
+
+		}
+
+		rocketClass.prototype.position = function(){
+			switch(arguments.length ){
+				case 0:
+					break;
+				case 1:
+					this.x = arguments[0].x;
+					this.y = arguments[0].y;
+					break;
+				case 2: 
+					this.x = arguments[0];
+					this.y = arguments[1];
+					break;
+				default:
+					throw "rocketClass::position: expecting two or fewer arguments, received " + arguments.length;
+			}
+			return {
+				x : this.x,
+				y : this.y
+			};
+		}
+
+		rocketClass.prototype.move = function(){
+			this.velocity.yi += config.gravity;
+
+			this.x += this.velocity.xi;
+			this.y += this.velocity.yi;
+
+			this.angle = rel_ang(0, 0, this.velocity.xi, this.velocity.yi);
+		}
+
+		rocketClass.launchNew = function(x, y, angle, speed){
+			var rocket = new rocketClass();
+			rocket.position(x + Math.sin(angle) * config.rocketLaunchOffset, y + Math.cos(angle + Math.PI) * config.rocketLaunchOffset);
+			rocket.angle = angle;
+			if(speed == undefined) speed = config.defaultRocketSpeed;
+
+			rocket.velocity = {
+				xi : Math.sin(angle) * speed,
+				yi : Math.cos(angle + Math.PI) * speed
+			};
+
+			state.rockets[state.rockets.length] = rocket;
+		}
+
+		function initialize(step){
+			if(step == undefined) step = 'initialize canvas';
+
+			switch(step){
+				case 'initialize canvas':
+					gameCanvas = document.getElementById('gameCanvas');
+					gameCanvas.width = window.innerWidth;
+					gameCanvas.height = window.innerHeight;
+					context = gameCanvas.getContext('2d');
+
+					// make sure the scaling is not blurred
+					context.webkitImageSmoothingEnabled = false;
+					context.mozImageSmoothingEnabled = false;
+					context.imageSmoothingEnabled = false; /// future
+
+					setTimeout(function(){
+						initialize('load sprites');
+					}, 1);
+					break;
+					
+				case 'load sprites':
+					sprites.rockets = new spriteSet('sprites.sprite', function(){
+
+						sprites.rocket = new cSprite(sprites.rockets).setFrame('rocket');
+						sprites.gun = new cSprite(sprites.rockets).setFrame('gun');
+						sprites.base = new cSprite(sprites.rockets).setFrame('base');
+
+						sprites.gun.setPosition(gameCanvas.width >> 1, gameCanvas.height - (sprites.gun.frame.height - sprites.gun.frame.centery - config.gun.vOffset) * config.scale);
+						sprites.base.setPosition(gameCanvas.width >> 1, gameCanvas.height - (sprites.base.frame.height - sprites.base.frame.centery) * config.scale);
+
+						setTimeout(function(){
+							initialize('initialize mouse');
+						}, 1);
+					});
+					break;
+				case 'initialize mouse':
+					gameCanvas.onmousemove = function(e){handleMouse(e)};
+					gameCanvas.onmousedown = function(e){handleMouse(e)};
+					gameCanvas.onmouseup = function(e){handleMouse(e)};
+					setTimeout(function(){
+						initialize('finish');
+					}, 1);
+					break;
+				case 'finish':
+					requestAnimationFrame(animate);
+			}
+ 		}
+
+		window.onload = function(){
+			initialize();
+		};
+
+		function handleMouse(e){
+			mouse.x = e.pageX;
+			mouse.y = e.pageY;
+			mouse.x -= e.currentTarget.offsetLeft;
+			mouse.y -= e.currentTarget.offsetTop;
+			if(!(e.buttons & 1) && (mouse.buttons & 1)){
+				mouse.clicked = 1;
+				mouse.buttons += 1;
+			}
+			mouse.buttons = e.buttons;
+
+		}
+
+		function getStates(){
+			state.gun.angle = rel_ang(sprites.gun.position.x, sprites.gun.position.y, mouse.x, mouse.y);
+			if(state.gun.angle > Math.PI && state.gun.angle < 2 * Math.PI - config.gun.maxTilt) state.gun.angle = -config.gun.maxTilt;
+			if(state.gun.angle < Math.PI && state.gun.angle > config.gun.maxTilt) state.gun.angle = config.gun.maxTilt;
+		}
+
+		function animate(){
+			getStates();
+
+			sprites.gun.rotateTo(state.gun.angle);
+
+			context.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
+			drawScene();
+
+			if(mouse.clicked){
+				rocketClass.launchNew(sprites.gun.position.x, sprites.gun.position.y, sprites.gun.rotation);
+				mouse.clicked = 0;
+			}
+
+			requestAnimationFrame(animate);
+		}
+
+		function drawScene(){
+			var n;
+			for(n in state.rockets){
+				sprites.rocket.rotateTo(state.rockets[n].angle);
+				state.rockets[n].move();
+				sprites.rocket.draw(context, {
+					scale : config.scale,
+					x : state.rockets[n].x,
+					y : state.rockets[n].y
+				});
+			}
+
+			sprites.gun.draw(context, {scale : config.scale});
+			sprites.base.draw(context, {scale : config.scale});
+
+
+		}
+	</script>
+</head>
+<body>
+	<canvas id="gameCanvas"></canvas>
+</body>
+</html>

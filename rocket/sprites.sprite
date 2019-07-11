@@ -1,0 +1,10 @@
+{
+	"image" : "rocketbase.png",
+	"frameWidth" : 0,
+	"frameHeight" : 0,
+	"frames" : {
+		"base" : {"xoffset" : 0, "yoffset" : 38, "width" : 57, "height" : 19, "centerx" : 28, "centery" : 18},
+		"gun" : {"xoffset" : 5, "yoffset" : 0, "width" : 24, "height" : 38, "centerx" : 12, "centery" : 28},
+		"rocket" : {"xoffset" : 0, "yoffset" : 0, "width" : 5, "height" : 18, "centerx" : 2.5, "centery" : 10}
+	}
+}
