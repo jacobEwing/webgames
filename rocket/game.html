@@ -171,7 +171,6 @@
 			var x3 = 2 * x2 - x1;
 			var y3 = sprites.gun.position.y;
 
-//			console.log(a + 'x^2 + ' + b + 'b + ' + c);
 			context.fillStyle = "#FFFFFF";
 			context.fillRect(x1, y1, 5, 5);
 			context.fillRect(x2, y2, 5, 5);
@@ -213,7 +212,11 @@
 			// ok, we have the legit parabola, now we need to calculate its tangent at the gun's position
 			var dy = 2 * a * x1 + b;  // <-- something is fucking up dy
 //			console.log(dy);
-			state.gun.angle = rel_ang(x1, 0, x1 < x2 ? 1 : -1, -dy);
+			if(dy < 0){
+				state.gun.angle = rel_ang(0, 0, 1, dy);
+			}else{
+				state.gun.angle = 2 * Math.PI - rel_ang(0, 0, 1, -dy);
+			}
 			console.log((x1 < x2 ? 1 : -1) + ', ' + dy + ': ' + state.gun.angle);
 
 			if(state.gun.angle > Math.PI && state.gun.angle < 2 * Math.PI - config.gun.maxTilt) state.gun.angle = -config.gun.maxTilt;
