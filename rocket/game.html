@@ -24,7 +24,11 @@
 	<script type="text/javascript">
 		var sprites = {};
 		var gameCanvas, context;
+		
+		// namespace for some graphical functions
+		var gfx = {};
 
+		// mouse status
 		var mouse = {
 			x : 0,
 			y : 0,
@@ -33,6 +37,7 @@
 			released : 0
 		};
 
+		// game constants
 		var config = {
 			gun : {
 				maxTilt : 1,
@@ -40,7 +45,7 @@
 			},
 			scale : 2,
 			gravity : .5,
-			defaultRocketSpeed : 25,
+			defaultRocketSpeed : 30,
 			rocketLaunchOffset : 25
 		};
 
@@ -48,6 +53,7 @@
 		config.gravity *= config.scale;
 		config.defaultRocketSpeed *= config.scale;
 
+		// global game states
 		var state = {
 			gun : {
 				angle : 0,
@@ -57,8 +63,11 @@
 			rockets : []
 		};
 
+		// game sprites
 		var sprites = {};
 
+
+		//=========================================================================
 		var rocketClass = function(){
 			this.x = 0;
 			this.y = 0;
@@ -111,6 +120,8 @@
 			state.rockets[state.rockets.length] = rocket;
 		}
 
+
+		//=========================================================================
 		function initialize(step){
 			if(step == undefined) step = 'initialize canvas';
 
@@ -128,9 +139,9 @@
 
 					setTimeout(function(){
 						initialize('load sprites');
-					}, 1);
+					}, 0);
 					break;
-					
+
 				case 'load sprites':
 					sprites.rockets = new spriteSet('sprites.sprite', function(){
 
@@ -143,7 +154,7 @@
 
 						setTimeout(function(){
 							initialize('initialize mouse');
-						}, 1);
+						}, 0);
 					});
 					break;
 				case 'initialize mouse':
@@ -152,7 +163,7 @@
 					gameCanvas.onmouseup = function(e){handleMouse(e)};
 					setTimeout(function(){
 						initialize('finish');
-					}, 1);
+					}, 0);
 					break;
 				case 'finish':
 					requestAnimationFrame(animate);
@@ -162,56 +173,38 @@
 		window.onload = function(){
 			initialize();
 		};
-		function calculateGunAngle(){
 
+		/*  this works, but won't fit the needs of the game
+		function calculateGunAngle(){
+			// calculate a parabola that intersects the gun, and which has a vertex at the
+			// mouse location.  Then set the gun angle to the tangent of that parabola.
 			var x1 = sprites.gun.position.x;
 			var y1 = sprites.gun.position.y;
 			var x2 = mouse.x;
 			var y2 = mouse.y;
 			var x3 = 2 * x2 - x1;
-			var y3 = sprites.gun.position.y;
+			var y3 = sprites.gun`.position.y;
 
-			context.fillStyle = "#FFFFFF";
-			context.fillRect(x1, y1, 5, 5);
-			context.fillRect(x2, y2, 5, 5);
-			context.fillRect(x3, y3, 5, 5);
-
-
-			// now let's draw the parabola
-			context.save();
-			context.lineWidth = 1.5;
-			context.strokeStyle = "rgb(160, 192, 256)";
-			if(x1 == x2 || x2 == x3 || x1 == x3){
-				if(x1 == x2) x2 = x3;
-				context.beginPath();
-				context.moveTo(x1, 0);
-				context.lineTo(x1, gameCanvas.height);
-				context.moveTo(x2, 0);
-				context.lineTo(x2, gameCanvas.height);
-
-			}else{
-				a = (y1 * (x3 - x2) + y2 * (x1 - x3) + y3 * (x2 - x1)) / (x1 * x1 * (x3 - x2) + x2 * x2 * (x1 - x3) + x3 * x3 * (x2 - x1));
-				b = (y1 - y2) / (x1 - x2) - a * (x1 + x2);
-				c = y1 - (x1 * x1) * a - x1 * b;
-
-				context.beginPath();
-				for(x = 0; x < gameCanvas.width; x += 2){
-					y = a * x * x + b * x + c;
-					if(x > 0 && ((y >= 0 && y < gameCanvas.height) || (oldy >= 0 && oldy < gameCanvas.height) || (oldy < 0 && y >= gameCanvas.height) || (y < 0 && oldy >= gameCanvas.height))){
-						context.lineTo(x, y);
-					}else{
-						context.moveTo(x, y);
-					}
-					oldx = x;
-					oldy = y;
-				}
+			// ensure a proper parabola
+			if(x1 == x2){
+				x1 += Math.random() * .1 - .05;
+				x2 += Math.random() * .1 - .05;
 			}
-			context.stroke();
-			context.restore();
+			if(x2 == x3){
+				x2 += Math.random() * .1 - .05;
+				x3 += Math.random() * .1 - .05;
+			}
+			if(x1 == x3){
+				x1 += Math.random() * .1 - .05;
+				x3 += Math.random() * .1 - .05;
+			}
+
+
+			var a = (y1 * (x3 - x2) + y2 * (x1 - x3) + y3 * (x2 - x1)) / (x1 * x1 * (x3 - x2) + x2 * x2 * (x1 - x3) + x3 * x3 * (x2 - x1));
+			var b = (y1 - y2) / (x1 - x2) - a * (x1 + x2);
 
 			// ok, we have the legit parabola, now we need to calculate its tangent at the gun's position
-			var dy = 2 * a * x1 + b;  // <-- something is fucking up dy
-//			console.log(dy);
+			var dy = 2 * a * x1 + b;
 			if(dy < 0){
 				state.gun.angle = rel_ang(0, 0, 1, dy);
 			}else{
@@ -222,9 +215,8 @@
 			if(state.gun.angle > Math.PI && state.gun.angle < 2 * Math.PI - config.gun.maxTilt) state.gun.angle = -config.gun.maxTilt;
 			if(state.gun.angle < Math.PI && state.gun.angle > config.gun.maxTilt) state.gun.angle = config.gun.maxTilt;
 		
-
-
 		}
+		*/
 
 		function handleMouse(e){
 			mouse.x = e.pageX;
@@ -243,15 +235,13 @@
 		}
 
 		function getStates(){
-		/*
 			state.gun.angle = rel_ang(sprites.gun.position.x, sprites.gun.position.y, mouse.x, mouse.y);
 			if(state.gun.angle > Math.PI && state.gun.angle < 2 * Math.PI - config.gun.maxTilt) state.gun.angle = -config.gun.maxTilt;
 			if(state.gun.angle < Math.PI && state.gun.angle > config.gun.maxTilt) state.gun.angle = config.gun.maxTilt;
-		*/
 		}
 
 		function animate(){
-			getStates();
+			//getStates();
 
 			sprites.gun.rotateTo(state.gun.angle);
 
@@ -268,9 +258,11 @@
 
 		function drawScene(){
 			var n;
+			getStates();
+			//calculateGunAngle();
 			for(n in state.rockets){
-				sprites.rocket.rotateTo(state.rockets[n].angle);
 				state.rockets[n].move();
+				sprites.rocket.rotateTo(state.rockets[n].angle);
 				sprites.rocket.draw(context, {
 					scale : config.scale,
 					x : state.rockets[n].x,
@@ -281,7 +273,10 @@
 			sprites.gun.draw(context, {scale : config.scale});
 			sprites.base.draw(context, {scale : config.scale});
 
-			calculateGunAngle();
+			//gfx.putPixel(10, 10, 255, 255, 0, 1);
+			context.fillStyle = "#FFFF00";
+			context.fillRect(10, 10, 1, 1);
+
 
 
 		}
