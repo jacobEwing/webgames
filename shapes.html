@@ -3,15 +3,34 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 	<style type="text/css">
-		* { margin: 0; padding : 0 }
+		* { 
+			margin: 0;
+			padding : 0;
+			cursor: pointer;
+		}
 		body, html {
 			height: 100%;
+			overflow: hidden;
+		}
+
+		#instructionPrompt{
+			position: relative;
+			top: 40%;
+			width: 100%;
+			display: none;
+			text-align: center;
+			font-size: 5mm;
 		}
 	</style>
 	<script type="text/javascript">
-		var context, canvasWidth = 800, canvasHeight = 600, mouseX = -1, mouseY = -1, shape=[], numShapes = 0, colourAngle = 0, leadShape = null, mouseDown = false;
+		var context, canvasWidth, canvasHeight;
+		var mouseX = -1, mouseY = -1, mouseDown = false;
+		var shape=[], numShapes = 0, colourAngle = 0, leadShape = null;
+		var linkSize = 12, chainLength = 80, shrinkRate = .98;
+		var colourOffset = { r : 0, g : 0 ,b : 0 };
 
 
+		// a class representing the individual polygons
 		var shapeClass = function(){
 			this.colour = { 'R' : 255, 'G' : 255, 'B' : 255 };
 			this.position = { x : 0, y : 0 };
@@ -29,28 +48,31 @@
 			this.cosine = Math.cos(ang);
 		};
 
+		// animate the shape's motion
 		shapeClass.prototype.move = function(){
 			var n;
 			if(this.parentShape == null){
+				// no parent?  then go free!
 				this.velocity.y++;
 				this.position.x += this.velocity.x;
 				this.position.y += this.velocity.y;
 			}else{
-				e4 = this.parentShape.position.x;
-				e7 = this.parentShape.position.y;
-				e6 = this.position.x;
-				e5 = this.position.y;
-				dx = e4 - e6;
-				dy = e7 - e5;
-				c4 = Math.sqrt(dx * dx + dy * dy);
-				dy *= 8.0 / c4;
-				dx *= 8.0 / c4;
+				// trail behind our parent shape
+				px = this.parentShape.position.x;
+				py = this.parentShape.position.y;
+				oldx = this.position.x;
+				oldy = this.position.y;
+				dx = px - oldx;
+				dy = py - oldy;
+				dist = Math.sqrt(dx * dx + dy * dy);
+				dy *= linkSize / dist;
+				dx *= linkSize / dist;
 				this.position = {
-					'x' : e4 - dx,
-					'y' : e7 - dy
+					'x' : px - dx,
+					'y' : py - dy
 				};
-				dx = this.position.x - e6;
-				dy = this.position.y - e5;
+				dx = this.position.x - oldx;
+				dy = this.position.y - oldy;
 				dx = dx > 5 ? 5 : (dx < -5 ? -5 : dx);
 				dy = dy > 10 ?10 :(dy < -10 ? -10 : dy) - 3;
 				this.velocity={
@@ -59,8 +81,8 @@
 				};
 				
 				for(n = 0; n < this.numpoints; n++){
-					this.points[n].x *= 0.95;
-					this.points[n].y *= 0.95;
+					this.points[n].x *= shrinkRate;
+					this.points[n].y *= shrinkRate;
 				}
 			}
 			for(n = 0; n < this.numpoints; n++){
@@ -119,6 +141,13 @@
 				context.stroke();
 				context.fill();
 			context.restore();
+
+			// let's flash the screen with the complement of that colour if the mouse button is down
+			if(mouseDown){
+				document.body.style.backgroundColor = 'rgba(' + (511 - this.colour.R >> 1) + ', ' + (511 - this.colour.G >> 1) + ', ' + (511 - this.colour.B >> 1) + ', 1)';
+			}else{
+				document.body.style.backgroundColor = '#FFFFFF';
+			}
 		};
 
 		shapeClass.prototype.scale = function(ratio){
@@ -129,9 +158,11 @@
 			}
 		};
 
+		// all things must die
 		shapeClass.prototype.age = function(chainPos){
 			chainPos = chainPos == undefined ? 0 : chainPos + 1;
-			if(chainPos > 30){
+			if(chainPos > chainLength){
+				
 				this.parentShape.childShape = null;
 				this.parentShape = null;
 				if(this.childShape != null){
@@ -151,6 +182,7 @@
 			}
 		};
 
+		// generate the canvas and add it to the document
 		function buildCanvas(){
 			var canvas = document.createElement("canvas");
 			canvasWidth = canvas.width = document.body.clientWidth;
@@ -160,18 +192,79 @@
 			return canvas;
 		}
 
+		// fade an element to the target opacity
+		function fadeTo(element, target, callback){
+			var opacity = parseFloat(element.style.opacity);
+			var difference = target - opacity;
+			var diff = Math.abs(difference);
+			if(diff > .1){
+				opacity += .1 * Math.sign(difference);
+			}else{
+				opacity = target;
+				if(callback != undefined){
+					callback();
+				}
+			}
+			element.style.opacity = opacity;
+
+			if(opacity != target){
+				setTimeout(function(){fadeTo(element, target, callback);}, 50);
+			}
+		}
+
+		function givePrompt(step){
+			if(mouseX != -1 ||  mouseY != -1) return;
+
+			var promptWin = document.getElementById('instructionPrompt');
+			if(step == undefined){
+				step = 0;
+				promptWin.style.display = 'inline-block';
+				promptWin.style.opacity = 0.1;
+				setTimeout(function(){fadeTo(promptWin, 1);}, 50);
+			}
+
+			setTimeout(function(){
+				fadeTo(promptWin, 0, function(){
+					promptWin.style.display = 'none';
+				});
+			}, 3000);
+		}
+
+		function animate(){
+			var n;
+			context.clearRect(0, 0, canvasWidth, canvasHeight);
+			for(n = 0; n < numShapes; n++){
+				if(mouseDown){
+					shape[n].scale(1.03);
+				}
+				shape[n].move();
+				// that isNAN is a catch for something breaking the numbers.  it was leaving dead polygons at 0 0 sometimes
+				if(isNaN(shape[n].position.y) || shape[n].position.y > canvasHeight + shape[n].radius){
+					shape.splice(n, 1);
+					n--;
+					numShapes--;
+				}else{
+					shape[n].opacity *= shrinkRate;
+					shape[n].draw();
+				}
+			}
+			if(leadShape != null){
+				leadShape.age();
+			}
+		}
+
 		window.onload = function(){
 			var canvas = buildCanvas();
 			context = canvas.getContext('2d');
-			canvas.onmousemove = function(evt){
+			canvas.onmousemove = function(evt){				
 				var x, y, colour;
 				x = evt.clientX;
 				y = evt.clientY;
 				var dx = x - mouseX, dy = y - mouseY;
-				colour ={
-					'R' : Math.floor(128 + 100 * Math.sin(colourAngle)),
-					'G' : Math.floor(128 + 100 * Math.cos(colourAngle)),
-					'B' : Math.floor(128 - 100 * Math.sin(colourAngle))
+				colour = {
+					'R' : Math.floor(128 + 100 * Math.sin(colourAngle + colourOffset.r)),
+					'G' : Math.floor(128 + 100 * Math.cos(colourAngle + colourOffset.g)),
+					'B' : Math.floor(128 - 100 * Math.sin(colourAngle + colourOffset.b))
 				};
 				if(dx * dx + dy * dy > 256){
 					shape[numShapes] = new shapeClass();
@@ -197,6 +290,11 @@
 
 			document.onmouseup = function(){
 				mouseDown = false;
+				colourOffset = {
+					r : 2 * Math.random() - 1,
+					g : 2 * Math.random() - 1,
+					b : 2 * Math.random() - 1
+				};
 				if(leadShape != null){
 					leadShape.age(10);
 				}
@@ -207,31 +305,15 @@
 			};
 
 			setInterval(animate, 40);
+
+			setTimeout(givePrompt, 3001);
 		};
 
-		function animate(){
-			var n;
-			context.clearRect(0, 0, canvasWidth, canvasHeight);
-			for(n = 0; n < numShapes; n++){
-				if(mouseDown){
-					shape[n].scale(1.03);
-				}
-				shape[n].move();
-				if(shape[n].position.y > canvasHeight + shape[n].radius){
-					shape.splice(n, 1);
-					n--;
-					numShapes--;
-				}else{
-					shape[n].opacity *= 0.95;
-					shape[n].draw();
-				}
-			}
-			if(leadShape != null){
-				leadShape.age();
-			}
-		}
 	</script>
 </head>
 <body>
+	<div id="instructionPrompt">
+		Try moving your mouse around
+	</div>
 </body>
 </html>
