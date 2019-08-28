@@ -1,16 +1,234 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
-<title>shapes</title>
-<style type="text/css">
-	body {text-align:center;}
-	#a0{position:relative;width:800;margin:auto;margin-top:4em;}
-</style>
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
-<script type="text/javascript">var a2,a7=800,b4=600,b7=-1;c6=-1,b6=[],a5=0,a6=0,a8=null,a4=true,a1=function(){this.b3={'R':255,'G':255,'B':255};this.c5={c0:0,e1:0};this.b1=this.b5=0;this.b2=[];this.b8={c0:0,e1 :0};this.c2=1;this.c7=this.d2=0;this.b9=null;this.c1=null;};a1.prototype.a9=function(d4){this.c7=Math.sin(d4);this.d2=Math.cos(d4);};a1.prototype.c8=function(){var e0;if(this.b9==null){this.b8.e1++;this.c5.c0+=this.b8.c0;this.c5.e1+=this.b8.e1;}else{e4=this.b9.c5.c0;e7=this.b9.c5.e1;e6=this.c5.c0;e5=this.c5.e1;e3=e4-e6;e2=e7-e5;c4=Math.sqrt(e3*e3+e2*e2);e2*=8.0/c4;e3*=8.0/c4;this.c5={'c0':e4-e3,'e1':e7-e2};e3=this.c5.c0-e6;e2=this.c5.e1-e5;e3=e3>5?5:(e3<-5?-5:e3);e2=e2>10?10:(e2<-10?-10:e2)-3;this.b8={c0:e3,e1:e2};for(e0=0;e0<this.b1;e0++){this.b2[e0].c0*=0.95;this.b2[e0].e1*=0.95;}}for(e0=0;e0<this.b1;e0++){var nx=this.d2*this.b2[e0].c0-this.c7*this.b2[e0].e1;this.b2[e0].e1=this.c7*this.b2[e0].c0+this.d2*this.b2[e0].e1;this.b2[e0].c0=nx;}};a1.prototype.d1=function(c0,e1,b5,b1,b3){var e0,e8,ai=Math.PI*2/b1,c9;this.c5={'c0':c0,'e1':e1};this.b1=b1;this.b5=b5;this.d3=Math.random()*Math.PI*2;this.angi=Math.random()*0.2;+0.1;this.b2=[];this.b3=b3;c9=b5*(1+(!(this.b1 % 2) && (this.b1>8 || Math.random()<0.5)?0.5:0));e8=this.d3;for(e0=0;e0<this.b1;e0++){if(e0 % 2){this.b2[e0]={'c0':this.b5*Math.sin(e8),'e1':this.b5*Math.cos(e8)};}else{this.b2[e0]={'c0':c9*Math.sin(e8),'e1':c9*Math.cos(e8)};}e8+=ai;}};a1.prototype.d7=function(){var e0;a2.save();a2.beginPath();a2.strokeStyle='rgba('+(this.b3.R>>1)+','+(this.b3.G>>1)+','+(this.b3.B>>1)+',1)';a2.fillStyle='rgba('+this.b3.R+','+this.b3.G+','+this.b3.B+','+this.c2+')';a2.lineWidth=1;a2.translate(this.c5.c0,this.c5.e1);a2.moveTo(this.b2[0].c0,this.b2[0].e1);for(e0=1;e0<this.b1;e0++){a2.lineTo(this.b2[e0].c0,this.b2[e0].e1);}a2.closePath();a2.stroke();a2.fill();a2.restore();};a1.prototype.d0=function(d9){var e0;for(e0=0;e0<this.b1;e0++){this.b2[e0].c0*=d9;this.b2[e0].e1*=d9;}};a1.prototype.c3=function(d5){d5=d5==undefined?0:d5+1;if(d5>30){this.b9.c1=null;this.b9=null;if(this.c1!=null){this.c1.c3(d5);}}else{if(this.c1==null){if(this==a8){a8=null;}else{this.b9.c1=null;this.b9=null;}}else{this.c1.c3(d5);}}};$(document).ready(function(){a2=document.getElementById('d8').getContext('2d');var a3=document.getElementById('d8');a3.onmousemove=function(e9){var b3={'R':Math.floor(128+100*Math.sin(a6)),'G':Math.floor(128+100*Math.cos(a6)),'B':Math.floor(128-100*Math.sin(a6))},c0=e9.clientX-a3.offsetLeft,e1=e9.clientY-a3.offsetTop-document.getElementById('a0').offsetTop,e3=c0-b7,e2=e1-c6;if(e3*e3+e2*e2>256){b6[a5]=new a1();b6[a5].d1(c0,e1,40,Math.floor(Math.random()*10)+3,b3);e3=e3>5?5:(e3<-5?-5:e3);e2=e2>10?10:(e2<-10?-10:e2)-3;b6[a5].a9(e3/30.0);b7=c0;c6=e1;b6[a5].b8={c0:e3,e1:e2};if(a4){if(a8!=null){a8.b9=b6[a5];}b6[a5].c1=a8;a8=b6[a5];}a5++;a6+=0.05;if(a6>2*Math.PI) a6-=2*Math.PI;}};document.onmouseup=function(){a4=true;if(a8!=null){a8.c3(10);}};document.onmousedown=function(){a4=false;};setInterval(d6,40);});function d6(){var e0;a2.clearRect(0,0,a7,b4);for(e0=0;e0<a5;e0++){if(!a4){b6[e0].d0(1.03);}b6[e0].c8();if(b6[e0].c5.e1>b4+b6[e0].b5){for(var b0=e0;b0<a5-1;b0++){b6[b0]=b6[b0+1];}e0--;a5--;}else{b6[e0].c2*=0.95;b6[e0].d7();}}if(a8!=null){a8.c3();}}</script>
-</head><body>
-	<div id="a0">
-		<canvas id="d8" width="800" height="600" style="border:2px solid #000"></canvas>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+	<style type="text/css">
+		body {
+			text-align:center;
+		}
+		#gameWrapper{position:relative;
+			width:800;
+			margin:auto;
+			margin-top:4em;
+		}
+	</style>
+	<script type="text/javascript">
+		var context, canvasWidth = 800, canvasHeight = 600, mouseX = -1, mouseY = -1, shape=[], numShapes = 0, colourAngle = 0, leadShape = null, mouseDown = false;
+
+
+		var shapeClass = function(){
+			this.colour = { 'R' : 255, 'G' : 255, 'B' : 255 };
+			this.position = { x : 0, y : 0 };
+			this.numpoints = this.radius = 0;
+			this.points = [];
+			this.velocity = { x : 0, y : 0 };
+			this.opacity = 1;
+			this.sine = this.cosine = 0;
+			this.parentShape = null;
+			this.childShape = null;
+		};
+
+		shapeClass.prototype.getTrigVals = function(ang){
+			this.sine = Math.sin(ang);
+			this.cosine = Math.cos(ang);
+		};
+
+		shapeClass.prototype.move = function(){
+			var n;
+			if(this.parentShape == null){
+				this.velocity.y++;
+				this.position.x += this.velocity.x;
+				this.position.y += this.velocity.y;
+			}else{
+				e4 = this.parentShape.position.x;
+				e7 = this.parentShape.position.y;
+				e6 = this.position.x;
+				e5 = this.position.y;
+				dx = e4 - e6;
+				dy = e7 - e5;
+				c4 = Math.sqrt(dx * dx + dy * dy);
+				dy *= 8.0 / c4;
+				dx *= 8.0 / c4;
+				this.position = {
+					'x' : e4 - dx,
+					'y' : e7 - dy
+				};
+				dx = this.position.x - e6;
+				dy = this.position.y - e5;
+				dx = dx > 5 ? 5 : (dx < -5 ? -5 : dx);
+				dy = dy > 10 ?10 :(dy < -10 ? -10 : dy) - 3;
+				this.velocity={
+					x : dx,
+					y : dy
+				};
+				
+				for(n = 0; n < this.numpoints; n++){
+					this.points[n].x *= 0.95;
+					this.points[n].y *= 0.95;
+				}
+			}
+			for(n = 0; n < this.numpoints; n++){
+				var newx = this.cosine * this.points[n].x - this.sine * this.points[n].y;
+				this.points[n].y = this.sine * this.points[n].x + this.cosine * this.points[n].y;
+				this.points[n].x = newx;
+			}
+		};
+
+		shapeClass.prototype.buildShape = function(x, y, radius, numpoints, colour){
+			var n, ang, angi = Math.PI * 2 / numpoints, otherRadius;
+			this.position={'x' : x, 'y' : y};
+			this.numpoints = numpoints;
+			this.radius = radius;
+			this.ang = Math.random() * Math.PI * 2;
+			this.angi = Math.random() * 0.2 + .01;
+			this.points = [];
+			this.colour = colour;
+			otherRadius = radius * (1 + (!(this.numpoints % 2) && (this.numpoints > 8 || Math.random() < 0.5) ? 0.5 : 0));
+			ang = this.ang;
+			for(n = 0; n < this.numpoints; n++){
+				if(n % 2){
+					this.points[n] = {
+						'x' : this.radius * Math.sin(ang),
+						'y' : this.radius * Math.cos(ang)
+					};
+				}else{
+					this.points[n] = {
+						'x' : otherRadius * Math.sin(ang),
+						'y' : otherRadius * Math.cos(ang)
+					};
+				}
+				ang += angi;
+			}
+		};
+
+
+		shapeClass.prototype.draw = function(){
+			var n;
+
+			context.save();
+				context.beginPath();
+				context.strokeStyle = 'rgba(' + (this.colour.R >> 1) + ', ' + (this.colour.G >> 1) + ', ' + (this.colour.B >> 1) + ', 1)';
+				context.fillStyle = 'rgba(' + this.colour.R + ', ' + this.colour.G + ', ' + this.colour.B + ', ' + this.opacity + ')';
+				context.lineWidth = 1;
+				context.translate(this.position.x, this.position.y);
+				context.moveTo(this.points[0].x, this.points[0].y);
+
+				for(n = 1; n < this.numpoints; n++){
+					context.lineTo(
+						this.points[n].x, 
+						this.points[n].y
+					);
+				}
+				context.closePath();
+				context.stroke();
+				context.fill();
+			context.restore();
+		};
+
+		shapeClass.prototype.scale = function(ratio){
+			var n;
+			for(n = 0; n < this.numpoints; n++){
+				this.points[n].x *= ratio;
+				this.points[n].y *= ratio;
+			}
+		};
+
+		shapeClass.prototype.age = function(chainPos){
+			chainPos = chainPos == undefined ? 0 : chainPos + 1;
+			if(chainPos > 30){
+				this.parentShape.childShape = null;
+				this.parentShape = null;
+				if(this.childShape != null){
+					this.childShape.age(chainPos);
+				}
+			}else{
+				if(this.childShape == null){
+					if(this == leadShape){
+						leadShape = null;
+					}else{
+						this.parentShape.childShape = null;
+						this.parentShape = null;
+					}
+				}else{
+					this.childShape.age(chainPos);
+				}
+			}
+		};
+
+		window.onload = function(){
+			var canvas = document.getElementById('gameCanvas');
+			context = canvas.getContext('2d');
+			canvas.onmousemove = function(evt){
+				var x, y, colour;
+				x = evt.clientX - canvas.offsetLeft;
+				y = evt.clientY - canvas.offsetTop - document.getElementById('gameWrapper').offsetTop;
+				var dx = x - mouseX, dy = y - mouseY;
+				colour ={
+					'R' : Math.floor(128 + 100 * Math.sin(colourAngle)),
+					'G' : Math.floor(128 + 100 * Math.cos(colourAngle)),
+					'B' : Math.floor(128 - 100 * Math.sin(colourAngle))
+				};
+				if(dx * dx + dy * dy > 256){
+					shape[numShapes] = new shapeClass();
+					shape[numShapes].buildShape(x, y, 40, Math.floor(Math.random() * 10) + 3, colour);
+					dx = dx > 5 ? 5 : (dx < -5 ? -5 : dx);
+					dy = dy > 10 ? 10 : (dy < -10 ? -10 : dy) - 3;
+					shape[numShapes].getTrigVals(dx / 30.0);
+					mouseX = x;
+					mouseY = y;
+					shape[numShapes].velocity = {x : dx, y : dy};
+					if(!mouseDown){
+						if(leadShape != null){
+							leadShape.parentShape = shape[numShapes];
+						}
+						shape[numShapes].childShape = leadShape;
+						leadShape = shape[numShapes];
+					}
+					numShapes++;
+					colourAngle += 0.05;
+					if(colourAngle > 2 * Math.PI) colourAngle -= 2 * Math.PI;
+				}
+			};
+
+			document.onmouseup = function(){
+				mouseDown = false;
+				if(leadShape != null){
+					leadShape.age(10);
+				}
+			};
+
+			document.onmousedown = function(){
+				mouseDown = true;
+			};
+
+			setInterval(animate, 40);
+		};
+
+		function animate(){
+			var n;
+			context.clearRect(0, 0, canvasWidth, canvasHeight);
+			for(n = 0; n < numShapes; n++){
+				if(mouseDown){
+					shape[n].scale(1.03);
+				}
+				shape[n].move();
+				if(shape[n].position.y > canvasHeight + shape[n].radius){
+					shape.splice(n, 1);
+					n--;
+					numShapes--;
+				}else{
+					shape[n].opacity *= 0.95;
+					shape[n].draw();
+				}
+			}
+			if(leadShape != null){
+				leadShape.age();
+			}
+		}
+	</script>
+</head>
+<body>
+	<div id="gameWrapper">
+		<canvas id="gameCanvas" width="800" height="600" style="border:2px solid #000"></canvas>
 	</div>
 </body></html>
