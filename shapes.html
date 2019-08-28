@@ -3,13 +3,9 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 	<style type="text/css">
-		body {
-			text-align:center;
-		}
-		#gameWrapper{position:relative;
-			width:800;
-			margin:auto;
-			margin-top:4em;
+		* { margin: 0; padding : 0 }
+		body, html {
+			height: 100%;
 		}
 	</style>
 	<script type="text/javascript">
@@ -155,13 +151,22 @@
 			}
 		};
 
+		function buildCanvas(){
+			var canvas = document.createElement("canvas");
+			canvasWidth = canvas.width = document.body.clientWidth;
+			canvasHeight = canvas.height = document.body.clientHeight;
+			canvas.id = 'gameCanvas';
+			document.body.appendChild(canvas);
+			return canvas;
+		}
+
 		window.onload = function(){
-			var canvas = document.getElementById('gameCanvas');
+			var canvas = buildCanvas();
 			context = canvas.getContext('2d');
 			canvas.onmousemove = function(evt){
 				var x, y, colour;
-				x = evt.clientX - canvas.offsetLeft;
-				y = evt.clientY - canvas.offsetTop - document.getElementById('gameWrapper').offsetTop;
+				x = evt.clientX;
+				y = evt.clientY;
 				var dx = x - mouseX, dy = y - mouseY;
 				colour ={
 					'R' : Math.floor(128 + 100 * Math.sin(colourAngle)),
@@ -228,7 +233,5 @@
 	</script>
 </head>
 <body>
-	<div id="gameWrapper">
-		<canvas id="gameCanvas" width="800" height="600" style="border:2px solid #000"></canvas>
-	</div>
-</body></html>
+</body>
+</html>
