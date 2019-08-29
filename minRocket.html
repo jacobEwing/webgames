@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<style type="text/css">
+		* { 
+			margin: 0;
+			padding : 0;
+			cursor: pointer;
+		}
+		body, html {
+			height: 100%;
+			overflow: hidden;
+		}
+		body{
+			background-color: #001;
+		}
+	</style>
+	<script type="text/javascript">
+
+		function drawRocket(ctx, showFire, angle){
+			ctx.translate(0, -60);
+			ctx.save();
+				ctx.translate(-59.65, -85.3);
+				ctx.lineWidth = 4;
+				ctx.strokeStyle = 'rgb(0,0,0)';
+				ctx.fillStyle = 'rgb(200, 32, 0)';
+				ctx.lineCap = 'butt';
+				ctx.lineJoin = 'miter';
+				ctx.miterLimit = 4;
+				ctx.save();
+					ctx.beginPath();
+						ctx.moveTo(21.29464,159.91371);
+						ctx.bezierCurveTo(29.60339,181.73666,37.3669,197.47588000000002,52.54464,208.52847);
+						ctx.lineTo(2.0089200000000034,242.36776);
+						ctx.lineTo(2.1068200000000035,195.35217);
+					ctx.closePath();
+					ctx.fill();
+					ctx.stroke();
+
+					ctx.beginPath();
+						ctx.moveTo(98.4375,159.82442);
+						ctx.bezierCurveTo(90.12875,181.64737,82.36524,197.38659,67.1875,208.43918);
+						ctx.lineTo(117.72322,242.27847);
+						ctx.lineTo(117.62532,195.26288);
+					ctx.closePath();
+					ctx.fill();
+					ctx.stroke();
+				ctx.restore();
+				ctx.save();
+					ctx.strokeStyle = "#000000";
+					ctx.lineJoin = "round";
+					ctx.miterLimit = 3.25;
+					ctx.beginPath();
+						ctx.moveTo(59.58206,1.92265);
+						ctx.bezierCurveTo(146.97105,98.95449,86.93906,210.84039,59.58206,210.84039);
+						ctx.bezierCurveTo(33.86587,210.84039,-28.36824,100.43404000000001,59.58206,1.9226500000000044);
+					ctx.closePath();
+					ctx.fill();
+					ctx.stroke();
+				ctx.restore();
+				ctx.save();
+					ctx.fillStyle = "#a0ced0";
+					ctx.strokeStyle = "#000000";
+					ctx.lineCap = "round";
+					ctx.lineJoin = "round";
+					ctx.miterLimit = 3.25;
+					ctx.translate(-201.17043,-146.05892);
+					ctx.beginPath();
+						ctx.moveTo(277.87088,231.4554);
+						ctx.bezierCurveTo(277.87088,240.91341,270.20365,248.58064,260.74564,248.58064);
+						ctx.bezierCurveTo(251.28762999999998,248.58064,243.62039,240.91341,243.62039,231.4554);
+						ctx.bezierCurveTo(243.62039,221.99739,251.28762999999998,214.33016,260.74564,214.33016);
+						ctx.bezierCurveTo(270.20365,214.33016,277.87088,221.99739,277.87088,231.4554);
+					ctx.closePath();
+					ctx.fill();
+					ctx.stroke();
+				ctx.restore();
+				ctx.save();
+					ctx.fillStyle = "#ffffff";
+					ctx.strokeStyle = "#000000";
+					ctx.lineWidth = 3;
+					ctx.lineCap = "butt";
+					ctx.lineJoin = "miter";
+					ctx.miterLimit = 4;
+
+					ctx.beginPath();
+						ctx.moveTo(34.78201,37.32311);
+						ctx.lineTo(84.93533,37.32311);
+						ctx.lineTo(92.84925999999999,55.09655);
+						ctx.lineTo(26.486679999999993,55.09655);
+					ctx.closePath();
+					ctx.fill();
+					ctx.stroke();
+
+				ctx.restore();
+				
+				ctx.save();
+					ctx.fillStyle = "#dbffff";
+					ctx.strokeStyle = "rgba(0, 0, 0, 0)";
+
+					ctx.translate(59.65 - 8 * Math.sin(angle + 1), 85.3 - 8 * Math.cos(angle + 1));
+					ctx.rotate(-angle);
+					//ctx.transform(1.7146131,0,0,1.7146131,-392.13851,-306.70001);
+					ctx.beginPath();
+						ctx.moveTo(3.03906, 2.51062);
+						ctx.lineTo(-1.13211, 3.4853);
+						ctx.lineTo(-4.0618, 0.3603);
+						ctx.lineTo(-2.82031, -3.73938);
+						ctx.lineTo(1.35086, -4.71406);
+						ctx.lineTo(4.28055, -1.58906);
+
+					ctx.closePath();
+					ctx.fill();
+					ctx.stroke();
+				ctx.restore();
+				
+			ctx.restore();
+
+
+			if(showFire){
+				ctx.save();
+					ctx.translate(-25, 130);
+					drawFire(ctx);
+				ctx.restore();
+			}
+			ctx.save();
+				ctx.translate(-59.65, -85.3);
+				ctx.save();
+					ctx.fillStyle = "#ffffff";
+					ctx.strokeStyle = "#000000";
+					ctx.lineWidth = 3;
+					ctx.lineCap = "butt";
+					ctx.lineJoin = "miter";
+					ctx.miterLimit = 4;
+
+					ctx.beginPath();
+						ctx.moveTo(20.817165,217.20591);
+						ctx.lineTo(99.53494,216.03403999999998);
+						ctx.bezierCurveTo(103.5549,210.35862999999998,88.51349,185.17839999999998,91.38442,179.11997999999997);
+						ctx.lineTo(29.611680000000007,178.72934999999998);
+						ctx.bezierCurveTo(31.830550000000006,185.20006999999998,17.894185000000007,211.56034,20.817165000000006,217.20591);
+					ctx.closePath();
+					ctx.fill();
+					ctx.stroke();
+				ctx.restore();
+				ctx.strokeStyle = 'rgb(0,0,0)';
+				ctx.fillStyle = 'rgb(200, 32, 0)';
+				ctx.lineCap = 'butt';
+				ctx.lineJoin = 'miter';
+				ctx.miterLimit = 4;
+				ctx.save();
+					ctx.fillStyle = "#8b2600";
+					ctx.strokeStyle = "#000000";
+					ctx.lineWidth = 4;
+					ctx.lineCap = "butt";
+					ctx.lineJoin = "miter";
+					ctx.miterLimit = 4;
+					ctx.beginPath();
+						ctx.moveTo(55.87571,160.31977);
+						ctx.lineTo(55.87571,228.14666);
+						ctx.bezierCurveTo(56.28114,234.48514,57.78154,238.19568999999998,59.47374,241.44594);
+						ctx.bezierCurveTo(61.184,238.22341,63.13056,235.85156,63.59711,228.15171);
+						ctx.lineTo(63.59711,160.21349);
+						ctx.bezierCurveTo(63.59711,160.21349,64.13088,152.66516000000001,59.74947,153.04389);
+						ctx.bezierCurveTo(55.4731,152.73481,55.875710000000005,160.31977,55.875710000000005,160.31977);
+					ctx.closePath();
+					ctx.fill();
+					ctx.stroke();
+				ctx.restore();
+			ctx.restore();
+		}
+
+		function drawStar (ctx, star){
+			var ang = Math.sin(star.angle) * 0.5;
+			var alpha = star.alpha;
+			var colour;
+			ctx.save();
+				ctx.lineWidth = 1;
+				ctx.lineCap = 'butt';
+				ctx.miterLimit = 4;
+				ctx.scale(star.scale, star.scale);
+				ctx.rotate(ang);
+				ctx.translate(-33, -32);
+				ctx.strokeStyle = 'rgb(0, 0, 0)';
+
+				ctx.save();
+					ctx.fillStyle = "rgb(" + star.colour.R + ", " + star.colour.G + ", " + star.colour.B + ")";
+					ctx.lineJoin = 'miter';
+					ctx.transform(0.49747795,0.86747663,-0.86747663,0.49747795,44.456863,-11.681756);
+					ctx.beginPath();
+						ctx.moveTo(42.004794,36.915896);
+						ctx.bezierCurveTo(40.91047,38.811319999999995,42.339031,48.07028,40.339602,48.960482999999996);
+						ctx.bezierCurveTo(38.340173,49.850685999999996,32.415318,42.593605,30.274498,42.13856);
+						ctx.bezierCurveTo(28.133678,41.683513999999995,19.769333000000003,45.903332,18.304842,44.276849999999996);
+						ctx.bezierCurveTo(16.840352,42.65036799999999,21.911365,34.772935,21.682589,32.59627699999999);
+						ctx.bezierCurveTo(21.453813,30.419619999999995,14.855803,23.768649999999994,15.950126000000001,21.873225999999995);
+						ctx.bezierCurveTo(17.04445,19.977801999999997,26.103364,22.366361999999995,28.102793,21.476158999999996);
+						ctx.bezierCurveTo(30.102221,20.585955999999996,34.388771999999996,12.255611999999996,36.529592,12.710657999999995);
+						ctx.bezierCurveTo(38.670412,13.165702999999995,39.198115,22.519347999999994,40.662606000000004,24.145828999999996);
+						ctx.bezierCurveTo(42.127097000000006,25.772310999999995,51.374341,27.274845999999997,51.603117000000005,29.451502999999995);
+						ctx.bezierCurveTo(51.83189300000001,31.628160999999995,43.099118000000004,35.02047099999999,42.004794000000004,36.915896);
+					ctx.closePath();
+					ctx.fill();
+					ctx.stroke();
+				ctx.restore();
+				ctx.lineCap = "round";
+				ctx.lineJoin = "round";
+				ctx.save();
+					colour = {R:Math.floor(98 * alpha), G:Math.floor(72 * alpha), B:Math.floor(15 * alpha)};
+					ctx.fillStyle = "rgb(" + colour.R + ", " + colour.G + ", " + colour.B + ")";
+					ctx.miterLimit = 4;
+					ctx.translate(0.09090909,-1.9090909);
+					ctx.beginPath();
+						ctx.moveTo(40.090909,35.090908);
+						ctx.bezierCurveTo(40.090909,39.710017,36.916201,43.454544,33,43.454544);
+						ctx.bezierCurveTo(29.083799,43.454544,25.909091,39.710017,25.909091,35.090908);
+						ctx.bezierCurveTo(25.909091,34.929282,25.913091,34.767689,25.921001,34.606334);
+						ctx.lineTo(33,35.090908);
+					ctx.closePath();
+					ctx.fill();
+					ctx.stroke();
+				ctx.restore();
+
+				colour = {R:Math.floor(214 * alpha), G:Math.floor(238 * alpha), B:Math.floor(150 * alpha)};
+				ctx.fillStyle = "rgb(" + colour.R + ", " + colour.G + ", " + colour.B + ")";
+				ctx.save();
+					ctx.lineCap = "round";
+					ctx.lineJoin = "round";
+					ctx.miterLimit = 4;
+					ctx.translate(-1.7272727,0.63636364);
+					ctx.beginPath();
+						ctx.moveTo(32.980909,28.542978);
+						ctx.bezierCurveTo(32.180707999999996,29.999693,31.796975999999997,29.819290000000002,30.254906999999996,29.252915);
+						ctx.bezierCurveTo(28.712837999999994,28.68654,28.332755999999996,28.401877000000002,28.398859999999996,26.860688000000003);
+						ctx.bezierCurveTo(28.464959999999994,25.319498000000003,28.762497999999997,24.823919000000004,30.252569999999995,24.239636000000004);
+						ctx.bezierCurveTo(31.742640999999995,23.655353000000005,32.18501499999999,24.125520000000005,33.213210999999994,25.467243000000003);
+						ctx.bezierCurveTo(34.241406999999995,26.808965000000004,33.78110999999999,27.086262000000005,32.980909,28.542978000000005);
+					ctx.closePath();
+					ctx.fill();
+					ctx.stroke();
+				ctx.restore();
+				ctx.save();
+					ctx.lineCap = "round";
+					ctx.lineJoin = "round";
+					ctx.miterLimit = 4;
+					ctx.transform(1.0464536,0.23164817,-0.24692148,0.98172525,10.966857,-6.2069728);
+					ctx.beginPath();
+						ctx.moveTo(32.980909,28.542978);
+						ctx.bezierCurveTo(32.180707999999996,29.999693,31.796975999999997,29.819290000000002,30.254906999999996,29.252915);
+						ctx.bezierCurveTo(28.712837999999994,28.68654,28.332755999999996,28.401877000000002,28.398859999999996,26.860688000000003);
+						ctx.bezierCurveTo(28.464959999999994,25.319498000000003,28.762497999999997,24.823919000000004,30.252569999999995,24.239636000000004);
+						ctx.bezierCurveTo(31.742640999999995,23.655353000000005,32.18501499999999,24.125520000000005,33.213210999999994,25.467243000000003);
+						ctx.bezierCurveTo(34.241406999999995,26.808965000000004,33.78110999999999,27.086262000000005,32.980909,28.542978000000005);
+					ctx.closePath();
+					ctx.fill();
+					ctx.stroke();
+				ctx.restore();
+				ctx.save();
+					ctx.lineCap = "round";
+					ctx.lineJoin = "round";
+					ctx.lineWidth = 15.531464576721191;
+					ctx.miterLimit = 4;
+					ctx.transform(0.06438543,0,0,0.06438543,26.906473,25.199499);
+					ctx.beginPath();
+						ctx.moveTo(43.000001,34.31818);
+						ctx.bezierCurveTo(43.000001,38.15907,39.886345,41.272726,36.045455999999994,41.272726);
+						ctx.bezierCurveTo(32.204567,41.272726,29.090909999999994,38.15907,29.090909999999994,34.31818);
+						ctx.bezierCurveTo(29.090909999999994,30.477290999999997,32.204567,27.363635,36.045455999999994,27.363635);
+						ctx.bezierCurveTo(39.88634499999999,27.363635,43.000001,30.477290999999997,43.000001,34.31818);
+					ctx.closePath();
+					ctx.fill();
+					ctx.stroke();
+				ctx.restore();
+				ctx.save();
+					ctx.lineCap = "round";
+					ctx.lineJoin = "round";
+					ctx.lineWidth = 15.531464576721191;
+					ctx.miterLimit = 4;
+					ctx.transform(0.06438543,0,0,0.06438543,34.588289,25.244955);
+					ctx.beginPath();
+						ctx.moveTo(43.000001,34.31818);
+						ctx.bezierCurveTo(43.000001,38.15907,39.886345,41.272726,36.045455999999994,41.272726);
+						ctx.bezierCurveTo(32.204567,41.272726,29.090909999999994,38.15907,29.090909999999994,34.31818);
+						ctx.bezierCurveTo(29.090909999999994,30.477290999999997,32.204567,27.363635,36.045455999999994,27.363635);
+						ctx.bezierCurveTo(39.88634499999999,27.363635,43.000001,30.477290999999997,43.000001,34.31818);
+					ctx.closePath();
+					ctx.fill();
+					ctx.stroke();
+				ctx.restore();
+				if(star.blinkStep > 0){
+					ctx.save();
+						var colour = {R:Math.floor(244 * alpha), G:Math.floor(217 * alpha), B:Math.floor(92 * alpha)};
+						ctx.fillStyle = "rgb(" + colour.R + ", " + colour.G + ", " + colour.B + ")";
+						ctx.strokeStyle = 'rgb(0, 0, 0)';
+						ctx.lineWidth = 0.2;
+						ctx.lineJoin = "miter";
+						ctx.miterLimit = 4;
+						ctx.beginPath();
+						ctx.translate(15, -15.5);
+						
+						for(var n = 0; n < 2; n++){
+							ctx.moveTo(11.1875,43.0625);
+								ctx.bezierCurveTo(11.22214,47.249765,17.211782,47.234847,17.3125,43.0625);
+								ctx.bezierCurveTo(17.22548,38.874014,11.203373,39.072301,11.1875,43.0625);
+							ctx.closePath();
+							ctx.translate(7.5, -0.25);
+						}
+						ctx.fill();
+						ctx.stroke();
+					ctx.restore();
+				}
+			ctx.restore();
+		}
+
+		function drawFire(ctx) {
+			ctx.save();
+				ctx.strokeStyle = 'rgba(0,0,0,0)';
+				ctx.lineCap = 'butt';
+				ctx.lineJoin = 'miter';
+				ctx.miterLimit = 4;
+				g=ctx.createRadialGradient(25, 0, 20, 25, 22, 50);
+				g.addColorStop(0,"rgba(255, 244, 196, 1)");
+				g.addColorStop(Math.random() * 0.4,"rgba(255, 210, 0, 1)");
+				g.addColorStop(0.4 + Math.random() * 0.4,"rgba(255, 148, 0, 0.8)");
+				g.addColorStop(1,"rgba(126, 64, 0, 0.7)");
+				ctx.fillStyle = g;
+				ctx.strokeStyle = "rgba(0, 0, 0, 0)";
+				var flamelength = 60;
+				ctx.beginPath();
+					ctx.moveTo(48, -12);
+					ctx.bezierCurveTo(
+						48, -12,
+						0, -32,
+						0, 4
+					);
+					for(var n = 3; n <= 51; n += 3){
+						flamelength = 40 + 80 * Math.pow(Math.cos((n - 26) * Math.PI / 52), 2);
+						ctx.bezierCurveTo(
+							n - 3 * Math.random() * 2, 10 + Math.random() * flamelength,
+							n, 10 + Math.random() * flamelength,
+							n + 3 * Math.random() * 2, 10 + Math.random() * flamelength
+						);
+					}
+					ctx.bezierCurveTo(
+						n - 3 * Math.random() * 2, 10 + Math.random() * flamelength,
+						n, 10 + Math.random() * flamelength,
+						54,0 
+					);
+				ctx.closePath();
+				ctx.fill();
+			ctx.restore();
+		}
+
+		function drawBrakes(ctx){
+			ctx.save();
+				ctx.translate(0, 30);
+				ctx.fillStyle = 'rgba(' + Math.floor(Math.random() * 100) + ', ' + Math.floor(140 + Math.random() * 100) + ', ' + Math.floor(200 + Math.random() * 56) + ', 0.05)';
+				var angle = Math.random();
+				var numPoints = Math.floor(3 + 4 * Math.random());
+				var angi = Math.PI / numPoints;
+				var radius = Math.random() * 20 + 150;
+				var bendFactor = 0.5 * Math.random() + .75;
+				ctx.beginPath();
+					ctx.moveTo(
+						radius * Math.sin(angle - angi), radius * Math.cos(angle - angi)
+					);
+					for(var n = 0; n < numPoints; n++){
+						ctx.quadraticCurveTo(
+							bendFactor * radius * Math.sin(angle), bendFactor * radius * Math.cos(angle),
+							radius * Math.sin(angle + angi), radius * Math.cos(angle + angi)
+						);
+						angle += angi * 2;
+						
+					}
+				ctx.fill();
+				ctx.stroke();
+			ctx.restore();
+		}
+
+		function drawPlanet(ctx){
+			var pointList = [
+				[53, 64, 2],[50, 40, 2],[27, 35, 1.25],[70, 50, 1.75],[18, 62, 1.5],[38, 57, 1.5],[40, 27, 1.5],
+				[62, 27, 1.5],[41, 12, 1.2],[18, 18, 1],[13, 40, .75],[56, 15, .75],[32, 70, .75],[26, 50, .65],
+				[32, 13, .5],[57, 50, .5],[70, 38, .5]
+			];
+			var n;
+			ctx.save();
+				ctx.scale(3, 3);
+				ctx.lineCap = 'butt';
+				ctx.lineJoin = 'miter';
+				ctx.fillStyle = "#f6f1ce";
+				ctx.strokeStyle = "#371a0d";
+				ctx.lineWidth = 1;
+				ctx.beginPath();
+					ctx.moveTo(24.24366,3.5713013);
+					ctx.bezierCurveTo(26.769042,3.5713013,46.719555,0.5408436600000002,46.719555,0.5408436600000002);
+					ctx.lineTo(65.154839,7.8644497);
+					ctx.bezierCurveTo(65.154839,7.8644497,75.76144099999999,16.198208,77.27667,22.511662);
+					ctx.bezierCurveTo(78.79189799999999,28.825115,82.57997,40.189332,80.812204,48.523089999999996);
+					ctx.bezierCurveTo(79.04443699999999,56.856849,76.398837,58.757543,72.225906,64.938069);
+					ctx.bezierCurveTo(67.510448,71.922131,56.568541999999994,76.049746,53.790623,76.302284);
+					ctx.bezierCurveTo(51.012702999999995,76.554822,45.456863999999996,81.100509,36.112953,79.585281);
+					ctx.bezierCurveTo(25.941157,77.935801,25.253813,78.32259,16.414978,72.514213);
+					ctx.bezierCurveTo(7.5761442,66.705835,9.0913729,61.907611,5.8083772,59.634768);
+					ctx.bezierCurveTo(2.5253814,57.361925,-0.75761444,47.007861,1.0101526,36.653797);
+					ctx.bezierCurveTo(2.9679811,25.186516,2.7779195,23.269276,6.5659916,17.713437);
+					ctx.bezierCurveTo(10.354063,12.157598,24.24366,3.5713013,24.24366,3.5713013);
+				ctx.closePath();
+				ctx.fill();
+				ctx.stroke();
+
+				g = ctx.createRadialGradient(0, 0, 0, 0, 0, 4);
+				g.addColorStop(0, "rgba(215, 189, 152, 0.5)");
+				g.addColorStop(0.51769549, "rgba(177, 146, 103, 0.27)");
+				g.addColorStop(0.93185186, "rgba(158, 125, 78, 0.87)");
+				g.addColorStop(1, "rgba(139, 104, 54, 1)");
+				ctx.strokeStyle = "rgba(55, 16, 13, 0.8)";
+				ctx.fillStyle = g;
+				ctx.setLineDash([.5, .25]);
+				for(n in pointList){
+					ctx.save();
+						ctx.lineWidth = 0.3 / pointList[n][2];
+						ctx.translate(pointList[n][0], pointList[n][1]);
+						ctx.scale(pointList[n][2], pointList[n][2]);
+
+						ctx.beginPath();
+							ctx.arc(0,0,3.75,0,2 * Math.PI,0);
+						ctx.closePath();
+						ctx.fill();
+						ctx.stroke();
+					ctx.restore();
+				}
+			ctx.restore();
+		}
+		var matrixClass = function(){
+			this.state = {};
+			this.width = this.height = 0;
+			this.data = [];
+			if(arguments.length == 1){
+				this.setVals(arguments[0]);
+			}else if(arguments.length == 2){
+				this.init(arguments[0], arguments[1]);
+				this.clear();
+			}
+		}
+
+		// Receive a 2-d array of data that will be assigned to this matrix.  The
+		// dimensions of the matrix will be the same as the array.
+		matrixClass.prototype.setVals = function(data){
+			var x, y;
+			this.data = [];
+			this.height = data.length;
+			this.width = data[0].length;
+
+			for(y = 0; y < data.length; y++){
+				for(x = 0; x < data[y].length; x++){
+					if(y == 0) this.data[x] = [];
+					this.data[x][y] = data[y][x];
+				}
+			}
+		};
+
+		// get the value at position (x, y) in the matrix
+		matrixClass.prototype.val = function(x, y){
+			if(x < 0 || x >= this.width || y < 0 || y >= this.height){
+				throw "coordinate outside of matrix range";
+			}
+			return this.data[x][y];
+		};
+
+		// set the value at position (x, y) in the matrix
+		matrixClass.prototype.setVal = function(x, y, value){
+			if(x < 0 || x >= this.width || y < 0 || y >= this.height){
+				throw "coordinate outside of matrix range";
+			}
+			this.data[x][y] = value;
+		};
+
+		// initialize this matrix with the specified dimensions
+		matrixClass.prototype.init = function(w, h){
+			//if(w < 1 || h < 1) throw "matrixClass::init(): Invalid matrix dimensions " + w + "x" + h;
+			this.width = w;
+			this.height = h;
+			this.data = [];
+			for(var x = 0; x < this.width; x++){
+				this.data[x] = [];
+			}
+		};
+
+		// set all values in the matrix to the specified value.  zero by default.
+		matrixClass.prototype.clear = function(){
+			var val = arguments.length == 0 ? 0 : arguments[0];
+			for(var x = 0; x < this.width; x++){
+				for(var y = 0; y < this.height; y++){
+					this.data[x][y] = val;
+				}
+			}
+		};
+
+		// for each row in this matrix, pass its values into function f()
+		matrixClass.prototype.eachRow = function(f){
+			for(var y = 0; y < this.height; y++){
+				var vals = [];
+				for(var x = 0; x < this.width; x++){
+					vals.push(this.data[x][y]);
+				}
+				f(vals);
+			}
+		};
+
+		// for each column in this matrix, pass its values into function f()
+		matrixClass.prototype.eachCol = function(f){
+			for(var x = 0; x < this.width; x++){
+				var vals = [];
+				for(var y = 0; y < this.height; y++){
+					vals.push(this.data[x][y]);
+				}
+				f(vals);
+			}
+		};
+
+		// create a duplicate of this matrix
+		matrixClass.prototype.duplicate = function(){
+			var rval = new matrixClass();
+			rval.width = this.width;
+			rval.height = this.height;
+			rval.data = [];
+			for(var x = 0; x < this.width; x++){
+				rval.data[x] = this.data[x].slice(0);
+			}
+			return rval;
+		};
+
+		// add together two matrices, returning a third one with their sum values
+		matrixClass.add = function(mat1, mat2){
+			if(mat1.height != mat2.height || mat1.width != mat2.width){
+				throw "Cannot add matrices of different dimensions";
+			}
+			var x, y;
+			var rval = mat1.duplicate();
+			for(x = 0; x < mat1.width; x++){
+				for(y = 0; y < mat1.height; y++){
+					rval.data[x][y] += mat2.data[x][y];
+				}
+			}
+			return rval;
+		};
+
+		// add a matrix to this one
+		matrixClass.prototype.add = function(mat2){
+			var rval = matrixClass.add(this, mat2);
+			this.data = rval.data;
+			this.width = rval.width;
+			this.height = rval.height;
+		};
+
+		// subtract the values in mat2 from those in mat1, returning a matrix of those values
+		matrixClass.subtract = function(mat1, mat2){
+			if(mat1.height != mat2.height || mat1.width != mat2.width){
+				throw "Cannot add matrices of different dimensions";
+			}
+			var x, y;
+			var rval = mat1.duplicate();
+			for(x = 0; x < mat1.width; x++){
+				for(y = 0; y < mat1.height; y++){
+					rval.data[x][y] -= mat2.data[x][y];
+				}
+			}
+			return rval;
+		};
+
+		// subtract the values of mat2 from this matrix
+		matrixClass.prototype.subtract = function(mat2){
+			var rval = matrixClass.subtract(this, mat2);
+			this.data = rval.data;
+			this.width = rval.width;
+			this.height = rval.height;
+		};
+
+		// return the product of two matrices
+		matrixClass.mul = function(mat1, mat2){
+			var x, y, rpos, val;
+			if(mat1.height != mat2.width){
+				throw "Cannot mulitply the specified matrices";
+			}
+			var rval = new matrixClass(mat1.width, mat2.height);
+
+
+			for(x = 0; x < rval.width; x++){
+				for(y = 0; y < rval.height; y++){
+					val = 0;
+					for(rpos = 0; rpos < rval.height; rpos++){
+						val += mat1.val(x, rpos) * mat2.val(rpos, y);
+					}
+					rval.setVal(x, y, val);
+				}   
+			}   
+			return rval;
+		};
+
+		// multiply this matrix by another one
+		matrixClass.prototype.mul = function(mat2){
+			var rval = matrixClass.mul(this, mat2);
+			this.data = rval.data;
+			this.width = rval.width;
+			this.height = rval.height;
+		};
+
+		// multiply this matrix by a scalar
+		matrixClass.prototype.mulScalar = function(scalar){
+			for(var n in this.data){
+				for(var m in this.data[n]){
+					this.data[n][m] *= scalar;
+				}
+			}
+		};
+
+		// return a copy of this matrix multiplied by a scalar
+		matrixClass.mulScalar = function(mat, scalar){
+			var rval = mat.duplicate();
+			for(var n in rval.data){
+				for(var m in rval.data[n]){
+					rval.data[n][m] *= scalar;
+				}
+			}
+			return rval;
+		};
+
+		// treating each column in the matrix as a vertex, translate each one of them
+		// with the vector that's passed in, either in the form of a 1xN matrix, or as
+		// a set of N scalar values.  Where N is the height of our matrix.
+		matrixClass.prototype.translate = function(){
+			var paramType = 'vals';
+			if(arguments.length == 1 && typeof arguments[0] == 'object'){
+				paramType = 'matrix';
+				if(arguments[0].height != this.height){
+					throw "translation matrix dimensions do not match";
+				}
+			}else if(arguments.length != this.height){
+				throw "translation dimensions do not match matrix";
+			}
+
+			if(paramType == 'vals'){
+				for(var x = 0; x < this.width; x++){
+					for(var y = 0; y < this.height; y++){
+						this.data[x][y] += arguments[y];
+					}
+				}
+			}else{
+				for(var x = 0; x < this.width; x++){
+					for(var y = 0; y < this.height; y++){
+						this.data[x][y] += arguments[0].val(0, y);
+					}
+				}
+			}
+		};
+
+		// generate a 2x2 rotation matrix for the specified angle
+		matrixClass.rotate2d = function(angle){
+			var sine = Math.sin(angle);
+			var cosine = Math.cos(angle);
+			rval = new matrixClass();
+			rval.setVals([
+				[cosine, -sine],
+				[sine, cosine]
+			]);
+			return rval;
+		};
+
+		// return a copy of this matrix, with each column treated as a vector and converted to a unit vector
+		matrixClass.prototype.unit = function(){
+			var x, y, hyp;
+			var rval = new matrixClass(this.width, this.height);
+			for(x = 0; x < this.width; x++){
+				hyp = 0;
+				for(y = 0; y < this.height; y++){
+					hyp += this.data[x][y] * this.data[x][y];
+				}
+				if(hyp == 0){
+					for(y = 0; y < this.height; y++){
+						rval.data[x][y] = 0
+					}
+				}else{
+					hyp = Math.pow(hyp, 0.5);
+					for(y = 0; y < this.height; y++){
+						rval.data[x][y] = this.data[x][y] / hyp
+					}
+				}
+			}
+			return rval;
+		};
+
+
+		var shipClass = function(){
+			this.angle = 0;
+			this.alpha = 1;
+			this.position = new matrixClass(1, 2);
+			this.position.setVals([[xResolution >> 1], [yResolution >> 1]])
+			this.baseVelocity = new matrixClass(1, 2);
+			this.baseVelocity.setVals([[0],[-0.5]]);
+			this.velocity = new matrixClass(1, 2);
+			this.velocity.setVals([[0],[0]]);
+			this.braking = false;
+		};
+		
+		var starClass = function(){
+			this.angle = Math.random() * 2 * Math.PI;
+			this.position = new matrixClass(1, 2);
+			this.position.setVals([[xResolution * Math.random()], [yResolution * Math.random()]]);
+			this.scale = Math.random() * 0.5 + 0.5;
+			this.blinkStep = 0;
+			this.angi = 0.1 + Math.random() * 0.15;
+			var ratio = (1 + Math.random()) / 2;
+			this.colour = {
+				R: Math.floor(255 - ratio * 11),
+				G: Math.floor(255 - ratio * 38),
+				B: Math.floor(255 - ratio * 162)
+			};
+			
+		};
+
+		starClass.prototype.draw = function(){
+			this.angle += this.angi;
+			if(this.blinkStep){
+				this.blinkStep--;
+			}else if(Math.random() < 0.02){
+				this.blinkStep = 5 + Math.floor(Math.random() * 6);;
+			}else if(Math.random() < 0.05){
+				this.angi = 0.1 + Math.random() * 0.15;
+			}
+			dContext.save();
+				dContext.matTranslate(this.position);
+				drawStar(dContext, this);//Math.sin(this.angle) * 0.5, this.scale, this.alpha, this.blinkStep);
+			dContext.restore();
+		};
+
+		var planetClass = function(){
+			this.position = new matrixClass(1, 2);
+			this.radius = 0;
+			this.drawScale = 1;
+			this.drawFunction = function(){};
+		}
+
+		var mouse = {
+			position : new matrixClass(1, 2),
+			leftbutton: {state : 0},
+			middlebutton: {state : 0},
+			rightbutton: {state : 0}
+		};
+
+		// returns the distance between two 2D points
+		function distance(){
+			var x1, y1, x2, y2;
+			if(arguments.length == 4){
+				x1 = arguments[0];
+				y1 = arguments[1];
+				x2 = arguments[2];
+				y2 = arguments[3];
+			}else if(arguments.length == 2){
+				try{
+					x1 = arguments[0].val(0, 0);
+					y1 = arguments[0].val(0, 1);
+					x2 = arguments[1].val(0, 0);
+					y2 = arguments[1].val(0, 1);
+				}catch(e){
+					x1 = 0;
+					y1 = 0;
+					x2 = arguments[0];
+					y2 = arguments[1];
+				}
+			}else if(arguments.length == 1){
+				x1 = 0;
+				y1 = 0;
+				x2 = arguments[0].val(0, 0);
+				y2 = arguments[0].val(0, 1);
+			}
+			return Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+		}
+
+		// returns the counter-clockwise angle between the line defined by any two points and the horizontal.
+		function rel_ang(/*x1, y1, x2, y2*/){
+			var x1, y1, x2, y2;
+			if(arguments.length == 4){
+				x1 = arguments[0];
+				y1 = arguments[1];
+				x2 = arguments[2];
+				y2 = arguments[3];
+			}else if(arguments.length == 2){
+				x1 = arguments[0].val(0, 0);
+				y1 = arguments[0].val(0, 1);
+				x2 = arguments[1].val(0, 0);
+				y2 = arguments[1].val(0, 1);
+			}
+			
+			var hyp, alpha, deltax, deltay;
+			deltax = x2 - x1; 
+			deltay = y2 - y1; 
+			hyp = Math.sqrt(deltax * deltax + deltay * deltay);
+			/********* figure out the value for alpha *********/
+			if(x2 == x1){
+				if(y2 > y1){
+					alpha = Math.PI;
+				}else{
+					alpha = 0;
+				}
+
+			}else if(y2 == y1){
+				if(x2 < x1){
+					alpha = 3 * Math.PI / 2; 
+				}else{
+					alpha = Math.PI / 2;
+				}
+			}else if(x2 > x1){
+				if(y2 < y1){
+					alpha = Math.PI - Math.acos(deltay / hyp);
+				}else if(y2 > y1){
+					alpha = Math.PI - Math.acos(deltay / hyp); 
+				}else{
+					alpha = 0;
+				}
+			}else if(x2 < x1){
+				if(y2 < y1){
+					alpha = 2 * Math.PI - Math.acos(-deltay / hyp);
+				}else if(y2 > y1){
+					alpha = 2 * Math.PI - Math.acos(-deltay / hyp); 
+				}else{
+					alpha = 0;
+				}
+			}   
+
+			return alpha;
+		}
+
+
+		function animate(){
+			ship.angle = 3.14159265 + rel_ang(mouse.position.val(0, 0), mouse.position.val(0, 1) - 50, ship.position.val(0, 0), ship.position.val(0, 1));
+
+			// accelerate on left click
+			if(mouse.leftbutton.state){
+				v = matrixClass.mul(ship.baseVelocity, matrixClass.rotate2d(ship.angle));
+				ship.velocity.add(v);
+				if(distance(ship.velocity) > max_speed){
+					ship.velocity = ship.velocity.unit();
+					ship.velocity.mulScalar(max_speed);
+				}
+			}else{
+				// stop if the left button isn't down and the speed is low enough
+				if(distance(ship.velocity) < 1){
+					ship.velocity.setVals([[0], [0]]);
+				}
+			}
+			// brake on right click
+			if(mouse.rightbutton.state){
+				ship.velocity.mulScalar(0.95);
+				if(distance(ship.velocity) < 1){
+					ship.velocity.setVals([[0], [0]]);
+				}
+			}
+
+			dContext.clearRect(0, 0, xResolution, yResolution);
+			dContext = document.getElementById('gameCanvas').getContext('2d');
+
+			for(n = 0; n < numStars; n++){
+				star[n].position.add(matrixClass.mulScalar(ship.velocity, -star[n].scale * .8));
+				if(star[n].position.val(0, 0) < 0){
+					star[n].position.setVals([[xResolution],[Math.random() * yResolution]]);
+				}else if(star[n].position.val(0, 0) >= xResolution){
+					star[n].position.setVals([[0],[Math.random() * yResolution]]);
+				}
+
+				if(star[n].position.val(0, 1) < 0){
+					star[n].position.setVals([[Math.random() * xResolution], [yResolution]]);
+				}else if(star[n].position.val(0, 1) >= yResolution){
+					star[n].position.setVals([[Math.random() * xResolution], [0]]);
+				}
+				star[n].draw();
+			}
+			for(n = 0; n < planets.length; n++){
+				planets[n].position.subtract(ship.velocity);
+				var x =planets[n].position.val(0, 0);
+				var y =planets[n].position.val(0, 1);
+				if(x < MINX) planets[n].position.setVal(0, 0, x + (MAXX - MINX));
+				if(x > MAXX) planets[n].position.setVal(0, 0, x - (MAXX - MINX));
+				if(y < MINY) planets[n].position.setVal(0, 1, y + (MAXY - MINY));
+				if(y > MAXY) planets[n].position.setVal(0, 1, y - (MAXY - MINY));
+				
+				var px1 = planets[n].position.val(0, 0); 
+				var py1 = planets[n].position.val(0, 1); 
+				var px2 = px1 + planets[n].radius * 2;
+				var py2 = py1 + planets[n].radius * 2;
+				if(py2 > 0 && px2 > 0 && py1 < yResolution && px1 < xResolution){
+					dContext.save();
+					dContext.matTranslate(planets[n].position);
+					drawPlanet(dContext);
+					dContext.restore();
+				}
+			}
+			dContext.save();
+				dContext.matTranslate(ship.position);
+				dContext.rotate(ship.angle);
+				dContext.scale(.4, .4);
+				drawRocket(dContext, mouse.leftbutton.state, ship.angle);
+				if((ship.velocity.val(0, 0) != 0 || ship.velocity.val(0, 1) != 0) && mouse.rightbutton.state){
+					drawBrakes(dContext);
+				}
+			dContext.restore();
+
+		}
+
+		function buildCanvas(){
+			var canvas = document.createElement("canvas");
+			xResolution = canvas.width = document.body.clientWidth;
+			yResolution = canvas.height = document.body.clientHeight;
+			centerX = xResolution >> 1;
+			centerY = yResolution >> 1;
+			numStars = xResolution * yResolution / 25000;
+			screenCornerDistance2 = (xResolution >> 1) * (xResolution >> 1) + (yResolution >> 1) * (yResolution >> 1);
+			MINX = -xResolution
+			MINY = -yResolution;
+			MAXX = xResolution * 2;
+			MAXY = yResolution * 2;
+			canvas.id = 'gameCanvas';
+			document.body.appendChild(canvas);
+			return canvas;
+		}
+
+		var dContext;
+		var xResolution, yResolution;
+		var centerX, centerY;
+		var ship;
+		var star = [], numStars;
+		var max_speed = 10;
+		var planets = [];
+		var screenCornerDistance2;
+		var MINX, MAXX, MINY, MAXY;
+
+
+		window.onload = function(){
+			var n;
+			var gameCanvas = buildCanvas();
+			dContext = gameCanvas.getContext('2d');
+
+			ship = new shipClass();
+
+
+			// add some handy functions to our context
+			dContext.matTranslate = function(mat){
+				for(var x = 0; x < mat.width; x++){
+					this.translate(mat.val(x, 0), mat.val(x, 1));
+				}
+			}
+
+			// create the stars
+			for(n = 0; n < numStars; n++){
+				star[n] = new starClass();
+				star[n].scale = 0.3 + 0.7 * n / numStars;
+				star[n].alpha = 0.35 + 0.65 * n / numStars;
+				star[n].colour.R = Math.floor(star[n].colour.R * star[n].alpha);
+				star[n].colour.G = Math.floor(star[n].colour.G * star[n].alpha);
+				star[n].colour.B = Math.floor(star[n].colour.B * star[n].alpha);
+
+			}
+
+			// create the planets
+			planets[0] = new planetClass();
+			planets[0].drawFunction = drawPlanet;
+			planets[0].position.setVals([[270], [350]]);
+			planets[0].drawScale = 3;
+			planets[0].radius = 40 * planets[0].drawScale;
+
+
+			// eleminate the right-click menu
+			document.getElementById('gameCanvas').addEventListener('contextmenu', function(evt){evt.preventDefault();});
+
+			// add mouse event handlers
+			gameCanvas.onmousedown = function(evt){ 
+				if(evt.which == 1) mouse.leftbutton.state = 1;
+				else if (evt.which == 2) mouse.middlebutton.state = 1;
+				else if (evt.which == 3) mouse.rightbutton.state = 1;
+				return false;
+			};
+
+			gameCanvas.onmouseup = function(evt){ 
+				if(evt.which == 1) mouse.leftbutton.state = 0;
+				else if (evt.which == 2) mouse.middlebutton.state = 0;
+				else if (evt.which == 3) mouse.rightbutton.state = 0;
+				return false;
+			};
+
+			gameCanvas.onmousemove = function(evt){
+				mouse.position.setVals([[evt.clientX], [evt.clientY]]);
+			};
+
+			//Add a placeholder function for browsers that don't have setLineDash()
+			if (!dContext.setLineDash) {
+				dContext.setLineDash = function () {}
+			}
+			// and start the game!
+			setInterval(animate, 20);
+		};
+
+
+	</script>
+</head>
+<body>
+</body>
+</html>
