@@ -161,6 +161,7 @@
 					gameCanvas.onmousemove = function(e){handleMouse(e)};
 					gameCanvas.onmousedown = function(e){handleMouse(e)};
 					gameCanvas.onmouseup = function(e){handleMouse(e)};
+					gameCanvas.addEventListener("wheel", function(e){handleMouseWheel(e)});
 					setTimeout(function(){
 						initialize('finish');
 					}, 0);
@@ -203,6 +204,8 @@
 			var a = (y1 * (x3 - x2) + y2 * (x1 - x3) + y3 * (x2 - x1)) / (x1 * x1 * (x3 - x2) + x2 * x2 * (x1 - x3) + x3 * x3 * (x2 - x1));
 			var b = (y1 - y2) / (x1 - x2) - a * (x1 + x2);
 
+			// no need to calculate the c in "ax^2 + bx + c", as we're not using the parabola itself, just its derivative.
+
 			// ok, we have the legit parabola, now we need to calculate its tangent at the gun's position
 			var dy = 2 * a * x1 + b;
 			if(dy < 0){
@@ -217,6 +220,11 @@
 		
 		}
 		*/
+
+		function handleMouseWheel(e){
+			// this function gets called on mouse wheel roll, but currently has no purpose.
+			//console.log(e.deltaY);
+		}
 
 		function handleMouse(e){
 			mouse.x = e.pageX;
@@ -272,11 +280,6 @@
 
 			sprites.gun.draw(context, {scale : config.scale});
 			sprites.base.draw(context, {scale : config.scale});
-
-			//gfx.putPixel(10, 10, 255, 255, 0, 1);
-			context.fillStyle = "#FFFF00";
-			context.fillRect(10, 10, 1, 1);
-
 
 
 		}

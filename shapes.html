@@ -23,6 +23,12 @@
 		}
 	</style>
 	<script type="text/javascript">
+		/*
+			For anyone reading this code, my apologies for any
+			difficulties.  I lost my original version of this and had to
+			decompile a compressed version that was cached on my browser to
+			get the code you see here.
+		*/
 		var context, canvasWidth, canvasHeight;
 		var mouseX = -1, mouseY = -1, mouseDown = false;
 		var shape=[], numShapes = 0, colourAngle = 0, leadShape = null;
@@ -274,13 +280,15 @@
 					shape[numShapes].getTrigVals(dx / 30.0);
 					mouseX = x;
 					mouseY = y;
-					shape[numShapes].velocity = {x : dx, y : dy};
 					if(!mouseDown){
+						shape[numShapes].velocity = {x : dx, y : dy};
 						if(leadShape != null){
 							leadShape.parentShape = shape[numShapes];
 						}
 						shape[numShapes].childShape = leadShape;
 						leadShape = shape[numShapes];
+					}else{
+						shape[numShapes].velocity = {x : 6 * dx - Math.random() * 12 * dx, y : dy - 12};
 					}
 					numShapes++;
 					colourAngle += 0.05;
@@ -313,7 +321,7 @@
 </head>
 <body>
 	<div id="instructionPrompt">
-		Try moving your mouse around
+		Try using your mouse
 	</div>
 </body>
 </html>

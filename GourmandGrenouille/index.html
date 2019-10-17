@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<style type="text/css">
+
+		@font-face {
+		  font-family: 'Love Ya Like A Sister';
+		  font-style: normal;
+		  font-weight: 400;
+		  src: local('Love Ya Like A Sister Regular'), local('LoveYaLikeASister-Regular'), url(https://fonts.gstatic.com/s/loveyalikeasister/v7/LzkxWS-af0Br2Sk_YgSJY6XrD0ew9-Ooe_pdZm-U6E0.ttf) format('truetype');
+		}
+
+		body {
+			text-align:center;
+			font-family: 'Love Ya Like A Sister', cursive;
+		}
+		#canvasBackdrop{
+			width: 800px;
+			height: 600px;
+			background-color: #DEF;
+			background-image: url(mound.png);
+			background-position: 148px 355px;
+			background-repeat: no-repeat;
+
+		}
+		#gameCanvas{
+			cursor: crosshair;
+		}
+		#gameWrapper{
+			position: relative;
+			width: 800px;
+			margin: auto;
+			margin-top: 4em;
+		}
+		#gameFooter{
+			width: 800px;
+			margin: auto;
+			font-size: 24px;
+			text-align: left;
+		}
+
+		#bodyOverlay{
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 800px;
+			height: 680px;
+			border: 1px solid #EEE8E0;
+			background-color: #FFF8F0;
+			font-size: 140px;
+			text-align: center;
+			line-height: 680px;
+		}
+
+		#header{
+			font-size: 32px;
+			text-align: left;
+		}
+
+		#headerRight{
+			font-size: 16px;
+			float: right;
+			display: inline-block;
+			text-align: left;
+			margin-top: 16px;
+		}
+
+		#headerRight a{
+			margin-left: 16px;
+		}
+
+		span.score{
+			margin-right: 32px;
+		}
+
+		div.score{
+			display: none;
+		}
+
+
+		a{ color: #000; text-decoration: none; }
+		a:active{ color: #000; text-decoration: none; }
+		a:hover{ color: #000; text-decoration: none; }
+		a:visited{ color: #000; text-decoration: none; }
+	</style>
+	<script src="jquery.min.js"></script>
+	<script type="text/javascript" src="spriteTemplate.js"></script>
+	<script type="text/javascript" src="grenouille.js"></script>
+</head>
+<body>
+	<div id="gameWrapper">
+		<div id="header">
+			Gourmand Grenouille
+		</div>
+		<div id="canvasBackdrop">
+			<canvas id="gameCanvas" width="800" height="600"></canvas>
+		</div>
+		<div id="gameFooter">
+			<div style="display:inline;float:right"><a href="#" onclick="quit(); return false">Exit</a></div>
+			<div class="score" id="scoreDiv_fly">Flies: <span id="score_fly" class="score">0</span></div>
+			<div class="score" id="scoreDiv_fish">Fish: <span id="score_fish" class="score">0</span></div>
+			<div class="score" id="scoreDiv_junk">Trash: <span id="score_junk" class="score">0</span></div>
+			<div class="score" id="scoreDiv_boat">Boats: <span id="score_boat" class="score">0</span></div>
+		</div>
+		<div id="bodyOverlay">Loading...</div>
+	</div>
+	<div id="debug"></div>
+</body>
+</html>
