@@ -1,0 +1,34 @@
+body{
+	font-family: sans-serif;
+}
+
+div.stackLabel{
+	font-weight: bold;
+	font-size: 14px;
+	color: #ACC;
+	margin-top: 1.5em;
+	position:absolute;
+}
+
+div.playerName{
+	font-weight: bold;
+	font-size: 18px;
+	color: #FFC;
+	margin-top: 1.5em;
+}
+
+div.playerDiv{
+	position: absolute;
+	text-align: center;
+	margin: auto;
+}
+
+#console{
+	position: absolute;
+	width: 250px;
+	height: 150px;
+/*	background-color: #000;*/
+	text-align: left;
+	overflow: hidden;
+	font-size: 10px;
+}
