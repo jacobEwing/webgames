@@ -49,6 +49,7 @@
 </head>
 <body>
 	<div id="gameWrapper" class="noSelect">
+		<div></div>
 		<div id="centering">
 			<div id="loadingPrompt"></div>
 			<div id="contentWrapper"><!-- style="display:none"-->
@@ -70,11 +71,5 @@
 			</div>
 		</div>
 	</div>
-<?php
-	if(array_key_exists('devel', $_GET)){
-		echo '<div id="tools"><span onclick = "dumpMap()">dump</span></div>';
-		echo '<div id="debug"></div>';
-	}
-?>
 </body>
 </html>
