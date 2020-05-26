@@ -120,28 +120,7 @@ function drawLevel(callback){
 	}
 
 }
-/*
-function handleOverlayClick(evt){
-	var realPos = function(x, y){ return {'x':48 * x - drawOffset.x, 'y': 27.5 * x + 55 * y + drawOffset.y}; };
-	var mapPos = function(x, y){
-		var mapx, mapy
-		mapx = Math.round((x + drawOffset.x) / 48);
-		mapy = Math.round(   (y - drawOffset.y) / 55  - (27.5 * mapx) / 55 );
-		return {
-			'x' : mapx,
-			'y' : mapy,
-		};
-	}
-	var parentPos = $('#centering').position();
-	var pos = {
-		x : evt.pageX - parentPos.left,
-		y : evt.pageY - parentPos.top
-	};
-	var mpos = mapPos(pos.x, pos.y);
-	$('#debug').html(mpos.x + ', ' + mpos.y + '<br/>');
-//	alert(evt.pageX - $(
-}
-*/
+
 function closeHint(){
 	colourBack.fadeTo(400, 0);
 	backing.fadeTo(400, 0, function(){

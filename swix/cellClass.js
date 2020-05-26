@@ -266,26 +266,3 @@ cellClass.prototype.realPosition = function(){
 function realPosition(x, y){
 	return {'x':48 * x - drawOffset.x, 'y': 27.5 * x + 55 * y + drawOffset.y};
 }
-
-//var cellSprite, cells;
-//var drawOffset = {x : 0, y : 0};
-
-/*
-$().ready(function(){
-
-	cells = [];
-	cellSprite = new spriteSet('tiles.sprite', function(){
-		var n;
-		for(n = 0; n < 9; n++){
-			cells[n] = new cellClass({
-				'sprite' : cellSprite,
-				'active' : 1,
-				'celltype' : n % 2 ? 'flip' : 'spin',
-				'position' : {x : 3 + (n % 3), y : Math.floor(n / 3) - (n % 3 == 2 ? 1 : 0)}
-			});
-			cells[n].draw($('#spriteTest'));
-		}
-	});
-
-});
-*/
