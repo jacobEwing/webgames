@@ -27,35 +27,17 @@ function finishLevel(){
 }
 
 function getLevel(levelNum){
+	// FIXME  Is this variable needed?
 	gameState = 'loading';
-	if(levelQueue[levelNum] == undefined){
-		loadLevel(levelNum, function(){getLevel(levelNum);});
+	levelMap = gameLevels[levelNum];
+	if(levelMap['cells'] != undefined){
+		drawLevel(function(){
+			showTitle(levelMap['title']);
+		});
 	}else{
-		levelMap = levelQueue[levelNum];
-		if(levelMap['cells'] != undefined){
-			drawLevel(function(){
-				showTitle(levelMap['title']);
-			});
-
-			// go ahead and cache the next level
-			if(1 * levelNum == levelNum){
-				nextLevelnum = 1 * levelNum + 1;
-				if(levelQueue[nextLevelnum] == undefined){
-					setTimeout('loadLevel(' + nextLevelnum + ')', 1000);
-				}
-			}
-		}else{
-			showHint(levelMap['message'], function(){currentLevel = 0; getLevel(currentLevel);}, true);
-		}
-
+	// why the hell do I have this else? 
+		showHint(levelMap['message'], function(){currentLevel = 0; getLevel(currentLevel);}, true);
 	}
-}
-
-function loadLevel(levelNum, callback){
-	$.get('swix.php', {'action':'getLevel', 'id':levelNum}, function(resultstring){
-		eval('levelQueue["' + levelNum + '"] = ' + resultstring);
-		if(callback != undefined) callback();
-	});
 }
 
 function showTitle(title){
@@ -99,8 +81,7 @@ function drawLevel(callback){
 	animationTally = 0;
 	beststeps = levelMap['best'];
 	$('#beststeps').html(beststeps);
-	testLevel = levelMap['testlevel'] != undefined;
-	offTally = testLevel ? 9999 : 0;
+	offTally = 0;
 	for(celltype in levelMap['cells']){
 		plateSet = levelMap['cells'][celltype];
 
