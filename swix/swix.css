@@ -109,6 +109,12 @@ a.rightActionButton{
 	cursor: pointer;
 }
 
+a.rightActionButton:hover{
+	-ms-transform: rotate(-25deg); /* IE 9 */
+	-webkit-transform: rotate(-25deg); /* Chrome, Safari, Opera */
+	transform: rotate(-25deg);
+}
+
 a.leftActionButton{
 	-ms-transform: rotate(30deg); /* IE 9 */
 	-webkit-transform: rotate(30deg); /* Chrome, Safari, Opera */
@@ -116,6 +122,12 @@ a.leftActionButton{
 	outline : 0;
 	color : #DDD;
 	cursor: pointer;
+}
+
+a.leftActionButton:hover{
+	-ms-transform: rotate(25deg); /* IE 9 */
+	-webkit-transform: rotate(25deg); /* Chrome, Safari, Opera */
+	transform: rotate(25deg);
 }
 
 #exitButton{
@@ -277,10 +289,22 @@ div.cellSample{
 	transform: rotate(-60deg);
 }
 
+.rotNeg60:hover{
+	-ms-transform: rotate(-55deg); /* IE 9 */
+	-webkit-transform: rotate(-55deg); /* Chrome, Safari, Opera */
+	transform: rotate(-55deg);
+}
+
 .rot60{
 	-ms-transform: rotate(60deg); /* IE 9 */
 	-webkit-transform: rotate(60deg); /* Chrome, Safari, Opera */
 	transform: rotate(60deg);
+}
+
+.rot60:hover{
+	-ms-transform: rotate(55deg); /* IE 9 */
+	-webkit-transform: rotate(55deg); /* Chrome, Safari, Opera */
+	transform: rotate(55deg);
 }
 
 #startButton{
@@ -294,4 +318,18 @@ div.cellSample{
 	top : 137px;
 	left : 438px;
 	
+}
+
+#menuSwixText{
+	cursor: pointer;
+	margin-top: 190px;
+	margin-left: 15px";
+}
+
+#menuSwixText:hover{
+	-ms-transform: rotate(30deg); /* IE 9 */
+	-webkit-transform: rotate(30deg); /* Chrome, Safari, Opera */
+	transform: rotate(30deg);
+	margin-top: 200px;
+	margin-left: 30px;
 }

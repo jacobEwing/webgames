@@ -42,9 +42,6 @@ function getLevel(levelNum){
 		drawLevel(function(){
 			showTitle(levelMap['title']);
 		});
-	}else{
-	// why the hell do I have this else? 
-		showHint(levelMap['message'], function(){currentLevel = 0; getLevel(currentLevel);}, true);
 	}
 }
 
