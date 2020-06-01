@@ -301,7 +301,7 @@ var startGame = function(){
 					swish : new Audio("sounds/swish.wav"),
 					mouseClick : new Audio("sounds/mouseClick.wav")
 				};
-				currentLevel = 47;
+				currentLevel = 0;
 
 				soundOn();				
 
