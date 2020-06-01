@@ -10,6 +10,7 @@ var hint;
 var cellSprite;
 var disableHints = false;
 var levelMap, stepsTaken;
+var soundEffects, music, muted = false;
 
 levelQueue = [];
 
@@ -25,7 +26,12 @@ function checkForWin(){
 
 function finishLevel(){
 	currentLevel++;
-	clearLevel(function(){getLevel(currentLevel)});
+	if(currentLevel >= gameLevels.length || currentLevel == 0){
+		currentLevel = 0;
+		toMenu();
+	}else{
+		clearLevel(function(){getLevel(currentLevel)});
+	}
 }
 
 function getLevel(levelNum){
@@ -195,20 +201,77 @@ function showHint(promptText, callback, hideDisable){
 }
 
 function restartLevel(){
+	playSound('mouseClick');
 	if(gameState == 'playing'){
 		clearLevel(function(){drawLevel()});
 	}
 }
 
-function skipLevel(){
+function skipLevel(direction){
+	if(direction == undefined) direction = 1;
+	if(currentLevel + direction > gameLevels.length - 1 || currentLevel + direction < 0){
+		return;
+	}
+
+	playSound('mouseClick');
 	if(gameState == 'playing'){
-		currentLevel++;
+		currentLevel += direction;
 		clearLevel(function(){getLevel(currentLevel)});
 	}
 }
 
+function playSound(soundName){
+	if(!muted){
+		soundEffects[soundName].cloneNode().play();
+	}
+}
+
+function soundOn(){
+
+	var playPromise = music[0].play();
+
+	if (playPromise !== undefined) {
+		playPromise.then(function() {
+			muted = false;
+			$('#soundCheckmark').html('On&nbsp;');
+		}).catch(function(error) {
+			muted = true;
+			$('#soundCheckmark').html('Off');
+			console.log(error);
+		});
+	}else{
+		muted = false;
+		$('#soundCheckmark').html('On&nbsp;');
+	}
+
+
+
+}
+
+function soundOff(){
+	music[0].pause();
+	muted = true;
+	$('#soundCheckmark').html('Off');
+}
+
+function toggleSound(){
+	muted ? soundOn() : soundOff();
+}
+
+function showMenu(){
+	$('#soundCheckmark').html(muted ? 'Off' : 'On&nbsp;');
+	console.log(muted);
+	$('#menuWrapper').css({
+		display : 'inline-block',
+		opacity : 0
+	}).animate({opacity: 1}, function(){
+		console.log('done');
+	});
+
+}
+
 var startGame = function(){
-	var loadingAnim;
+	var loadingAnim, n;
 	return function(step){
 		if(step == undefined){
 			step = 'init';
@@ -216,6 +279,32 @@ var startGame = function(){
 		switch(step){
 			case 'init':
 				gameState = 'initializing';
+				startGame('loadSounds');
+				break;
+			case 'loadSounds':
+				// we'll load the sounds first to get the music started ASAP
+				music = [
+					new Audio('music/bensound-smallguitar.mp3'),
+					new Audio('music/bensound-ukulele.mp3'),
+					new Audio('music/bensound-smile.mp3')
+				];
+				for(n in music){
+					music[n].volume = 0.5;
+					music[n].addEventListener("ended", function(){
+						music.push(music.shift());
+						music[0].play();
+					});
+				}
+
+				soundEffects = {
+					crank : new Audio("sounds/crank.wav"),
+					swish : new Audio("sounds/swish.wav"),
+					mouseClick : new Audio("sounds/mouseClick.wav")
+				};
+				currentLevel = 47;
+
+				soundOn();				
+
 				startGame('loadSprite');
 				break;
 			case 'loadSprite':
@@ -249,12 +338,7 @@ var startGame = function(){
 						'font-size' : (Math.random() * 2 + 39) + 'px'
 					});
 				}, 20);
-				startGame('loadCopyright');
-				break;
-			case 'loadCopyright':
-				$('<img src="images/copyright.png">').load(function(){
-					startGame('loadHexgrid');
-				});
+				startGame('loadHexgrid');
 				break;
 			case 'loadHexgrid':
 				$('<img src="images/hexgrid.png">').load(function(){
@@ -262,15 +346,25 @@ var startGame = function(){
 				});
 				break;
 			case 'loadTiles':
+				$('#loadingPrompt').fadeTo('slow', 0, function(){
+					$(this).remove();
+				});
 				$('<img src="images/tiles.png">').load(function(){
-					startGame('fadeIn');
+					startGame('doMenu');
 				});
 				break;
+			case 'doMenu':
+				clearInterval(loadingAnim);
+				showMenu();
+				//startGame('fadeIn');
+				break;
 			case 'fadeIn':
-				$('#loadingPrompt').fadeTo('slow', 0);
-				$('#contentWrapper').fadeTo('slow', 1, function(){
-					clearInterval(loadingAnim);
-					startGame('complete');
+				
+				$('#menuWrapper').fadeTo('slow', 0, function(){
+					$('#menuWrapper').css('display', 'none');
+					$('#contentWrapper').fadeTo('slow', 1, function(){
+						startGame('complete');
+					});
 				});
 				break;
 			case 'complete':
@@ -283,3 +377,16 @@ var startGame = function(){
 		}
 	}
 }();
+
+function toMenu(){
+	playSound('mouseClick');
+	clearLevel(function(){
+		$('#contentWrapper').fadeTo('slow', 0, function(){
+			$('#contentWrapper').css('display', 'none');
+			$('#menuWrapper').fadeTo('slow', 1, function(){
+				//startGame('complete');
+			});
+		});
+	});
+	
+}

@@ -118,6 +118,7 @@ cellClass.prototype.getNeighbours = function(){
 cellClass.prototype.flipNeighbours = function(){
 	var n;
 	var neighbourList = this.getNeighbours();
+	playSound('swish');
 	for(n = 0; n < neighbourList.length; n++){
 		neighbourList[n].flip();
 	}
@@ -173,6 +174,7 @@ cellClass.prototype.rotNeighbours = function(){
 	var childSequence;
 	var myRealPos = this.realPosition();
 	this.children = this.getNeighbours();
+	playSound('crank');
 	for(n = 0; n < this.children.length; n++){
 		//this.children[n].sprite.element.remove().appendTo($('#spriteTest'));
 		this.children[n].sprite.element.appendTo($('#spriteTest'));

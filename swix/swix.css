@@ -1,3 +1,11 @@
+@font-face {
+    font-family: 'cheveuxdangemedium';
+    src: url('fonts/cheveuxdange-webfont.woff2') format('woff2'),
+         url('fonts/cheveuxdange-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
 a {
 	text-decoration: none;
 }
@@ -5,7 +13,8 @@ body{
 	background-color: #2b2925;
 	background-image:url(images/backdrop2.jpg);
 	margin:0px;
-	font-family: 'Coming Soon', cursive;
+    	font-family: 'cheveuxdangemedium';
+	font-size: 28px;
 }
 .anchor{
 	cursor:pointer;cursor:hand; /* <- 'cause ie sucks */
@@ -33,6 +42,8 @@ img.embed{ margin: 10px; }
 }
 
 #gameWrapper{
+	/* the margin is necessary to fit the grid and the title */
+	margin-top: 80px;
 	text-align:center;
 }
 
@@ -53,13 +64,11 @@ img.embed{ margin: 10px; }
 #stepstaken{
 	transform-origin: 0 0;
 	position:absolute;
-	top: 20px;
-	left: 425px;
+	top: 31px;
+	left: 436px;
 }
 
 div.topRightEdge{
-	font-family: 'Loved by the King', cursive;
-	font-size: 28px;
 	-ms-transform: rotate(30deg); /* IE 9 */
 	-webkit-transform: rotate(30deg); /* Chrome, Safari, Opera */
 	transform: rotate(30deg);
@@ -70,62 +79,68 @@ div.topRightEdge{
 #stepstitle{
 	position:absolute;
 	top:0px;
-	left:360px;
+	left:335px;
 }
 #beststeps{
 	transform-origin: 0 0;
 	position:absolute;
-	top:78px;
-	left:529px;
+	top:90px;
+	left:540px;
 }
 #beststepstitle{
 	position:absolute;
-	top:62px;
-	left:475px;
+	top:68px;
+	left:465px;
 }
 #centering{
 	position:relative;
-	top: 6em;
+/*	top: 6em;*/
 	width:600px;
 	height:637px;
 	margin:auto;
 }
 
-a.actionButton{
-	font-family: 'Loved by the King', cursive;
-	font-size: 28px;
+a.rightActionButton{
 	-ms-transform: rotate(-30deg); /* IE 9 */
 	-webkit-transform: rotate(-30deg); /* Chrome, Safari, Opera */
 	transform: rotate(-30deg);
 	outline : 0;
 	color : #DDD;
+	cursor: pointer;
+}
+
+a.leftActionButton{
+	-ms-transform: rotate(30deg); /* IE 9 */
+	-webkit-transform: rotate(30deg); /* Chrome, Safari, Opera */
+	transform: rotate(30deg);
+	outline : 0;
+	color : #DDD;
+	cursor: pointer;
 }
 
 #exitButton{
 	position:absolute;
-	left: 536px;
-	top: 502px;
+	left: 60px;
+	top: 535px;
 }
+
 #resetButton{
 	position:absolute;
-	left: 340px;
-	top: 612px;
+	left: 150px;
+	top: 595px;
 }
 #skipButton{
 	position:absolute;
-	left: 440px;
-	top: 555px;
+	left: 375px;
+	top: 595px;
 }
-#tools{
+
+#prevButton{
 	position:absolute;
-	top:0px;
-	left:0px;
+	left: 455px;
+	top: 534px;
 }
-#copyright{
-	position:absolute;
-	top:525px;
-	left:65px;
-}
+
 #titleDivWrapper{
 	position:absolute;
 	top:0px;
@@ -145,7 +160,6 @@ a.actionButton{
 	margin:auto;
 	font-size: 30px;
 	color: #FFF;
-	font-family: 'Loved by the King', cursive;
 	pointer-events: none;
 }
 .customcheck{
@@ -186,11 +200,11 @@ div.promptWrapper{
 	margin:auto;
 	border-radius: 5px 25px;
 }
-
+/*
 div.promptWrapper p{
 	font-family: verdana;
 }
-
+*/
 
 div.promptBox{
 	position:relative;
@@ -236,4 +250,48 @@ div.cellSample{
 	overflow: hidden;
 	background-image: url(images/tiles.png);
 	display: inline;
+}
+
+/****************************************************
+***********      title screen styles      ***********
+****************************************************/
+#menuWrapper{
+	width: 600px;
+	height: 600px;
+	background-image: url('images/bigCell.png');
+	position: relative;
+	display: none;
+}
+
+.menuLink{
+	display: inline-block;
+	outline : 0;
+	color : #DDD;
+	cursor: pointer;
+	font-size: 40px;
+}
+
+.rotNeg60{
+	-ms-transform: rotate(-60deg); /* IE 9 */
+	-webkit-transform: rotate(-60deg); /* Chrome, Safari, Opera */
+	transform: rotate(-60deg);
+}
+
+.rot60{
+	-ms-transform: rotate(60deg); /* IE 9 */
+	-webkit-transform: rotate(60deg); /* Chrome, Safari, Opera */
+	transform: rotate(60deg);
+}
+
+#startButton{
+	position: absolute;
+	top : 132px;
+	left : 12px;
+}
+
+#soundCheckbox{
+	position: absolute;
+	top : 137px;
+	left : 438px;
+	
 }

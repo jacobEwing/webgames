@@ -4,8 +4,11 @@
 	<meta property="og:image" content="/Swix.png" />
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 
-	<link href='http://fonts.googleapis.com/css?family=Loved+by+the+King' rel='stylesheet' type='text/css'>
+	<link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
+
 	<link rel="stylesheet" type="text/css" href="swix.css" />
+
 	<script type="text/javascript" src="jquery.js"></script>
 	<script type="text/javascript" src="spriteSet.js"></script>
 	<script type="text/javascript" src="cellClass.js"></script>
@@ -18,53 +21,34 @@
 		try{urchinTracker();}catch(e){};
 		*/
 
-		function dumpMap(){
-			for(m in buttonTypes){
-				echo("'" + buttonTypes[m] + "'" + ' => array(');
-				for(n in button){
-					if(button[n].objType == buttonTypes[m] && button[n].state == 0){
-						echo(button[n].position.x + ',' + button[n].position.y + ',' + button[n].state + ',  ');
-					}
-				}
-				echo("<br/>");
-				for(n in button){
-					if(button[n].objType == buttonTypes[m] && button[n].state == 1){
-						echo(button[n].position.x + ',' + button[n].position.y + ',' + button[n].state + ',  ');
-					}
-				}
-				echo("),<br/>");
-			}
-		}
-		var echo = (function(){
-			var output = document.getElementById('debug');
-			return function(text){
-				var span = document.createElement('SPAN');
-				span.innerHTML = text;
-				output.appendChild(span);
-			};
-		})();
-
-		window.onload = startGame();
+		window.onload = function(){ document.getElementById('contentWrapper').style.display = 'none'; startGame() };
 	</script>
 </head>
 <body>
 	<div id="gameWrapper" class="noSelect">
-		<div></div>
 		<div id="centering">
 			<div id="loadingPrompt"></div>
+			<div id="menuWrapper">
+				<img src="images/swix.png" style="cursor: pointer; margin-top: 190px; margin-left: 15px" onclick = "startGame('fadeIn');"/>
+				<span id="startButton" class="menuLink rotNeg60" onclick="startGame('fadeIn');">Play!</span>
+				<div id="soundCheckbox" class="menuLink rot60" onclick="toggleSound();">
+					Sound:&nbsp;<span id="soundCheckmark">On</span>
+				</div>
+			</div>
 			<div id="contentWrapper"><!-- style="display:none"-->
-				<div class="noSelect">
+				<div id="topOptions" class="noSelect">
 					<div id="swix"><img src="images/swix.png"/></div>
-					<img id="copyright" src="images/copyright.png"/>
 					<div id="stepstitle" class="topRightEdge">Moves:</div>
 					<div id="stepstaken" class="topRightEdge">0</div>
 					<div id="beststepstitle" class="topRightEdge">Best:</div>
 					<div id="beststeps" class="topRightEdge">0</div>
 				</div>
 				<div id="content"></div>
-				<a id="resetButton" class="actionButton" href="#" onclick="restartLevel(); return false">reset</a>
-				<a id="exitButton" class="actionButton" href="#"  onclick="exit(); return false;">exit</a>
-				<a id="skipButton" class="actionButton" href="#" onclick="skipLevel(); return false;">skip</a>
+				<a id="skipButton" class="rightActionButton" onclick="skipLevel(1); return false;">Next</a>
+				<a id="prevButton" class="rightActionButton" onclick="skipLevel(-1); return false;">Previous</a>
+
+				<a id="resetButton" class="leftActionButton" onclick="restartLevel(); return false">Reset</a>
+				<a id="exitButton" class="leftActionButton" onclick="toMenu(); return false;">Exit</a>
 				<div id="titleDivWrapper">
 					<div id="titleDiv"></div>
 				</div>
