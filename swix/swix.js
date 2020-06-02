@@ -7,7 +7,7 @@ var stepstaken, beststeps;
 var levelmap, testlevel;
 var levelQueue;
 var hint;
-var cellSprite;
+var cellSprite, menuSpriteSet, menuSprite;
 var disableHints = false;
 var levelMap, stepsTaken;
 var soundEffects, music, muted = false;
@@ -48,7 +48,7 @@ function getLevel(levelNum){
 function showTitle(title){
 	var titleDiv = $('#titleDiv');
 	titleDiv.html(title);
-	titleDiv.fadeIn('medium').delay(500).fadeOut('medium');
+	titleDiv.fadeIn('medium').delay(1000).fadeOut('medium');
 }
 
 function clearLevel(callback){
@@ -267,6 +267,24 @@ function showMenu(){
 
 }
 
+function showAbout(){
+
+	menuSprite.startSequence('flipOff');
+	$('#menuTop').animate({opacity : 0}, function(){
+		$(this).css('display', 'none');
+		$('#aboutMenu').css('display', 'block').animate({opacity : 1});
+	});
+	
+}
+
+function showMainMenu(){
+	menuSprite.startSequence('flipOn');
+	$('#aboutMenu').animate({opacity : 0}, function(){
+		$(this).css('display', 'none');
+		$('#menuTop').css('display', 'block').animate({opacity : 1});
+	});
+}
+
 var startGame = function(){
 	var loadingAnim, n;
 	return function(step){
@@ -276,7 +294,7 @@ var startGame = function(){
 		switch(step){
 			case 'init':
 				gameState = 'initializing';
-				startGame('loadSounds');
+				setTimeout(function(){ startGame('loadSounds'); }, 0);
 				break;
 			case 'loadSounds':
 				// we'll load the sounds first to get the music started ASAP
@@ -302,9 +320,18 @@ var startGame = function(){
 
 				soundOn();				
 
-				startGame('loadSprite');
+				setTimeout(startGame('loadBigCellSprite'), 0);
 				break;
-			case 'loadSprite':
+			case 'loadBigCellSprite':
+				menuSpriteSet = new spriteSet('bigCell.sprite', function(){
+					menuSprite = new spriteClass(menuSpriteSet);
+					menuSprite.currentFrame = 0;
+					menuSprite.draw($('#menuBackdrop'));
+
+					startGame('loadCellSprite');
+				});
+				break;
+			case 'loadCellSprite':
 				cellSprite = new spriteSet('tiles.sprite', function(){
 					startGame('loadbg');
 				});

@@ -173,6 +173,7 @@ a.leftActionButton:hover{
 	font-size: 30px;
 	color: #FFF;
 	pointer-events: none;
+	text-shadow: 1px 1px #000;
 }
 .customcheck{
 	background-color: #666;
@@ -212,11 +213,6 @@ div.promptWrapper{
 	margin:auto;
 	border-radius: 5px 25px;
 }
-/*
-div.promptWrapper p{
-	font-family: verdana;
-}
-*/
 
 div.promptBox{
 	position:relative;
@@ -234,6 +230,8 @@ div.promptBox{
 
 h3{
 	font-weight:normal;
+	font-size: 12px;
+	margin-bottom: 0.2em;
 
 }
 
@@ -270,9 +268,18 @@ div.cellSample{
 #menuWrapper{
 	width: 600px;
 	height: 600px;
-	background-image: url('images/bigCell.png');
 	position: relative;
 	display: none;
+}
+#menuTop{
+	position: relative;
+}
+
+#aboutMenu{
+	position: absolute;
+	top: 0;
+	width: 100%;
+	display:none;
 }
 
 .menuLink{
@@ -309,8 +316,27 @@ div.cellSample{
 
 #startButton{
 	position: absolute;
-	top : 132px;
-	left : 12px;
+	top : 555px;
+	left : 260px;
+}
+
+#startButton:hover{
+	-ms-transform: rotate(5deg); /* IE 9 */
+	-webkit-transform: rotate(5deg); /* Chrome, Safari, Opera */
+	transform: rotate(5deg);
+	
+}
+
+#mainMenuButton{
+	position: absolute;
+	top : 130px;
+	left : 20px;
+}
+
+#creditsButton{
+	position: absolute;
+	top : 130px;
+	left : 0px;
 }
 
 #soundCheckbox{
@@ -323,13 +349,46 @@ div.cellSample{
 #menuSwixText{
 	cursor: pointer;
 	margin-top: 190px;
-	margin-left: 15px";
+	margin-left: 15px;
 }
 
 #menuSwixText:hover{
 	-ms-transform: rotate(30deg); /* IE 9 */
 	-webkit-transform: rotate(30deg); /* Chrome, Safari, Opera */
 	transform: rotate(30deg);
-	margin-top: 200px;
-	margin-left: 30px;
+	margin-top: 195px;
+	margin-left: 50px;
+}
+
+#creditList {
+	color: #FFF;
+	font-size: 80%;
+	text-shadow: 1px 1px #000;
+}
+#creditList a{
+	color: #FFF;
+}
+
+#aboutMenu a{
+	color: #fde4ad;
+	display:inline-block;
+}
+
+.rotNeg3:hover{
+	-ms-transform: rotate(-3deg); /* IE 9 */
+	-webkit-transform: rotate(-3deg); /* Chrome, Safari, Opera */
+	transform: rotate(-3deg);
+	
+}
+
+.rot3:hover{
+	-ms-transform: rotate(3deg); /* IE 9 */
+	-webkit-transform: rotate(3deg); /* Chrome, Safari, Opera */
+	transform: rotate(3deg);
+	
+}
+
+#aboutMenu p{
+	line-height: 1em;
+	margin: unset;
 }
