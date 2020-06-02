@@ -1,9 +1,9 @@
 @font-face {
-    font-family: 'cheveuxdangemedium';
-    src: url('fonts/cheveuxdange-webfont.woff2') format('woff2'),
-         url('fonts/cheveuxdange-webfont.woff') format('woff');
-    font-weight: normal;
-    font-style: normal;
+	  font-family: 'cheveuxdangemedium';
+	  src: url('fonts/cheveuxdange-webfont.woff2') format('woff2'),
+	       url('fonts/cheveuxdange-webfont.woff') format('woff');
+	  font-weight: normal;
+	  font-style: normal;
 
 }
 a {
@@ -13,7 +13,7 @@ body{
 	background-color: #2b2925;
 	background-image:url(images/backdrop2.jpg);
 	margin:0px;
-    	font-family: 'cheveuxdangemedium';
+	  	font-family: 'cheveuxdangemedium';
 	font-size: 28px;
 }
 .anchor{
@@ -275,7 +275,17 @@ div.cellSample{
 	position: relative;
 }
 
+
 #aboutMenu{
+	position: absolute;
+	top: 0;
+	width: 100%;
+	display:none;
+}
+
+#settingsMenu{
+	color: #FFF;
+	text-shadow: 1px 1px #000;
 	position: absolute;
 	top: 0;
 	width: 100%;
@@ -327,7 +337,7 @@ div.cellSample{
 	
 }
 
-#mainMenuButton{
+#aboutMainMenuButton{
 	position: absolute;
 	top : 130px;
 	left : 20px;
@@ -339,10 +349,10 @@ div.cellSample{
 	left : 0px;
 }
 
-#soundCheckbox{
+#settingsButton{
 	position: absolute;
-	top : 137px;
-	left : 438px;
+	top : 140px;
+	left : 460px;
 	
 }
 
@@ -375,6 +385,11 @@ div.cellSample{
 	display:inline-block;
 }
 
+#settingsMenu a{
+	color: #fde4ad;
+	display:inline-block;
+}
+
 .rotNeg3:hover{
 	-ms-transform: rotate(-3deg); /* IE 9 */
 	-webkit-transform: rotate(-3deg); /* Chrome, Safari, Opera */
@@ -392,4 +407,61 @@ div.cellSample{
 #aboutMenu p{
 	line-height: 1em;
 	margin: unset;
+}
+
+#settingsMainMenuButton{
+	position: absolute;
+	top : 130px;
+	left : 490px;
+	/*
+	top : 130px;
+	left : 20px;
+	*/
+}
+#optionMenuWrapper{
+	position:relative;
+	display: block;
+	width: 360px;
+	margin: auto;
+	text-align: left;
+}
+
+.volumeSlider {
+	-webkit-appearance: none;
+	float: right;
+	height: 1em;
+	border-radius: 5px;
+	background: #211;
+	outline: none;
+	opacity: 0.7;
+	-webkit-transition: .2s;
+	transition: opacity .2s;
+	box-shadow: -2px -2px #000;
+	margin-top: .8em;
+}
+
+.volumeSlider::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 15px;
+	height: 30px;
+	border-radius: 4px; 
+	background: #322;
+	cursor: pointer;
+	box-shadow: 1px 1px #000, inset 2px 2px #655, inset -2px -2px #211;
+}
+
+
+.volumeSlider::-moz-range-thumb {
+	width: 15px;
+	height: 30px;
+	border-radius: 4px;
+	background: #322;
+	cursor: pointer;
+	box-shadow: 1px 1px #000, inset 2px 2px #655, inset -2px -2px #211;
+}
+
+#soundCheckmark{
+	float: right;
+	margin-right: 7em;
 }

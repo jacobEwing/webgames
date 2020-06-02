@@ -31,23 +31,34 @@
 			<div id="menuWrapper">
 				<div id="menuBackdrop"></div>
 				<div id="menuTop">
-					<img src="images/swix.png" id="menuSwixText" onclick = "startGame('fadeIn');"/>
+					<img src="images/swix.png" id="menuSwixText" onclick = "startPlaying();"/>
 					<span id="creditsButton" class="menuLink rotNeg60" onclick="showAbout();">Credits</span>
-					<span id="startButton" class="menuLink" onclick="startGame('fadeIn');">Play!</span>
-					<div id="soundCheckbox" class="menuLink rot60" onclick="toggleSound();">
-						Sound:&nbsp;<span id="soundCheckmark">On</span>
-					</div>
+					<span id="startButton" class="menuLink" onclick="startPlaying();">Play!</span>
+					<span id="settingsButton" class="menuLink rot60" onclick="showSettings();">Settings</span>
 				</div>
 				<div id="aboutMenu">
-					<span id="mainMenuButton" class="menuLink rotNeg60" onclick="showMainMenu();">Back</span>
+					<span id="aboutMainMenuButton" class="menuLink rotNeg60" onclick="aboutShowMainMenu();">Back</span>
 					<div id="creditList">
-						<img src="images/swix.png" style="margin:auto"/>
+						<img src="images/swix.png" style="margin:auto; margin-top: -2em"/>
 						<h3>Concept, design, development and graphics:</h3><p>Jacob Ewing <a class="rotNeg3" href="http://www.weirdly.net">www.weirdly.net</a></p>
 
 						<h3>Royalty free music:</h3><p>Bensound <a class="rot3" href="https://bensound.com/">https://bensound.com/</a></p>
 
-						<h3>Font &quot;Cheveux D'ange&quot; (&quot;Angel's Hair&quot;):</h3></a><p>Michel LUN <a class="rotNeg3" href="http://www.peax-webdesign.com">http://www.peax-webdesign.com</a></p>
+						<h3>Font &quot;Cheveux D'ange&quot; (&quot;Angel Hair&quot;):</h3></a><p>Michel LUN <a class="rotNeg3" href="http://www.peax-webdesign.com">http://www.peax-webdesign.com</a></p>
 
+					</div>
+				</div>
+				
+				<div id="settingsMenu">
+					<span id="settingsMainMenuButton" class="menuLink rot60" onclick="settingsShowMainMenu();">Back</span>
+					<img src="images/swix.png" style="margin:auto; margin-top: -2em; margin-bottom: 3em"/>
+					<div id="optionMenuWrapper">
+						<div id="soundCheckbox" onclick="toggleSound();">
+							Sound:&nbsp;<span id="soundCheckmark" class="rot3">On</span><br/>
+
+						</div>
+						Music Volume:&nbsp;<input id="musicVolumeSlider" class="volumeSlider" type="range" min="0" max="1" value=".5" class="slider" step = ".01" onInput="setMusicVolume(this.value)"/><br/>
+						Effects Volume:&nbsp;<input id="effectsVolumeSlider" class="volumeSlider" type="range" min="0" max="1" value="1" class="slider" step = ".01" onInput="setEffectsVolume(this.value)"/><br/>
 					</div>
 				</div>
 			</div>

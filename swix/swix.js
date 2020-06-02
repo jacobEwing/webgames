@@ -10,7 +10,7 @@ var hint;
 var cellSprite, menuSpriteSet, menuSprite;
 var disableHints = false;
 var levelMap, stepsTaken;
-var soundEffects, music, muted = false;
+var soundEffects, music, muted = false, musicVolume = 0.5, effectsVolume = 1;
 
 levelQueue = [];
 
@@ -219,7 +219,9 @@ function skipLevel(direction){
 
 function playSound(soundName){
 	if(!muted){
-		soundEffects[soundName].cloneNode().play();
+		var sound = soundEffects[soundName].cloneNode();
+		sound.volume = effectsVolume;
+		sound.play();
 	}
 }
 
@@ -277,9 +279,30 @@ function showAbout(){
 	
 }
 
-function showMainMenu(){
+function showSettings(){
+
+	menuSprite.startSequence('flipOff');
+	$('#menuTop').animate({opacity : 0}, function(){
+		$(this).css('display', 'none');
+		$('#settingsMenu').css('display', 'block').animate({opacity : 1});
+		$('#musicVolumeSlider').val(musicVolume);
+		$('#effectsVolumeSlider').val(effectsVolume);
+	});
+	
+}
+
+
+function aboutShowMainMenu(){
 	menuSprite.startSequence('flipOn');
 	$('#aboutMenu').animate({opacity : 0}, function(){
+		$(this).css('display', 'none');
+		$('#menuTop').css('display', 'block').animate({opacity : 1});
+	});
+}
+
+function settingsShowMainMenu(){
+	menuSprite.startSequence('flipOn');
+	$('#settingsMenu').animate({opacity : 0}, function(){
 		$(this).css('display', 'none');
 		$('#menuTop').css('display', 'block').animate({opacity : 1});
 	});
@@ -304,7 +327,7 @@ var startGame = function(){
 					new Audio('music/bensound-smile.mp3')
 				];
 				for(n in music){
-					music[n].volume = 0.5;
+					music[n].volume = musicVolume;
 					music[n].addEventListener("ended", function(){
 						music.push(music.shift());
 						music[0].play();
@@ -316,6 +339,9 @@ var startGame = function(){
 					swish : new Audio("sounds/swish.wav"),
 					mouseClick : new Audio("sounds/mouseClick.wav")
 				};
+				for(n in soundEffects){
+					soundEffects[n].volume = effectsVolume;
+				}
 				currentLevel = 0;
 
 				soundOn();				
@@ -374,33 +400,37 @@ var startGame = function(){
 					$(this).remove();
 				});
 				$('<img src="images/tiles.png">').load(function(){
-					startGame('doMenu');
+					startGame('buildSettingsWidgets');
 				});
+				break;
+			case 'buildSettingsWidgets':
+				/********
+
+			WRITE ME!
+
+				********/
+				setTimeout(function(){ startGame('doMenu'); }, 0);
 				break;
 			case 'doMenu':
 				clearInterval(loadingAnim);
 				showMenu();
-				//startGame('fadeIn');
-				break;
-			case 'fadeIn':
-				
-				$('#menuWrapper').fadeTo('slow', 0, function(){
-					$('#menuWrapper').css('display', 'none');
-					$('#contentWrapper').fadeTo('slow', 1, function(){
-						startGame('complete');
-					});
-				});
-				break;
-			case 'complete':
-				beststeps = 0;
-				finishClearLevel();
-				getLevel(currentLevel);
 				break;
 			default:
 				alert('invalid startGame step: "' + step + '"');
 		}
 	}
 }();
+
+function startPlaying(){
+	$('#menuWrapper').fadeTo('slow', 0, function(){
+		$('#menuWrapper').css('display', 'none');
+		$('#contentWrapper').fadeTo('slow', 1, function(){
+			beststeps = 0;
+			finishClearLevel();
+			getLevel(currentLevel);
+		});
+	});
+}
 
 function toMenu(){
 	playSound('mouseClick');
@@ -413,4 +443,18 @@ function toMenu(){
 		});
 	});
 	
+}
+
+function setMusicVolume(volume){
+	musicVolume = volume;
+	for(var n in music){
+		music[n].volume = musicVolume;
+	}
+}
+
+function setEffectsVolume(volume){
+	effectsVolume = volume;
+	for(var n in soundEffects){
+		soundEffects[n].volume = effectsVolume;
+	}
 }
