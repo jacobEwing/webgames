@@ -353,11 +353,12 @@ div.cellSample{
 }
 
 #menuSwixText:hover{
-	-ms-transform: rotate(30deg); /* IE 9 */
-	-webkit-transform: rotate(30deg); /* Chrome, Safari, Opera */
-	transform: rotate(30deg);
-	margin-top: 195px;
-	margin-left: 50px;
+	-ms-transform: rotate(8deg); /* IE 9 */
+	-webkit-transform: rotate(8deg); /* Chrome, Safari, Opera */
+	transform: rotate(8deg);
+	transform-origin: 40% 70%;
+/*	margin-top: 195px;
+	margin-left: 50px;*/
 }
 
 #creditList {
