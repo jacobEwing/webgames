@@ -217,8 +217,9 @@ function skipLevel(direction){
 	}
 }
 
-function playSound(soundName){
-	if(!muted){
+function playSound(soundName, force){
+	if(force == undefined) force = 0;
+	if(!muted || force){
 		var sound = soundEffects[soundName].cloneNode();
 		sound.volume = effectsVolume;
 		sound.play();
@@ -270,7 +271,7 @@ function showMenu(){
 }
 
 function showAbout(){
-
+	playSound('swish');
 	menuSprite.startSequence('flipOff');
 	$('#menuTop').animate({opacity : 0}, function(){
 		$(this).css('display', 'none');
@@ -280,7 +281,7 @@ function showAbout(){
 }
 
 function showSettings(){
-
+	playSound('swish');
 	menuSprite.startSequence('flipOff');
 	$('#menuTop').animate({opacity : 0}, function(){
 		$(this).css('display', 'none');
@@ -293,6 +294,7 @@ function showSettings(){
 
 
 function aboutShowMainMenu(){
+	playSound('swish');
 	menuSprite.startSequence('flipOn');
 	$('#aboutMenu').animate({opacity : 0}, function(){
 		$(this).css('display', 'none');
@@ -301,6 +303,7 @@ function aboutShowMainMenu(){
 }
 
 function settingsShowMainMenu(){
+	playSound('swish');
 	menuSprite.startSequence('flipOn');
 	$('#settingsMenu').animate({opacity : 0}, function(){
 		$(this).css('display', 'none');
@@ -309,7 +312,7 @@ function settingsShowMainMenu(){
 }
 
 var startGame = function(){
-	var loadingAnim, n;
+	var loadingAnim, n, widget;
 	return function(step){
 		if(step == undefined){
 			step = 'init';
@@ -404,11 +407,16 @@ var startGame = function(){
 				});
 				break;
 			case 'buildSettingsWidgets':
-				/********
-
-			WRITE ME!
-
-				********/
+				var selectElement = document.getElementById('startingLevel');
+				for(n = 0; n < gameLevels.length; n++){
+					widget = document.createElement('option');
+					widget.value = n;
+					widget.text = (n + 1) + ' - ' + gameLevels[n].title;
+					selectElement.appendChild(widget);
+				}
+				selectElement.onchange = function(){
+					currentLevel = 1 * this.value;
+				}
 				setTimeout(function(){ startGame('doMenu'); }, 0);
 				break;
 			case 'doMenu':

@@ -2,7 +2,7 @@
 	"image" : "images/bigCell.png",
 	"frameWidth" : 600,
 	"frameHeight" : 600,
-	"frameRate" : 50,
+	"frameRate" : 30,
 	"centerx" : 300,
 	"centery" : 300,
 	"frames" : {
