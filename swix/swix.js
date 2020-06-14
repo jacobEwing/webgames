@@ -352,13 +352,18 @@ var startGame = function(){
 				setTimeout(startGame('loadBigCellSprite'), 0);
 				break;
 			case 'loadBigCellSprite':
-				menuSpriteSet = new spriteSet('bigCell.sprite', function(){
-					menuSprite = new spriteClass(menuSpriteSet);
-					menuSprite.currentFrame = 0;
-					menuSprite.draw($('#menuBackdrop'));
+				// pre cache the sprite image as it's too big to be ready when loading
+				var img = document.createElement('IMG');
+				img.onload = function(){
+					menuSpriteSet = new spriteSet('bigCell.sprite', function(){
+						menuSprite = new spriteClass(menuSpriteSet);
+						menuSprite.currentFrame = 0;
+						menuSprite.draw($('#menuBackdrop'));
 
-					startGame('loadCellSprite');
-				});
+						startGame('loadCellSprite');
+					});
+				};
+				img.src = "images/bigCell.png";
 				break;
 			case 'loadCellSprite':
 				cellSprite = new spriteSet('tiles.sprite', function(){
