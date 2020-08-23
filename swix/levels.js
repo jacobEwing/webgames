@@ -9,7 +9,7 @@ var gameLevels = [
 			-156,
 			122
 		],
-		"hint":"<h2 style=\"text-align:center\">Objective<\/h2>\n\t\t<div style=\"float:right; margin:5px;\" class=\"cellSample\"><\/div>\n\t\t<p>Each tile in the game has a <i>coloured active side<\/i> and a <i>dark inactive side<\/i>.  The goal is to flip all tiles to show their active side.<\/p><br\/>\n\t\t<div style=\"float:left;margin:5px; background-position: -64px -128px\" class=\"cellSample\"><\/div>\n\t\t<h3>Blue Switchers<\/h3>\n\t\t<p>Clicking the blue switcher tile will cause all neighbouring tiles to be flipped (but not itself).<\/p>\n\t\t"
+		"hint":"<h2 style=\"text-align:center\">Objective<\/h2><div style=\"float:right; margin:5px;\" class=\"cellSample\"><\/div><p>Each tile in the game has a <strong>coloured active side<\/strong> and a <strong>dark inactive side<\/strong>.  The goal is to flip all tiles to show their active side.<\/p><br\/><h2 style=\"text-align:center\">Blue Switchers<\/h2><div style=\"float:left;margin:5px; background-position: -64px -128px\" class=\"cellSample\"><\/div><p>Clicking the blue switcher tile will cause all neighbouring tiles to be flipped (but not itself).<\/p>"
 	},
 	{
 		"title":"Tiny Snowflake",
@@ -165,7 +165,7 @@ var gameLevels = [
 			-60,
 			66
 		],
-		"hint":"<h2 style=\"text-align:center\">Spinners<\/h2>\n\t\t<div style=\"float:left;margin:2em; background-position: -64px -256px\" class=\"cellSample\"><\/div>\n\t\t<\/p>\n\t\tThis is the spinner, which you might say adds a &quot;twist&quot; to the game.  Rather than switching the state of its neighbours, it instead rotates them clockwise around itself.<\/p>"
+		"hint":"<h2 style=\"text-align:center\">Spinners<\/h2><div style=\"float:left;margin:2em; background-position: -64px -256px\" class=\"cellSample\"><\/div><\/p>This is the spinner, which you might say adds a &quot;twist&quot; to the game.  Rather than switching the state of its neighbours, it instead rotates them clockwise around itself.<\/p>"
 	},
 	{
 		"title":"Like a Record Baby",

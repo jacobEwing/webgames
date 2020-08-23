@@ -33,32 +33,43 @@
 				<div id="aboutMenu">
 					<span id="aboutMainMenuButton" class="menuLink rotNeg60" onclick="aboutShowMainMenu();">Back</span>
 					<div id="creditList">
-						<img src="images/swix.png" style="margin:auto; margin-top: -2em"/>
-						<h3>Concept, design, development and graphics:</h3><p>Jacob Ewing <a class="rotNeg3" href="http://weirdly.net">weirdly.net</a></p>
+						<img src="images/swix.png" style="margin:auto;margin-top: -3em;margin-bottom: -1.5em;">
+						<!--img src="images/swix.png" style="margin:auto; margin-top: -4em"/-->
+						<h3>Design, development and graphics:</h3><p>Jacob Ewing <a class="rotNeg3" href="http://weirdly.net">weirdly.net</a></p>
 
 						<h3>Royalty free music:</h3><p>Bensound <a class="rot3" href="https://bensound.com/">bensound.com</a></p>
 
-						<h3>Font &quot;Cheveux D'ange&quot; (&quot;Angel Hair&quot;):</h3><p>Michel LUN <a class="rotNeg3" href="https://peax-webdesign.com">peax-webdesign.com</a></p>
+						<h3>Fonts:</h3>
+						<p>
+							&quot;Cheveux D'ange&quot; (&quot;Angel Hair&quot;): Michel LUN
+							<br/><a class="rotNeg3" href="https://peax-webdesign.com">peax-webdesign.com</a>
+						</p>
+						<br/>
+						<p>
+							&quot;Neucha&quot;:  Jovanny Lemonad
+							<br/><a class="rot3" href="https://fonts.google.com/specimen/Neucha">https://fonts.google.com/specimen/Neucha</a>
+						</p>
+						
 
-						<h3>Sound efects courtesy of</h3><p><a class="rot3" href="https://freesound.org/">freesound.org</a>:</p>
+						<h3>Sound efects courtesy of</h3><p><a class="rotNeg3" href="https://freesound.org/">freesound.org</a>:</p>
 						<div id="soundCredits">
 							<div>
 								<span class="sampleSpeaker rot10" onclick="playSound('mouseClick', true);"><img src="images/speaker.png"/></span>
-								<a class="rotNeg3" href="https://freesound.org/people/Ayliffe/sounds/69930/">Marble impact</a>
+								<a class="rot3" href="https://freesound.org/people/Ayliffe/sounds/69930/">Marble impact</a>
 								<br/>
 								by Ayliffe
 							</div>
 
 							<div>
 								<span class="sampleSpeaker rotNeg10" onclick="playSound('swish', true);"><img src="images/speaker.png"/></span>
-								<a class="rot3" href="https://freesound.org/people/soundscalpel.com/sounds/110616/">Cable whoosh through air</a>
+								<a class="rotNeg3" href="https://freesound.org/people/soundscalpel.com/sounds/110616/">Cable whoosh through air</a>
 								<br/>
 								by &quot;soundscalpel.com&quot;
 							</div>
 
 							<div>
 								<span class="sampleSpeaker rot10" onclick="playSound('crank', true);"><img src="images/speaker.png"/></span>
-								<a class="rotNeg3" href="https://freesound.org/people/bolkmar/sounds/459613/">FX Wheel Mechanism</a>
+								<a class="rot3" href="https://freesound.org/people/bolkmar/sounds/459613/">FX Wheel Mechanism</a>
 								<br/>
 								by bolkmar
 							</div>
@@ -101,6 +112,20 @@
 				<a id="exitButton" class="leftActionButton" onclick="toMenu(); return false;">Exit</a>
 				<div id="titleDivWrapper">
 					<div id="titleDiv"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="interfaceModules">
+		<div class="promptWrapper noSelect">
+			<div class="promptBox">
+
+				<div class="promptContent">
+				</div>
+
+				<div style="clear: both; padding-top: 2em; position: relative;">
+					<div class="disableHints colouredButton">Disable Tips</div>
+					<div class="closeButton colouredButton">Close</div>
 				</div>
 			</div>
 		</div>
