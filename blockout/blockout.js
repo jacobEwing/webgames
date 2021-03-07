@@ -8,10 +8,10 @@ var settings = {
 	animationFrequency : 40
 };
 
-var gameCanvas, canvasWrapper, gameWrapper, context, player, blockStrength, blocks;
+var gameCanvas, canvasWrapper, gameWrapper, context, player, blockStrength, blocks, gameState;
 
 var playerClass = function(){
-	this.level = 0;
+	this.level = 1;
 	this.x = 0;
 	this.angle = 0;
 	this.ballSpeed = 5;
@@ -20,6 +20,7 @@ var playerClass = function(){
 };
 
 playerClass.prototype.fire = function(){
+	console.log('fire!');
 }
 
 playerClass.prototype.addBall = function(){
@@ -38,6 +39,7 @@ playerClass.prototype.launchBalls = function(){
 
 	var interval = setInterval(function(){
 		var ball = this.balls[idx++];
+		console.log('launching ball ' + idx);
 		// set the ball's position to that of the player
 		ball.position = {
 			x : this.x,
@@ -51,6 +53,7 @@ playerClass.prototype.launchBalls = function(){
 		// stop after looping through all the balls
 		if(idx >= balls.length){
 			clearInterval(interval);
+			console.log('balls launched')
 			/****************************
 
 
@@ -191,7 +194,7 @@ blockClass.prototype.pickAColour = function(){
 }
 /////////////////////////////////
 function startRound(){
-	player.level++;
+	//player.level++;
 
 	if(dropBlocks()){
 		doGameOver();
@@ -203,11 +206,9 @@ function startRound(){
 	
 	// draw the game area
 	renderGame();
-
 	// wait for user input
+	gameState = 'aiming';
 	playerTurn();
-//	setTimeout(startRound, 100);
-
 }
 
 function playerTurn(){
@@ -220,6 +221,7 @@ function playerTurn(){
 
 	var handleMouseUp = function(e){
 		if(mouseState == 1){
+			gameState = 'launching';
 			gameCanvas.removeEventListener('mousemove', handleMouseTargeting);
 			gameCanvas.removeEventListener('mouseup', handleMouseUp);
 			gameCanvas.removeEventListener('mousedown', handleMouseDown);
@@ -379,6 +381,7 @@ function initialize(callback, step){
 	if(step == undefined){
 		step = 'createObjects';
 	}
+	gameState = step;
 	switch(step){
 		case 'createObjects':
 			player = new playerClass();
@@ -427,9 +430,9 @@ function initialize(callback, step){
 		case 'initPlayer':
 			player.x = Math.ceil(settings.gridSize.x * settings.gridScale >> 1);
 			player.addBall();
-			setTimeout(function(){initialize(callback, 'finish');}, 0);
+			setTimeout(function(){initialize(callback, 'finish initializing');}, 0);
 			break;
-		case 'finish':
+		case 'finish initializing':
 			// We'll use a callback here to allow the use of this function to re-initialize the canvas
 			// without resetting the game statse.  That will be done with initialize("initCanvas");
 			callback();
