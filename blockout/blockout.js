@@ -5,7 +5,8 @@ var settings = {
 	blockProbability : .4,
 	minAngle : 7 * Math.PI / 16,
 	maxAngle : 25 * Math.PI / 16,
-	animationFrequency : 20
+	animationFrequency : 30,
+	defaultBallRadius: 16
 };
 
 var gameCanvas, canvasWrapper, gameWrapper, context, player, blockStrength, blocks, gameState;
@@ -14,14 +15,14 @@ var playerClass = function(){
 	this.level = 1;
 	this.x = 0;
 	this.angle = 0;
-	this.ballSpeed = 5;
-	this.launchFrequency = 200;
+	this.ballSpeed = 10;
+	this.launchFrequency = settings.defaultBallRadius * 10;
 	this.balls = [];
 };
 
 playerClass.prototype.fire = function(){
 	gameState = 'launching';
-	console.log('fire!');
+	this.launchBalls();
 }
 
 playerClass.prototype.addBall = function(){
@@ -37,10 +38,12 @@ playerClass.prototype.launchBalls = function(){
 	// actually a matrix rotation of a vertical line.
 	var idx = 0;
 	var angle = this.angle;
+	var me = this;
 
-	var interval = setInterval(function(){
+	gameState = 'balls moving';
+
+	var launch = function(){
 		var ball = this.balls[idx++];
-		console.log('launching ball ' + idx);
 		// set the ball's position to that of the player
 		ball.position = {
 			x : this.x,
@@ -48,35 +51,35 @@ playerClass.prototype.launchBalls = function(){
 		};
 		// set its velocity correctly
 		ball.velocity = {
-			dx : -Math.sin(this.angle) * this.ballSpeed,
-			dy : Math.cos(this.angle) * this.ballSpeed
+			dx : Math.sin(this.angle) * this.ballSpeed,
+			dy : -Math.cos(this.angle) * this.ballSpeed
 		}
+		ball.moving = true;
 		// stop after looping through all the balls
-		if(idx >= balls.length){
-			clearInterval(interval);
-			console.log('balls launched')
-			/****************************
-
-
-Here we should set the state to animateballs;
-		
-console.log('foo');
-
-			***************************/
+		if(idx < this.balls.length){
+			console.log(idx);
+			setTimeout(function(){launch.call(me);}, this.launchFrequency);
 		}
-	}, this.launchFrequency);
+	};
+	launch.call(this);
 };
 
 var ballClass = function(){
 	this.position = {x: 0, y : 0};
 	this.velocity = {dx: 0, dy : 0};
 	this.animaionInterval = null;
+	this.radius = settings.defaultBallRadius;
+	this.moving = false;
 };
 
-ballClass.prototype.move = function(){
-	this.position.x += this.velocity.dx;
-	this.position.y += this.velocity.dy;
-
+ballClass.prototype.draw = function(){
+	context.save()
+		context.beginPath();
+		context.fillStyle = 'rgb(180, 180, 160)';
+		context.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
+		context.fill();
+		context.closePath();
+	context.restore();
 }
 
 var blockClass = function(strength){
@@ -310,6 +313,61 @@ context.fillStyle = pattern;
 
 }
 
+function animateBalls(){
+	var animated = false;
+	var ball, n;
+	var xResolution = settings.gridScale * settings.gridSize.x;
+	var yResolution = settings.gridScale * settings.gridSize.y;
+	for(n = 0; n < player.balls.length; n++){
+		ball = player.balls[n];
+		if(ball.velocity.dx == 0 && ball.velocity.dy == 0){
+			ball.draw();
+			continue;
+		}
+		animated = true;
+
+		ball.position.x += ball.velocity.dx;
+		ball.position.y += ball.velocity.dy;
+
+		if(ball.position.x < ball.radius){
+			ball.position.x = Math.abs(ball.position.x)
+			ball.velocity.dx = Math.abs(ball.velocity.dx);
+		}
+
+		if(ball.position.x >= xResolution - ball.radius){
+//			ball.position.x = 2 * yResolution - ball.position.x;
+			ball.velocity.dx = -Math.abs(ball.velocity.dx);
+		}
+
+		if(ball.position.y < 0){
+			ball.position.y = Math.abs(ball.position.y);
+			ball.velocity.dy = Math.abs(ball.velocity.dy);
+		}
+
+		if(ball.position.y >= yResolution - ball.radius && ball.velocity.dy > 0){
+			console.log(ball.velocity.dy);
+			/// THIS IS JUST FOR TESTING.
+			// this should actulaly make the ball stop
+			ball.velocity.dy = 0;//-Math.abs(ball.velocity.dy);
+			ball.velocity.dx = 0;
+		}
+		ball.draw();
+
+	}
+
+	if(!animated){
+		endRound();
+	}
+}
+
+function endRound(){
+	gameState = 'endRound';
+
+	// additional stuff can be put here
+
+	startRound();
+}
+
 function renderGame(){
 	var n;
 
@@ -317,10 +375,17 @@ function renderGame(){
 	for(n = 0; n < blocks.length; n++){
 		blocks[n].draw();
 	}
-	if(gameState == 'aiming'){
-		renderArrow();
+	switch(gameState){
+		case 'aiming':
+			renderArrow();
+			break;
+		case 'balls moving':
+			animateBalls();
+			break;
 	}
+
 }
+
 
 function addBlockRow(){
 	var n, idx;
@@ -422,17 +487,19 @@ function initialize(callback, step){
 					setTimeout(function(){initialize(callback, 'initPlayer');}, 0);
 				}
 			};
-
 			var img = new Image();
 			img.onload = loadCallback;
 			img.src = "assets/images/OrangeArrow.png";
 
+/*
 			//var pattern = context.createPattern(img, "repeat");
 			//context.fillStyle = pattern;
+*/
 			
 			break;
 		case 'initPlayer':
 			player.x = Math.ceil(settings.gridSize.x * settings.gridScale >> 1);
+			player.addBall();
 			player.addBall();
 			setTimeout(function(){initialize(callback, 'finish initializing');}, 0);
 			break;
