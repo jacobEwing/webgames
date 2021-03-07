@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<style type="text/css">
+		* { margin: 0; padding: 0;}
+
+		@font-face {
+		    font-family: 'PoorStory';
+		    src: url('assets/fonts/PoorStory-Regular.woff2') format('woff2'),
+			url('assets/fonts/PoorStory-Regular.woff') format('woff');
+		    font-weight: normal;
+		    font-style: normal;
+		    font-display: swap;
+		}
+
+		body, html{
+			
+			height: 100%;
+			image-rendering: pixelated;
+			image-rendering: -moz-crisp-edges;
+			image-rendering: crisp-edges;
+			background-color: #000;
+
+			color: #FFF;
+			font-family: 'PoorStory';
+
+		}
+
+		#gameWrapper {
+			width: 100%;
+			height: 100%;
+			text-align:center;
+		}
+
+		#canvasWrapper {
+			position:relative;
+			display: inline-block;
+			height: 100%;
+		}
+
+		#gameCanvas {
+			position: relative;
+			background : url(assets/images/scratchedmetalblue.png);
+/*			background-size: 38px 38px;*/
+			top: 50%;
+			transform: translateY(-50%);
+		}
+
+	</style>
+	<script type="text/javascript" src="geometry.js"></script>
+	<script type="text/javascript" src="blockout.js"></script>
+</head>
+<body>
+	<div id="gameWrapper">
+		<div id="canvasWrapper">
+			<canvas id="gameCanvas"></canvas>
+		</div>
+	</div>
+</body>
+</html>
