@@ -6,16 +6,18 @@ var settings = {
 	minAngle : 7 * Math.PI / 16,
 	maxAngle : 25 * Math.PI / 16,
 	animationFrequency : 30,
-	defaultBallRadius: 16
+	defaultBallRadius: 10
 };
 
 var gameCanvas, canvasWrapper, gameWrapper, context, player, blockStrength, blocks, gameState;
+
+
 
 var playerClass = function(){
 	this.level = 1;
 	this.x = 0;
 	this.angle = 0;
-	this.ballSpeed = 10;
+	this.ballSpeed = 16;
 	this.launchFrequency = settings.defaultBallRadius * 10;
 	this.balls = [];
 };
@@ -80,6 +82,64 @@ ballClass.prototype.draw = function(){
 		context.fill();
 		context.closePath();
 	context.restore();
+};
+
+ballClass.prototype.move = function(){
+	var xResolution = settings.gridScale * settings.gridSize.x;
+	var yResolution = settings.gridScale * settings.gridSize.y;
+
+	this.position.x += this.velocity.dx;
+	this.position.y += this.velocity.dy;
+
+	if(this.position.x < this.radius){
+		this.position.x = Math.abs(this.position.x)
+		this.velocity.dx = Math.abs(this.velocity.dx);
+	}
+
+	if(this.position.x >= xResolution - this.radius){
+		this.velocity.dx = -Math.abs(this.velocity.dx);
+	}
+
+	if(this.position.y < 0){
+		this.position.y = Math.abs(this.position.y);
+		this.velocity.dy = Math.abs(this.velocity.dy);
+	}
+
+	if(this.position.y >= yResolution - this.radius && this.velocity.dy > 0){
+		this.velocity.dy = 0;
+		this.velocity.dx = 0;
+	}
+};
+
+
+ballClass.prototype.checkCollisions = function(){
+	var block = null, n;
+
+	var gridx = Math.floor(this.position.x / settings.gridScale);
+	var gridy = Math.floor(this.position.y / settings.gridScale);
+
+	var blockCenter = {
+		x: (gridx + .5) * settings.gridScale,
+		y: (gridy + .5) * settings.gridScale
+	};
+
+
+	for(n = 0; n < blocks.length; n++){
+		if(blocks[n].position.x == gridx && blocks[n].position.y == gridy){
+			block = blocks[n];
+			break;
+		}
+	}
+
+	if(block != undefined){
+		// we are colliding with a block
+		var speed = distance(0, 0, this.velocity.dx, this.velocity.dy);
+		this.velocity = unitVector(this.position.x - blockCenter.x, this.position.y - blockCenter.y);
+		this.velocity.dx *= speed;
+		this.velocity.dy *= speed;
+		hitBlock(n);
+
+	}
 }
 
 var blockClass = function(strength){
@@ -196,7 +256,16 @@ blockClass.prototype.pickAColour = function(){
 	this.negative = 'rgb(' + (this.rgb.red >> 2) + ', ' + (this.rgb.green >> 2) + ', ' + (this.rgb.blue >> 2) + ')';
 	this.colour = 'rgb(' + this.rgb.red + ', ' + this.rgb.green + ', ' + this.rgb.blue + ')';
 }
-/////////////////////////////////
+
+function hitBlock(idx){
+	blocks[idx].strength--;
+	if(blocks[idx].strength <= 0){
+		blocks.splice(idx, 1);
+	}
+}
+/////////////////////////////////a
+
+
 function startRound(){
 	//player.level++;
 
@@ -274,7 +343,7 @@ function renderArrow(){
 	// for now we'll draw the arrow with simple vectors.  In the future, I'd like
 	// to replace it with a particular raster image, assets/images/OrangeArrow.png
 	var arrowPoints = [
-		-1, 0,  -1, -5,  -2, -4.5,  0, -7.5,  2, -4.5, 1, -5, 1, 0
+		-1, -2,  -1, -5,  -2, -4.5,  0, -7.5,  2, -4.5, 1, -5, 1, -2
 	];
 	var n;
 	var px = player.x;
@@ -316,8 +385,6 @@ context.fillStyle = pattern;
 function animateBalls(){
 	var animated = false;
 	var ball, n;
-	var xResolution = settings.gridScale * settings.gridSize.x;
-	var yResolution = settings.gridScale * settings.gridSize.y;
 	for(n = 0; n < player.balls.length; n++){
 		ball = player.balls[n];
 		if(ball.velocity.dx == 0 && ball.velocity.dy == 0){
@@ -326,31 +393,9 @@ function animateBalls(){
 		}
 		animated = true;
 
-		ball.position.x += ball.velocity.dx;
-		ball.position.y += ball.velocity.dy;
+		ball.move();
+		ball.checkCollisions();
 
-		if(ball.position.x < ball.radius){
-			ball.position.x = Math.abs(ball.position.x)
-			ball.velocity.dx = Math.abs(ball.velocity.dx);
-		}
-
-		if(ball.position.x >= xResolution - ball.radius){
-//			ball.position.x = 2 * yResolution - ball.position.x;
-			ball.velocity.dx = -Math.abs(ball.velocity.dx);
-		}
-
-		if(ball.position.y < 0){
-			ball.position.y = Math.abs(ball.position.y);
-			ball.velocity.dy = Math.abs(ball.velocity.dy);
-		}
-
-		if(ball.position.y >= yResolution - ball.radius && ball.velocity.dy > 0){
-			console.log(ball.velocity.dy);
-			/// THIS IS JUST FOR TESTING.
-			// this should actulaly make the ball stop
-			ball.velocity.dy = 0;//-Math.abs(ball.velocity.dy);
-			ball.velocity.dx = 0;
-		}
 		ball.draw();
 
 	}
@@ -500,7 +545,6 @@ function initialize(callback, step){
 		case 'initPlayer':
 			player.x = Math.ceil(settings.gridSize.x * settings.gridScale >> 1);
 			player.addBall();
-			player.addBall();
 			setTimeout(function(){initialize(callback, 'finish initializing');}, 0);
 			break;
 		case 'finish initializing':
@@ -558,3 +602,12 @@ function die(status) {
 function log10(value){
 	return Math.log(value) / Math.log(10);
 }
+
+// return a unit vector matching the specified one
+function unitVector(dx, dy){
+	var length = Math.sqrt(dx * dx + dy * dy);
+	dx /= length;
+	dy /= length;
+	return { dx : dx, dy : dy };
+}
+
