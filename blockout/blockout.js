@@ -5,7 +5,7 @@ var settings = {
 	blockProbability : .4,
 	minAngle : 7 * Math.PI / 16,
 	maxAngle : 25 * Math.PI / 16,
-	animationFrequency : 40
+	animationFrequency : 20
 };
 
 var gameCanvas, canvasWrapper, gameWrapper, context, player, blockStrength, blocks, gameState;
@@ -20,6 +20,7 @@ var playerClass = function(){
 };
 
 playerClass.prototype.fire = function(){
+	gameState = 'launching';
 	console.log('fire!');
 }
 
@@ -204,8 +205,6 @@ function startRound(){
 	// add a top row
 	addBlockRow();
 	
-	// draw the game area
-	renderGame();
 	// wait for user input
 	gameState = 'aiming';
 	playerTurn();
@@ -221,7 +220,6 @@ function playerTurn(){
 
 	var handleMouseUp = function(e){
 		if(mouseState == 1){
-			gameState = 'launching';
 			gameCanvas.removeEventListener('mousemove', handleMouseTargeting);
 			gameCanvas.removeEventListener('mouseup', handleMouseUp);
 			gameCanvas.removeEventListener('mousedown', handleMouseDown);
@@ -252,7 +250,6 @@ var handleMouseTargeting = (function(){
 
 		// get the relative angle between the current location and the mouse pointer
 
-		renderGame();
 		doAiming(e.offsetX, e.offsetY);
 	}
 })();
@@ -264,6 +261,13 @@ function scrubAimingAngle(angle){
 }
 
 function doAiming(targetX, targetY){
+	// calculate the correct angle
+	player.angle = scrubAimingAngle(rel_ang(
+		player.x, settings.gridSize.y * settings.gridScale, targetX, targetY
+	));
+}
+
+function renderArrow(){
 	// for now we'll draw the arrow with simple vectors.  In the future, I'd like
 	// to replace it with a particular raster image, assets/images/OrangeArrow.png
 	var arrowPoints = [
@@ -272,9 +276,6 @@ function doAiming(targetX, targetY){
 	var n;
 	var px = player.x;
 	var py = settings.gridSize.y * settings.gridScale
-
-	// calculate the correct angle
-	player.angle = scrubAimingAngle(rel_ang(px, py, targetX, targetY));
 
 	// scale the arrow vectors to match the game scale
 	for(n = 0; n < arrowPoints.length; n++){
@@ -315,6 +316,9 @@ function renderGame(){
 	context.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
 	for(n = 0; n < blocks.length; n++){
 		blocks[n].draw();
+	}
+	if(gameState == 'aiming'){
+		renderArrow();
 	}
 }
 
@@ -442,10 +446,10 @@ function initialize(callback, step){
 	}
 }
 
-
 window.onload = function(){
 	initialize(function(){
 		blocks = [];
+		setInterval(renderGame, settings.animationFrequency);
 		startRound();
 	});
 };
