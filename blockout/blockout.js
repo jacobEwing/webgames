@@ -16,6 +16,7 @@ var gameCanvas, canvasWrapper, gameWrapper, context, player, blockStrength, bloc
 var playerClass = function(){
 	this.level = 1;
 	this.x = 0;
+	this.newX = 0;
 	this.angle = 0;
 	this.ballSpeed = 16;
 	this.launchFrequency = Math.floor(settings.defaultBallRadius * 20);
@@ -71,16 +72,59 @@ var ballClass = function(){
 	this.animaionInterval = null;
 	this.radius = settings.defaultBallRadius;
 	this.moving = false;
+	this.colour = {};
+	this.pickAColour();
 };
+
+ballClass.prototype.pickAColour = function(){
+	this.colour = {
+		red : 64 + Math.floor(Math.random() * 128),
+		green : 128 + Math.floor(Math.random() * 129),
+		blue : 192 + Math.floor(Math.random() * 64)
+	};
+}
+
+function brighten(val){
+	return (val + 255) >> 1;
+}
+
+function darken(val){
+	return (val + 0) >> 1;
+}
 
 ballClass.prototype.draw = function(){
 	if(this.velocity.dy == 0 && this.velocity.dx == 0) return;
+	var radius = settings.gridScale * this.radius / 75;
+	var colour = 'rgb(' + this.colour.red + ', ' + this.colour.green + ', ' + this.colour.blue + ')';
+	var brightColour = 'rgba(' + brighten(this.colour.red) + ', ' + brighten(this.colour.green) + ', ' + brighten(this.colour.blue) + ')';
+	var darkColour = 'rgba(' + darken(this.colour.red) + ', ' + darken(this.colour.green) + ', ' + darken(this.colour.blue) + ')';
+
+	var sqrtRad = Math.floor(Math.sqrt(2 * radius * radius));
+
 	context.save()
+		// first draw the circle
+		context.fillStyle = colour;
 		context.beginPath();
-		context.fillStyle = 'rgb(180, 180, 160)';
-		context.arc(this.position.x, this.position.y, settings.gridScale * this.radius / 60, 0, 2 * Math.PI);
+		context.arc(this.position.x, this.position.y, radius, 0, 2 * Math.PI);
 		context.fill();
 		context.closePath();
+
+		// shade it on the top left
+		context.fillStyle = brightColour;
+		context.beginPath();
+		context.arc(this.position.x, this.position.y, radius, 3 * Math.PI / 4, 7 * Math.PI / 4);
+		context.bezierCurveTo(this.position.x, this.position.y - radius, this.position.x - radius, this.position.y,  this.position.x - sqrtRad / 2, this.position.y + sqrtRad / 2);
+		context.closePath();
+		context.fill();
+
+		// and on the bottom right
+		context.fillStyle = darkColour;
+		context.beginPath();
+		context.arc(this.position.x, this.position.y, radius, -Math.PI / 4, 3 * Math.PI / 4);
+		context.bezierCurveTo(this.position.x, this.position.y + radius, this.position.x + radius, this.position.y,  this.position.x + sqrtRad / 2, this.position.y - sqrtRad / 2);
+		context.closePath();
+		context.fill();
+
 	context.restore();
 };
 
@@ -108,7 +152,7 @@ ballClass.prototype.move = function(){
 	if(this.position.y >= yResolution - this.radius && this.velocity.dy > 0){
 		this.velocity.dy = 0;
 		this.velocity.dx = 0;
-		player.x = this.position.x;
+		player.newX = this.position.x;
 	}
 };
 
@@ -517,7 +561,7 @@ function animateBalls(){
 
 function endRound(){
 	gameState = 'endRound';
-
+	player.x = player.newX;
 	// additional stuff can be put here
 	blockStrength++;
 	player.addBall();
@@ -548,7 +592,7 @@ function addBlockRow(){
 	for(n = 0; n < settings.gridSize.x; n++){
 		if(Math.random() < settings.blockProbability){
 			idx = blocks.length;
-			blocks[idx] = new blockClass(blockStrength);
+			blocks[idx] = new blockClass(blockStrength * (Math.random() < .1 ? 2 : 1));
 			blocks[idx].position = {
 				x : n,
 				y : 0
@@ -631,7 +675,6 @@ function initialize(callback, step){
 			gameCanvas.height = bestSize.height;
 			settings.gridScale = bestSize.scale;
 			player.ballSpeed = settings.gridScale / 5;
-			console.log(player.ballSpeed);
 			
 			// get drawing context
 			context = gameCanvas.getContext('2d');
