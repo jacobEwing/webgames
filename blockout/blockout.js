@@ -18,7 +18,7 @@ var playerClass = function(){
 	this.x = 0;
 	this.angle = 0;
 	this.ballSpeed = 16;
-	this.launchFrequency = settings.defaultBallRadius * 10;
+	this.launchFrequency = Math.floor(settings.defaultBallRadius * 20);
 	this.balls = [];
 };
 
@@ -59,7 +59,6 @@ playerClass.prototype.launchBalls = function(){
 		ball.moving = true;
 		// stop after looping through all the balls
 		if(idx < this.balls.length){
-			console.log(idx);
 			setTimeout(function(){launch.call(me);}, this.launchFrequency);
 		}
 	};
@@ -75,10 +74,11 @@ var ballClass = function(){
 };
 
 ballClass.prototype.draw = function(){
+	if(this.velocity.dy == 0 && this.velocity.dx == 0) return;
 	context.save()
 		context.beginPath();
 		context.fillStyle = 'rgb(180, 180, 160)';
-		context.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
+		context.arc(this.position.x, this.position.y, settings.gridScale * this.radius / 60, 0, 2 * Math.PI);
 		context.fill();
 		context.closePath();
 	context.restore();
@@ -108,13 +108,14 @@ ballClass.prototype.move = function(){
 	if(this.position.y >= yResolution - this.radius && this.velocity.dy > 0){
 		this.velocity.dy = 0;
 		this.velocity.dx = 0;
+		player.x = this.position.x;
 	}
 };
 
 
 ballClass.prototype.checkCollisions = function(){
 	var block = null, n;
-
+	var edgeBits; // <-- named so because it will store bitflags to note which edges are collided with
 	var gridx = Math.floor(this.position.x / settings.gridScale);
 	var gridy = Math.floor(this.position.y / settings.gridScale);
 
@@ -133,14 +134,89 @@ ballClass.prototype.checkCollisions = function(){
 
 	if(block != undefined){
 		// we are colliding with a block
-		var speed = distance(0, 0, this.velocity.dx, this.velocity.dy);
-		this.velocity = unitVector(this.position.x - blockCenter.x, this.position.y - blockCenter.y);
-		this.velocity.dx *= speed;
-		this.velocity.dy *= speed;
+
+		edgeFlags = this.getCollisionSide(block);
+
+
+		if(1 & edgeFlags){ // top of block
+			this.velocity.dy = -Math.abs(this.velocity.dy);
+		}
+		
+		if(2 & edgeFlags){ // right edge
+			this.velocity.dx = Math.abs(this.velocity.dx)
+		}
+
+		if(4 & edgeFlags){ // bottom edge
+			this.velocity.dy = Math.abs(this.velocity.dy);
+		}
+
+		if(8 & edgeFlags){// left edge
+			this.velocity.dx = -Math.abs(this.velocity.dx)
+		}
+
+		/*
+			What I have here is pretty good.  There are some issues though:
+			1) the balls move fast enough that if two blocks are corner-to-corner,
+			   the balls can move right between them, jumping across.
+
+			   One solution to that would be to use the same collision detection in edge
+			   flags, but instead of testing two points and checking for line intersection,
+			   trace every pixel on the step, and check for collisions with each one, bouncing
+			   as we trace, giving us the correct position.
+
+			2) The motion is too uniform.  The slope you launch at is maintained throughout
+			   each run.  A solution to this would be to account for the rounded curve
+			   edges on the blocks, treating them like circles to bounce off of.
+
+		*/
+
+		/*
+		// old code
+		if(edgeFlags && !15){
+			var speed = distance(0, 0, this.velocity.dx, this.velocity.dy);
+			this.velocity = unitVector(this.position.x - blockCenter.x, this.position.y - blockCenter.y);
+			this.velocity.dx *= speed;
+			this.velocity.dy *= speed;
+		}
+		*/
+
 		hitBlock(n);
 
 	}
 }
+
+ballClass.prototype.getCollisionSide = function(block){
+	var n, p1, p2;
+	var oldx = this.position.x - this.velocity.dx;
+	var oldy = this.position.y - this.velocity.dy;
+	var collisionTally = 0;
+
+	for(n = 0; n < 4; n++){
+		p1 = block.getCornerVector(n);
+		p2 = block.getCornerVector((n + 1) % 4);
+		if(
+		     sideOfLine(p1.x, p1.y, p2.x, p2.y, oldx, oldy) 
+		  != sideOfLine(p1.x, p1.y, p2.x, p2.y, this.position.x, this.position.y)
+		){
+			collisionTally += 1 << n;
+
+/*
+			context.save();
+				context.lineWidth = 5;
+				context.strokeStyle = 'rgb(255, 255, 64)';
+				context.beginPath();
+				context.moveTo(p1.x, p1.y);
+				context.lineTo(p2.x, p2.y);
+				context.stroke();
+				context.closePath();
+			context.restore();
+*/
+		}
+	}
+	return collisionTally;
+
+}
+
 
 var blockClass = function(strength){
 	if(strength == undefined) strength = 1;
@@ -163,6 +239,40 @@ var blockClass = function(strength){
 	};
 
 };
+
+blockClass.prototype.getCornerVector = function(idx){
+	var rval;
+	switch(idx){
+		case 0:
+			rval = { 
+				x : this.position.x * settings.gridScale,
+				y : this.position.y * settings.gridScale
+			}; 
+			break;
+
+		case 1: 
+			rval = { 
+				x : (this.position.x + 1) * settings.gridScale - 1,
+				y : this.position.y * settings.gridScale
+			}; 
+			break;
+		case 2: 
+			rval = { 
+				x : (this.position.x + 1) * settings.gridScale - 1,
+				y : (this.position.y + 1) * settings.gridScale - 1
+			}; 
+			break;
+		case 3:
+			rval = { 
+				x : this.position.x * settings.gridScale,
+				y : (this.position.y + 1) * settings.gridScale - 1
+			}; 
+			break;
+		default:
+			throw "blockClass.getCornerVector: invalid corner index \"" + idx + "\"";
+	}
+	return rval;
+}
 
 blockClass.prototype.draw = function(x, y){
 	var darkColour = 'rgba(' + (this.rgb.red >> 1) + ', ' + (this.rgb.green >> 1) + ', ' + (this.rgb.blue >> 1) + ', 0.6)';
@@ -409,7 +519,8 @@ function endRound(){
 	gameState = 'endRound';
 
 	// additional stuff can be put here
-
+	blockStrength++;
+	player.addBall();
 	startRound();
 }
 
@@ -437,7 +548,7 @@ function addBlockRow(){
 	for(n = 0; n < settings.gridSize.x; n++){
 		if(Math.random() < settings.blockProbability){
 			idx = blocks.length;
-			blocks[idx] = new blockClass(player.level);
+			blocks[idx] = new blockClass(blockStrength);
 			blocks[idx].position = {
 				x : n,
 				y : 0
@@ -500,6 +611,7 @@ function initialize(callback, step){
 		case 'createObjects':
 			player = new playerClass();
 			setTimeout(function(){initialize(callback, 'initCanvas');}, 0);
+			blockStrength = 1;
 			break;
 		case 'initCanvas':
 			var width, height, bestSize;
@@ -518,6 +630,8 @@ function initialize(callback, step){
 			gameCanvas.width = bestSize.width;
 			gameCanvas.height = bestSize.height;
 			settings.gridScale = bestSize.scale;
+			player.ballSpeed = settings.gridScale / 5;
+			console.log(player.ballSpeed);
 			
 			// get drawing context
 			context = gameCanvas.getContext('2d');
