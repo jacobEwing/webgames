@@ -1,12 +1,12 @@
 var settings = {
 	gridScale : 0, // <-- calculated in "bestCanvasSize()"
-	gridSize : { x : 8 , y : 12},
+	gridSize : { x : 6 , y : 9},
 	minTileSize : 5,
 	blockProbability : .4,
 	minAngle : 7 * Math.PI / 16,
 	maxAngle : 25 * Math.PI / 16,
-	animationFrequency : 30,
-	defaultBallRadius: 10
+	animationFrequency : 24,
+	defaultBallRadius: 15
 };
 
 var gameCanvas, canvasWrapper, gameWrapper, context, player, blockStrength, blocks, gameState;
@@ -19,7 +19,7 @@ var playerClass = function(){
 	this.newX = 0;
 	this.angle = 0;
 	this.ballSpeed = 16;
-	this.launchFrequency = Math.floor(settings.defaultBallRadius * 20);
+	this.launchFrequency = Math.floor(settings.defaultBallRadius * 10);
 	this.balls = [];
 };
 
@@ -98,7 +98,7 @@ ballClass.prototype.draw = function(){
 	var colour = 'rgb(' + this.colour.red + ', ' + this.colour.green + ', ' + this.colour.blue + ')';
 	var brightColour = 'rgba(' + brighten(this.colour.red) + ', ' + brighten(this.colour.green) + ', ' + brighten(this.colour.blue) + ')';
 	var darkColour = 'rgba(' + darken(this.colour.red) + ', ' + darken(this.colour.green) + ', ' + darken(this.colour.blue) + ')';
-
+	var brightest = 'rgba(255, 255, 255, 0.6)';
 	var sqrtRad = Math.floor(Math.sqrt(2 * radius * radius));
 
 	context.save()
@@ -113,7 +113,7 @@ ballClass.prototype.draw = function(){
 		context.fillStyle = brightColour;
 		context.beginPath();
 		context.arc(this.position.x, this.position.y, radius, 3 * Math.PI / 4, 7 * Math.PI / 4);
-		context.bezierCurveTo(this.position.x, this.position.y - radius, this.position.x - radius, this.position.y,  this.position.x - sqrtRad / 2, this.position.y + sqrtRad / 2);
+		context.bezierCurveTo(this.position.x, this.position.y - radius / 3, this.position.x - radius / 3, this.position.y,  this.position.x - sqrtRad / 2, this.position.y + sqrtRad / 2);
 		context.closePath();
 		context.fill();
 
@@ -122,6 +122,14 @@ ballClass.prototype.draw = function(){
 		context.beginPath();
 		context.arc(this.position.x, this.position.y, radius, -Math.PI / 4, 3 * Math.PI / 4);
 		context.bezierCurveTo(this.position.x, this.position.y + radius, this.position.x + radius, this.position.y,  this.position.x + sqrtRad / 2, this.position.y - sqrtRad / 2);
+		context.closePath();
+		context.fill();
+
+		// shade it on the top left
+		context.fillStyle = brightest;
+		context.beginPath();
+		context.arc(this.position.x, this.position.y, radius, 3 * Math.PI / 4, 7 * Math.PI / 4);
+		context.bezierCurveTo(this.position.x, this.position.y - radius, this.position.x - radius, this.position.y,  this.position.x - sqrtRad / 2, this.position.y + sqrtRad / 2);
 		context.closePath();
 		context.fill();
 
@@ -185,7 +193,7 @@ ballClass.prototype.checkCollisions = function(){
 		if(1 & edgeFlags){ // top of block
 			this.velocity.dy = -Math.abs(this.velocity.dy);
 		}
-		
+
 		if(2 & edgeFlags){ // right edge
 			this.velocity.dx = Math.abs(this.velocity.dx)
 		}
@@ -327,10 +335,10 @@ blockClass.prototype.draw = function(x, y){
 	if(y == undefined) y = this.realY();
 
 	// let's draw the surrounding box with rounded corners:
+	context.beginPath();
 	context.fillStyle = this.colour;
 	context.strokeStyle = this.negative;
 	context.lineWidth = settings.gridScale >> 4;
-	context.beginPath();
 	context.moveTo(x, y + quarterblock);
 	context.quadraticCurveTo(x, y, x + quarterblock, y);
 	context.lineTo(x + settings.gridScale - quarterblock, y);
@@ -430,7 +438,7 @@ function startRound(){
 
 	// add a top row
 	addBlockRow();
-	
+
 	// wait for user input
 	gameState = 'aiming';
 	playerTurn();
@@ -442,7 +450,7 @@ function playerTurn(){
 	var handleMouseDown = function(e){
 		mouseState = 1;
 
-	}	
+	}
 
 	var handleMouseUp = function(e){
 		if(mouseState == 1){
@@ -469,7 +477,6 @@ var handleMouseTargeting = (function(){
 		var dateTime = new Date();
 		var time = dateTime.getTime();
 		if(time < lastTime + 25){
-			
 			return;
 		}
 		lastTime = time;
@@ -512,7 +519,7 @@ function renderArrow(){
 	context.save();
 		context.beginPath();
 		context.fillStyle = 'rgb(160, 120, 64)';
-/*		
+/*
 // leftover for reference, this is how you want to do the image, but I might just use my sprite library for it instead
 var img = new Image();
 img.src = "assets/images/OrangeArrow.png";
@@ -570,8 +577,7 @@ function endRound(){
 
 function renderGame(){
 	var n;
-
-	context.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
+	drawBackground();
 	for(n = 0; n < blocks.length; n++){
 		blocks[n].draw();
 	}
@@ -586,6 +592,53 @@ function renderGame(){
 
 }
 
+drawBackground = (function(){
+	var ang = 0;
+	var radius = null;//settings.gridScale;
+	return function(){
+		if(radius === null){
+			radius =  (settings.gridSize.y >> 3) * settings.gridScale;// / 5;
+		}
+		ang += .01;
+		if(ang > 4 * Math.PI) ang -= 4 * Math.PI;
+
+		//context.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
+
+		context.save();
+		context.fillStyle = "#FFC";
+		context.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
+		context.restore();
+		doBGSine(ang * 2 + 2, radius / 2, gameCanvas.height >> 2, "#EFE0A0"); 
+		doBGSine(ang, radius, gameCanvas.height >> 1, "#A85");
+		doBGSine(ang  / 2 + 1, radius, gameCanvas.height * .75, "#863");
+
+
+	};
+})();
+
+function doBGSine(ang, radius, midpoint, colour){
+	var x, y;
+	var stepSize = settings.gridScale * .1;
+	var myAng = ang;
+	var myAngi = settings.gridScale * .0005;
+	context.save();
+		context.fillStyle = colour;
+		context.beginPath();
+		context.moveTo(0, midpoint + radius * Math.sin(ang));
+		x = -stepSize;
+		do{
+			x += stepSize;
+			y = midpoint + radius * Math.sin(myAng);
+			myAng += myAngi;
+
+			context.lineTo(x, y);
+		}while(x < gameCanvas.width);
+		context.lineTo(gameCanvas.width, gameCanvas.height);
+		context.lineTo(0, gameCanvas.height);
+		context.fill();
+
+	context.restore();
+}
 
 function addBlockRow(){
 	var n, idx;
@@ -630,9 +683,9 @@ function bestCanvasSize(){
 	var parentWidth = gameWrapper.clientWidth;
 	var parentHeight = gameWrapper.clientHeight;
 
-	var gridScale = Math.floor(parentHeight / (settings.gridSize.y + 2));
+	var gridScale = Math.floor(parentHeight / (settings.gridSize.y + .1));
 	if((settings.gridSize.x + 2) * gridScale > parentWidth){
-		gridScale = Math.floor(parentWidth / (settings.gridSize.x + 2));
+		gridScale = Math.floor(parentWidth / (settings.gridSize.x + .1));
 	}
 
 	if(gridScale < settings.minTileSize){
@@ -675,7 +728,7 @@ function initialize(callback, step){
 			gameCanvas.height = bestSize.height;
 			settings.gridScale = bestSize.scale;
 			player.ballSpeed = settings.gridScale / 5;
-			
+
 			// get drawing context
 			context = gameCanvas.getContext('2d');
 
@@ -697,7 +750,7 @@ function initialize(callback, step){
 			//var pattern = context.createPattern(img, "repeat");
 			//context.fillStyle = pattern;
 */
-			
+
 			break;
 		case 'initPlayer':
 			player.x = Math.ceil(settings.gridSize.x * settings.gridScale >> 1);

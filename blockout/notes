@@ -1,0 +1,36 @@
+A totall rebbot/improvement of "ballz-online" (presumably just ballz")
+it's like breakout, but instead fo having a ball that you bounce on a pad, you
+launch the balls from a single point, hitting the bricks.  The impacts decrease
+the brick's number, and it disappears at zero.  Numbers tend to be the same as
+your number of balls, but sometimes double that.
+
+It could be SOOO much better revamped.  The graphics are crapped, so that would
+be an easy improvement.
+
+Also, power-ups.  Some ideas there:
+ - aiming assistance, a line tracing the projected path of the ball
+ - make the floor bouncy for ten seconds
+ - all balls split on next impact
+ - gun
+ - fireballs for more damage
+ - set launch point
+ - double game speed
+ - halve game speed
+ - brief gravity control
+ - damage multiplier
+ - balls are destroyed on impact with bricks, giving 10X or some other factor
+   of the normal damage
+ - Balls are launched by holding mouse, with direction changing with mouse motion
+
+
+ Some other touch-ups:
+ - add occasional spinning blocks that the ball bounces off at varying angles
+ - special bonus when all blocks are cleared
+ - Animated scrolling background of various textures
+ - Perhaps not square bricks.. Maybe not even numbers, although I think they're
+   important.
+ - perhaps instead of the balls being launched from the first fall spot, the
+   mouse would move the pad left and right until the button is pressed, at
+   which point motion changes the angle.
+ - The balls can be of varying colours.  Perhaps the blocks that provide them
+   can be of varying colours, which determine the colour of the balls.
