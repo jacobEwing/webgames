@@ -504,11 +504,17 @@ function renderArrow(){
 	// for now we'll draw the arrow with simple vectors.  In the future, I'd like
 	// to replace it with a particular raster image, assets/images/OrangeArrow.png
 	var arrowPoints = [
-		-1, -2,  -1, -5,  -2, -4.5,  0, -7.5,  2, -4.5, 1, -5, 1, -2
+		-.8, -2,  -.8, -5,  -2, -4.75,  0, -7.5,  2, -4.75, .8, -5, .8, -2
 	];
 	var n;
 	var px = player.x;
 	var py = settings.gridSize.y * settings.gridScale
+
+	var arrowStyle = context.createLinearGradient(0, 0, 170, 0);
+	arrowStyle.addColorStop(0, "#FEA");
+	arrowStyle.addColorStop(0.2, "#FA0");
+	arrowStyle.addColorStop(0.5, "#A80");
+	arrowStyle.addColorStop(1, "white");
 
 	// scale the arrow vectors to match the game scale
 	for(n = 0; n < arrowPoints.length; n++){
@@ -518,7 +524,7 @@ function renderArrow(){
 	// drow the arrow
 	context.save();
 		context.beginPath();
-		context.fillStyle = 'rgb(160, 120, 64)';
+		context.lineJoin = 'round';
 /*
 // leftover for reference, this is how you want to do the image, but I might just use my sprite library for it instead
 var img = new Image();
@@ -527,7 +533,8 @@ var pattern = context.createPattern(img, "repeat");
 context.fillStyle = pattern;
 */
 
-		context.strokeStyle = 'rgb(255, 255, 64)';
+//		context.strokeStyle = 'rgb(96, 48, 37)';
+		context.lineWidth = 5;
 		context.translate(px, py);
 		context.rotate(player.angle);
 		context.moveTo(arrowPoints[0], arrowPoints[1]);
@@ -537,6 +544,10 @@ context.fillStyle = pattern;
 		}
 
 		context.closePath();
+
+		context.fillStyle = arrowStyle;
+		context.strokeStyle = arrowStyle;
+
 		context.fill();
 		context.stroke();
 	context.restore();
@@ -642,16 +653,18 @@ function doBGSine(ang, radius, midpoint, colour){
 
 function addBlockRow(){
 	var n, idx;
-	for(n = 0; n < settings.gridSize.x; n++){
-		if(Math.random() < settings.blockProbability){
-			idx = blocks.length;
-			blocks[idx] = new blockClass(blockStrength * (Math.random() < .1 ? 2 : 1));
-			blocks[idx].position = {
-				x : n,
-				y : 0
-			};
+	do{
+		for(n = 0; n < settings.gridSize.x; n++){
+			if(Math.random() < settings.blockProbability){
+				idx = blocks.length;
+				blocks[idx] = new blockClass(blockStrength * (Math.random() < .1 ? 2 : 1));
+				blocks[idx].position = {
+					x : n,
+					y : 0
+				};
+			}
 		}
-	}
+	}while(blocks.length == 0);
 }
 
 function dropBlocks(){
@@ -735,6 +748,8 @@ function initialize(callback, step){
 			setTimeout(function(){initialize(callback, 'loadImages');}, 0);
 			break;
 		case 'loadImages':
+			setTimeout(function(){initialize(callback, 'initPlayer');}, 0);
+			/*
 			var cacheTally = 1;
 			var loadCallback = function(){
 				cacheTally --;
@@ -745,7 +760,7 @@ function initialize(callback, step){
 			var img = new Image();
 			img.onload = loadCallback;
 			img.src = "assets/images/OrangeArrow.png";
-
+			*/
 /*
 			//var pattern = context.createPattern(img, "repeat");
 			//context.fillStyle = pattern;
