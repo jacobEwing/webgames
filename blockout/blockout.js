@@ -68,10 +68,13 @@ var ballClass = function(){
 	this.position = {x: 0, y : 0};
 	this.velocity = {dx: 0, dy : 0};
 	this.animaionInterval = null;
-	this.radius = settings.defaultBallRadius;
+	this.radius = settings.defaultBallRadius ;
 	this.moving = false;
 	this.colour = {};
 	this.pickAColour();
+	// balls can now rotate as they fly, but for the default ball type, that shouldn't happen
+	this.angle = 0;//Math.random() * 2 * Math.PI;
+	this.angi = 0;//Math.random() < 0.5 ? -.1 : .1;
 };
 
 ballClass.prototype.pickAColour = function(){
@@ -98,36 +101,37 @@ ballClass.prototype.draw = function(){
 	var darkColour = 'rgba(' + darken(this.colour.red) + ', ' + darken(this.colour.green) + ', ' + darken(this.colour.blue) + ')';
 	var brightest = 'rgba(255, 255, 255, 0.6)';
 	var sqrtRad = Math.floor(Math.sqrt(2 * radius * radius));
-
 	context.save()
+		context.translate(this.position.x, this.position.y);
+		context.rotate(this.angle);
 		// first draw the circle
 		context.fillStyle = colour;
 		context.beginPath();
-		context.arc(this.position.x, this.position.y, radius, 0, 2 * Math.PI);
+		context.arc(0, 0, radius, 0, 2 * Math.PI);
 		context.fill();
 		context.closePath();
 
 		// shade it on the top left
 		context.fillStyle = brightColour;
 		context.beginPath();
-		context.arc(this.position.x, this.position.y, radius, 3 * Math.PI / 4, 7 * Math.PI / 4);
-		context.bezierCurveTo(this.position.x, this.position.y - radius / 3, this.position.x - radius / 3, this.position.y,  this.position.x - sqrtRad / 2, this.position.y + sqrtRad / 2);
+		context.arc(0, 0, radius, 3 * Math.PI / 4, 7 * Math.PI / 4);
+		context.bezierCurveTo(0,  -radius / 3,  -radius / 3, 0,  -sqrtRad / 2, sqrtRad / 2);
 		context.closePath();
 		context.fill();
 
 		// and on the bottom right
 		context.fillStyle = darkColour;
 		context.beginPath();
-		context.arc(this.position.x, this.position.y, radius, -Math.PI / 4, 3 * Math.PI / 4);
-		context.bezierCurveTo(this.position.x, this.position.y + radius, this.position.x + radius, this.position.y,  this.position.x + sqrtRad / 2, this.position.y - sqrtRad / 2);
+		context.arc(0, 0, radius, -Math.PI / 4, 3 * Math.PI / 4);
+		context.bezierCurveTo(0, radius, radius, 0, sqrtRad / 2, -sqrtRad / 2);
 		context.closePath();
 		context.fill();
 
 		// shade it on the top left
 		context.fillStyle = brightest;
 		context.beginPath();
-		context.arc(this.position.x, this.position.y, radius, 3 * Math.PI / 4, 7 * Math.PI / 4);
-		context.bezierCurveTo(this.position.x, this.position.y - radius, this.position.x - radius, this.position.y,  this.position.x - sqrtRad / 2, this.position.y + sqrtRad / 2);
+		context.arc(0, 0, radius, 3 * Math.PI / 4, 7 * Math.PI / 4);
+		context.bezierCurveTo(0, -radius, -radius, 0,  -sqrtRad / 2, sqrtRad / 2);
 		context.closePath();
 		context.fill();
 
@@ -160,6 +164,7 @@ ballClass.prototype.move = function(){
 				sgndx *= -1;
 				this.velocity.dx *= -1;
 				this.position.x += 2 * sgndx;
+				this.angi *= -1;
 			}
 
 			tally += absdy;
@@ -169,6 +174,7 @@ ballClass.prototype.move = function(){
 					sgndy *= -1;
 					this.velocity.dy *= -1;
 					this.position.y += 2 * sgndy;
+					this.angi *= -1;
 				}
 				if(this.position.y >= yResolution + this.radius){ // +radius to let it go off bottom
 					this.velocity.dy = 0;
@@ -185,6 +191,7 @@ ballClass.prototype.move = function(){
 				sgndy *= -1;
 				this.velocity.dy *= -1;
 				this.position.y += 2 * sgndy;
+				this.angi *= -1
 			}
 			if(this.position.y >= yResolution + this.radius){ // +radius to let it go off bottom
 				this.velocity.dy = 0;
@@ -202,12 +209,14 @@ ballClass.prototype.move = function(){
 					sgndx *= -1;
 					this.velocity.dx *= -1;
 					this.position.x += 2 * sgndx;
+					this.angi *= -1;
 				}
 				tally -= absdy;
 			}
 		}
 
 	}
+	this.angle += this.angi;
 
 };
 
