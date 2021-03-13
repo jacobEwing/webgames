@@ -38,9 +38,7 @@ playerClass.prototype.addBall = function(){
 }
 
 playerClass.prototype.launchBalls = function(){
-	// actually a matrix rotation of a vertical line.
 	var idx = 0;
-	var angle = this.angle;
 	var me = this;
 
 	gameState = 'balls moving';
@@ -140,135 +138,94 @@ ballClass.prototype.move = function(){
 	var xResolution = settings.gridScale * settings.gridSize.x;
 	var yResolution = settings.gridScale * settings.gridSize.y;
 
-	this.position.x += this.velocity.dx;
-	this.position.y += this.velocity.dy;
 
-	if(this.position.x < this.radius){
-		this.position.x = Math.abs(this.position.x)
-		this.velocity.dx = Math.abs(this.velocity.dx);
+	var sgndx = Math.sign(this.velocity.dx);
+	var sgndy = Math.sign(this.velocity.dy);
+	var absdx = Math.abs(this.velocity.dx);
+	var absdy = Math.abs(this.velocity.dy);
+	var n, tally = 0;
+
+	/*
+		Here we'll use Bresenham's line algorithm to trace the balls'
+		movements, allowing us to accurately bounce off the edges.
+	*/
+
+	if(absdx > absdy){
+		for(n = 0; n < absdx; n++){
+			this.position.x += sgndx;
+			if( this.position.x < this.radius ||
+			    this.position.x >= xResolution - this.radius ||
+			    this.testCollision()
+			){
+				sgndx *= -1;
+				this.velocity.dx *= -1;
+				this.position.x += 2 * sgndx;
+			}
+
+			tally += absdy;
+			if(tally > absdx){
+				this.position.y += sgndy;
+				if(this.position.y < this.radius || this.testCollision()){
+					sgndy *= -1;
+					this.velocity.dy *= -1;
+					this.position.y += 2 * sgndy;
+				}
+				if(this.position.y >= yResolution + this.radius){ // +radius to let it go off bottom
+					this.velocity.dy = 0;
+					this.velocity.dx = 0;
+					player.newX = this.position.x;
+				}
+				tally -= absdx;
+			}
+		}
+	}else{
+		for(n = 0; n < absdy; n++){
+			this.position.y += sgndy;
+			if(this.position.y < this.radius || this.testCollision()){
+				sgndy *= -1;
+				this.velocity.dy *= -1;
+				this.position.y += 2 * sgndy;
+			}
+			if(this.position.y >= yResolution + this.radius){ // +radius to let it go off bottom
+				this.velocity.dy = 0;
+				this.velocity.dx = 0;
+				player.newX = this.position.x;
+			}
+
+			tally += absdx;
+			if(tally > absdy){
+				this.position.x += sgndx;
+				if( this.position.x < this.radius ||
+				    this.position.x >= xResolution - this.radius ||
+				    this.testCollision()
+				){
+					sgndx *= -1;
+					this.velocity.dx *= -1;
+					this.position.x += 2 * sgndx;
+				}
+				tally -= absdy;
+			}
+		}
+
 	}
 
-	if(this.position.x >= xResolution - this.radius){
-		this.velocity.dx = -Math.abs(this.velocity.dx);
-	}
-
-	if(this.position.y < 0){
-		this.position.y = Math.abs(this.position.y);
-		this.velocity.dy = Math.abs(this.velocity.dy);
-	}
-
-	if(this.position.y >= yResolution - this.radius && this.velocity.dy > 0){
-		this.velocity.dy = 0;
-		this.velocity.dx = 0;
-		player.newX = this.position.x;
-	}
 };
 
-
-ballClass.prototype.checkCollisions = function(){
-	var block = null, n;
-	var edgeBits; // <-- named so because it will store bitflags to note which edges are collided with
-	var gridx = Math.floor(this.position.x / settings.gridScale);
-	var gridy = Math.floor(this.position.y / settings.gridScale);
-
-	var blockCenter = {
-		x: (gridx + .5) * settings.gridScale,
-		y: (gridy + .5) * settings.gridScale
-	};
-
-
+ballClass.prototype.testCollision = function(){
+	var rval = false;
+	var n, center;
+	var halfWidth = settings.gridScale >> 1;
 	for(n = 0; n < blocks.length; n++){
-		if(blocks[n].position.x == gridx && blocks[n].position.y == gridy){
-			block = blocks[n];
-			break;
+		center = blocks[n].centerPoint();
+		if(Math.abs(center.x - this.position.x) - this.radius < halfWidth){
+			if(Math.abs(center.y - this.position.y) - this.radius < halfWidth){	
+				rval = true;
+				hitBlock(n);
+			}
 		}
 	}
-
-	if(block != undefined){
-		// we are colliding with a block
-
-		edgeFlags = this.getCollisionSide(block);
-
-
-		if(1 & edgeFlags){ // top of block
-			this.velocity.dy = -Math.abs(this.velocity.dy);
-		}
-
-		if(2 & edgeFlags){ // right edge
-			this.velocity.dx = Math.abs(this.velocity.dx)
-		}
-
-		if(4 & edgeFlags){ // bottom edge
-			this.velocity.dy = Math.abs(this.velocity.dy);
-		}
-
-		if(8 & edgeFlags){// left edge
-			this.velocity.dx = -Math.abs(this.velocity.dx)
-		}
-
-		/*
-			What I have here is pretty good.  There are some issues though:
-			1) the balls move fast enough that if two blocks are corner-to-corner,
-			   the balls can move right between them, jumping across.
-
-			   One solution to that would be to use the same collision detection in edge
-			   flags, but instead of testing two points and checking for line intersection,
-			   trace every pixel on the step, and check for collisions with each one, bouncing
-			   as we trace, giving us the correct position.
-
-			2) The motion is too uniform.  The slope you launch at is maintained throughout
-			   each run.  A solution to this would be to account for the rounded curve
-			   edges on the blocks, treating them like circles to bounce off of.
-
-		*/
-
-		/*
-		// old code
-		if(edgeFlags && !15){
-			var speed = distance(0, 0, this.velocity.dx, this.velocity.dy);
-			this.velocity = unitVector(this.position.x - blockCenter.x, this.position.y - blockCenter.y);
-			this.velocity.dx *= speed;
-			this.velocity.dy *= speed;
-		}
-		*/
-
-		hitBlock(n);
-
-	}
+	return rval;
 }
-
-ballClass.prototype.getCollisionSide = function(block){
-	var n, p1, p2;
-	var oldx = this.position.x - this.velocity.dx;
-	var oldy = this.position.y - this.velocity.dy;
-	var collisionTally = 0;
-
-	for(n = 0; n < 4; n++){
-		p1 = block.getCornerVector(n);
-		p2 = block.getCornerVector((n + 1) % 4);
-		if(
-		     sideOfLine(p1.x, p1.y, p2.x, p2.y, oldx, oldy) 
-		  != sideOfLine(p1.x, p1.y, p2.x, p2.y, this.position.x, this.position.y)
-		){
-			collisionTally += 1 << n;
-
-/*
-			context.save();
-				context.lineWidth = 5;
-				context.strokeStyle = 'rgb(255, 255, 64)';
-				context.beginPath();
-				context.moveTo(p1.x, p1.y);
-				context.lineTo(p2.x, p2.y);
-				context.stroke();
-				context.closePath();
-			context.restore();
-*/
-		}
-	}
-	return collisionTally;
-
-}
-
 
 var blockClass = function(strength){
 	if(strength == undefined) strength = 1;
@@ -292,38 +249,11 @@ var blockClass = function(strength){
 
 };
 
-blockClass.prototype.getCornerVector = function(idx){
-	var rval;
-	switch(idx){
-		case 0:
-			rval = { 
-				x : this.position.x * settings.gridScale,
-				y : this.position.y * settings.gridScale
-			}; 
-			break;
-
-		case 1: 
-			rval = { 
-				x : (this.position.x + 1) * settings.gridScale - 1,
-				y : this.position.y * settings.gridScale
-			}; 
-			break;
-		case 2: 
-			rval = { 
-				x : (this.position.x + 1) * settings.gridScale - 1,
-				y : (this.position.y + 1) * settings.gridScale - 1
-			}; 
-			break;
-		case 3:
-			rval = { 
-				x : this.position.x * settings.gridScale,
-				y : (this.position.y + 1) * settings.gridScale - 1
-			}; 
-			break;
-		default:
-			throw "blockClass.getCornerVector: invalid corner index \"" + idx + "\"";
-	}
-	return rval;
+blockClass.prototype.centerPoint = function(){
+	return {
+		x : Math.floor((this.position.x + .5) * settings.gridScale),
+		y : Math.floor((this.position.y + .5) * settings.gridScale)
+	};
 }
 
 blockClass.prototype.draw = function(x, y){
@@ -425,8 +355,9 @@ function hitBlock(idx){
 		blocks.splice(idx, 1);
 	}
 }
-/////////////////////////////////a
 
+
+////////////////////////////////
 
 function startRound(){
 	//player.level++;
@@ -473,16 +404,15 @@ function playerTurn(){
 var handleMouseTargeting = (function(){
 	var lastTime = 0;
 	return function(e){
-		// only allow a canvas update every 50ms at the most
+		// only update the arrow with the animation frequency at the most
 		var dateTime = new Date();
 		var time = dateTime.getTime();
-		if(time < lastTime + 25){
+		if(time < lastTime + settings.animationFrequency){
 			return;
 		}
 		lastTime = time;
 
 		// get the relative angle between the current location and the mouse pointer
-
 		doAiming(e.offsetX, e.offsetY);
 	}
 })();
@@ -501,8 +431,6 @@ function doAiming(targetX, targetY){
 }
 
 function renderArrow(){
-	// for now we'll draw the arrow with simple vectors.  In the future, I'd like
-	// to replace it with a particular raster image, assets/images/OrangeArrow.png
 	var arrowPoints = [
 		-.8, -2,  -.8, -5,  -2, -4.75,  0, -7.5,  2, -4.75, .8, -5, .8, -2
 	];
@@ -525,15 +453,6 @@ function renderArrow(){
 	context.save();
 		context.beginPath();
 		context.lineJoin = 'round';
-/*
-// leftover for reference, this is how you want to do the image, but I might just use my sprite library for it instead
-var img = new Image();
-img.src = "assets/images/OrangeArrow.png";
-var pattern = context.createPattern(img, "repeat");
-context.fillStyle = pattern;
-*/
-
-//		context.strokeStyle = 'rgb(96, 48, 37)';
 		context.lineWidth = 5;
 		context.translate(px, py);
 		context.rotate(player.angle);
@@ -566,7 +485,6 @@ function animateBalls(){
 		animated = true;
 
 		ball.move();
-		ball.checkCollisions();
 
 		ball.draw();
 
@@ -695,11 +613,13 @@ function doGameOver(){
 function bestCanvasSize(){
 	var parentWidth = gameWrapper.clientWidth;
 	var parentHeight = gameWrapper.clientHeight;
+	var marginScale = .2;
 
-	var gridScale = Math.floor(parentHeight / (settings.gridSize.y + .1));
-	if((settings.gridSize.x + 2) * gridScale > parentWidth){
-		gridScale = Math.floor(parentWidth / (settings.gridSize.x + .1));
+	var gridScale = Math.floor(parentHeight / (settings.gridSize.y + marginScale));
+	if((settings.gridSize.x + marginScale) * gridScale > parentWidth){
+		gridScale = Math.floor(parentWidth / (settings.gridSize.x + marginScale));
 	}
+//	debugger;
 
 	if(gridScale < settings.minTileSize){
 		throw "Could not create an area large enough for this game";
@@ -827,12 +747,3 @@ function die(status) {
 function log10(value){
 	return Math.log(value) / Math.log(10);
 }
-
-// return a unit vector matching the specified one
-function unitVector(dx, dy){
-	var length = Math.sqrt(dx * dx + dy * dy);
-	dx /= length;
-	dy /= length;
-	return { dx : dx, dy : dy };
-}
-
