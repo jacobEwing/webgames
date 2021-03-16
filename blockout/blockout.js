@@ -68,7 +68,7 @@ var ballClass = function(){
 	this.position = {x: 0, y : 0};
 	this.velocity = {dx: 0, dy : 0};
 	this.animaionInterval = null;
-	this.radius = settings.defaultBallRadius ;
+	this.radius = settings.defaultBallRadius / 2 + Math.random() * 2 * settings.defaultBallRadius ;
 	this.moving = false;
 	this.colour = {};
 	this.pickAColour();
@@ -157,9 +157,10 @@ ballClass.prototype.move = function(){
 	if(absdx > absdy){
 		for(n = 0; n < absdx; n++){
 			this.position.x += sgndx;
-			if( this.position.x < this.radius ||
-			    this.position.x >= xResolution - this.radius ||
-			    this.testCollision()
+			if(
+			   (this.position.x < this.radius && this.velocity.dx < 0) ||
+			   (this.position.x >= xResolution - this.radius && this.velocity.dx > 0) ||
+			   this.testCollision()
 			){
 				sgndx *= -1;
 				this.velocity.dx *= -1;
@@ -202,9 +203,10 @@ ballClass.prototype.move = function(){
 			tally += absdx;
 			if(tally > absdy){
 				this.position.x += sgndx;
-				if( this.position.x < this.radius ||
-				    this.position.x >= xResolution - this.radius ||
-				    this.testCollision()
+				if(
+				   (this.position.x < this.radius && this.velocity.dx < 0) ||
+				   (this.position.x >= xResolution - this.radius && this.velocity.dx > 0) ||
+				   this.testCollision()
 				){
 					sgndx *= -1;
 					this.velocity.dx *= -1;
@@ -223,13 +225,17 @@ ballClass.prototype.move = function(){
 ballClass.prototype.testCollision = function(){
 	var rval = false;
 	var n, center;
+	var xdist, ydist;
 	var halfWidth = settings.gridScale >> 1;
 	for(n = 0; n < blocks.length; n++){
 		center = blocks[n].centerPoint();
-		if(Math.abs(center.x - this.position.x) - this.radius < halfWidth){
-			if(Math.abs(center.y - this.position.y) - this.radius < halfWidth){	
+		xdist = Math.abs(center.x - this.position.x) - this.radius;
+		if(xdist < halfWidth){
+			ydist = Math.abs(center.y - this.position.y) - this.radius;
+			if(ydist < halfWidth){	
 				rval = true;
 				hitBlock(n);
+				//console.log('(' + xdist + ', ' + ydist + ')');
 			}
 		}
 	}
