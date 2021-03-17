@@ -68,7 +68,7 @@ var ballClass = function(){
 	this.position = {x: 0, y : 0};
 	this.velocity = {dx: 0, dy : 0};
 	this.animaionInterval = null;
-	this.radius = settings.defaultBallRadius / 2 + Math.random() * 2 * settings.defaultBallRadius ;
+	this.radius = settings.defaultBallRadius;// / 2 + Math.random() * settings.defaultBallRadius ;
 	this.moving = false;
 	this.colour = {};
 	this.pickAColour();
@@ -149,6 +149,64 @@ ballClass.prototype.move = function(){
 	var absdy = Math.abs(this.velocity.dy);
 	var n, tally = 0;
 
+	var alreadyHit = {};
+
+	var testBlockCollision = function(){
+		// we're defining this function locally because we need access to the same variables.
+		var n, center;
+		var xdist, ydist;
+		var halfWidth = settings.gridScale >> 1;
+		var cornerRadius = settings.gridScale >> 2;
+		var newVelocity;
+
+		for(n = 0; n < blocks.length; n++){
+			center = blocks[n].centerPoint();
+			xdist = Math.abs(center.x - this.position.x) - this.radius;
+			if(xdist < halfWidth){
+				ydist = Math.abs(center.y - this.position.y) - this.radius;
+				if(ydist < halfWidth){	
+					if(alreadyHit[n] != undefined){
+						continue;
+					}
+					alreadyHit[n] = 1;
+
+					if(Math.abs(xdist - ydist) < cornerRadius){
+						var speed = distance(this.velocity.dx, this.velocity.dy);
+						var dx = this.position.x - center.x;
+						var dy = this.position.y - center.y;
+						var unitLength = Math.sqrt(dx * dx + dy * dy);
+						this.velocity = {
+							dx : speed * dx / unitLength,
+							dy : speed * dy / unitLength
+						}
+						this.angi *= -1
+					}else{
+						// we're hitting a side, so we'll just negate the velocity on that axis
+						if(xdist >= ydist){
+							sgndx *= -1;
+							this.velocity.dx *= -1;
+							this.position.x += 2 * sgndx;
+							this.angi *= -1;
+						}
+
+						if(ydist >= xdist){
+							sgndy *= -1;
+							this.velocity.dy *= -1;
+							this.position.y += 2 * sgndy;
+							this.angi *= -1
+						}
+					}
+					hitBlock(n);
+					//console.log('(' + xdist + ', ' + ydist + ')');
+
+				}else if(alreadyHit[n] != undefined){
+					alreadyHit[n] = undefined;
+				}
+			}else if(alreadyHit[n] != undefined){
+				alreadyHit[n] = undefined;
+			}
+		}
+	}
 	/*
 		Here we'll use Bresenham's line algorithm to trace the balls'
 		movements, allowing us to accurately bounce off the edges.
@@ -159,8 +217,7 @@ ballClass.prototype.move = function(){
 			this.position.x += sgndx;
 			if(
 			   (this.position.x < this.radius && this.velocity.dx < 0) ||
-			   (this.position.x >= xResolution - this.radius && this.velocity.dx > 0) ||
-			   this.testCollision()
+			   (this.position.x >= xResolution - this.radius && this.velocity.dx > 0)
 			){
 				sgndx *= -1;
 				this.velocity.dx *= -1;
@@ -168,10 +225,11 @@ ballClass.prototype.move = function(){
 				this.angi *= -1;
 			}
 
+
 			tally += absdy;
 			if(tally > absdx){
 				this.position.y += sgndy;
-				if(this.position.y < this.radius || this.testCollision()){
+				if(this.position.y < this.radius){
 					sgndy *= -1;
 					this.velocity.dy *= -1;
 					this.position.y += 2 * sgndy;
@@ -184,16 +242,18 @@ ballClass.prototype.move = function(){
 				}
 				tally -= absdx;
 			}
+			testBlockCollision.call(this);
 		}
 	}else{
 		for(n = 0; n < absdy; n++){
 			this.position.y += sgndy;
-			if(this.position.y < this.radius || this.testCollision()){
+			if(this.position.y < this.radius){
 				sgndy *= -1;
 				this.velocity.dy *= -1;
 				this.position.y += 2 * sgndy;
 				this.angi *= -1
 			}
+
 			if(this.position.y >= yResolution + this.radius){ // +radius to let it go off bottom
 				this.velocity.dy = 0;
 				this.velocity.dx = 0;
@@ -205,8 +265,7 @@ ballClass.prototype.move = function(){
 				this.position.x += sgndx;
 				if(
 				   (this.position.x < this.radius && this.velocity.dx < 0) ||
-				   (this.position.x >= xResolution - this.radius && this.velocity.dx > 0) ||
-				   this.testCollision()
+				   (this.position.x >= xResolution - this.radius && this.velocity.dx > 0)
 				){
 					sgndx *= -1;
 					this.velocity.dx *= -1;
@@ -215,6 +274,7 @@ ballClass.prototype.move = function(){
 				}
 				tally -= absdy;
 			}
+			testBlockCollision.call(this);
 		}
 
 	}
@@ -222,25 +282,6 @@ ballClass.prototype.move = function(){
 
 };
 
-ballClass.prototype.testCollision = function(){
-	var rval = false;
-	var n, center;
-	var xdist, ydist;
-	var halfWidth = settings.gridScale >> 1;
-	for(n = 0; n < blocks.length; n++){
-		center = blocks[n].centerPoint();
-		xdist = Math.abs(center.x - this.position.x) - this.radius;
-		if(xdist < halfWidth){
-			ydist = Math.abs(center.y - this.position.y) - this.radius;
-			if(ydist < halfWidth){	
-				rval = true;
-				hitBlock(n);
-				//console.log('(' + xdist + ', ' + ydist + ')');
-			}
-		}
-	}
-	return rval;
-}
 
 var blockClass = function(strength){
 	if(strength == undefined) strength = 1;
