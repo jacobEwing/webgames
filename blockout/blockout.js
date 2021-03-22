@@ -70,7 +70,7 @@ var ballClass = function(){
 	this.position = {x: 0, y : 0};
 	this.velocity = {dx: 0, dy : 0};
 	this.animaionInterval = null;
-	this.radius = settings.defaultBallRadius;// / 2 + Math.random() * settings.defaultBallRadius ;
+	this.radius = settings.defaultBallRadius + Math.random() * settings.defaultBallRadius ;
 	this.moving = false;
 	this.colour = {};
 	this.pickAColour();
@@ -420,7 +420,9 @@ function hitBlock(idx){
 	if(blocks[idx].strength <= 0){
 		blocks.splice(idx, 1);
 		player.score += player.scoreIncrement;
-		player.scoreIncrement *= 2;
+		player.scoreIncrement ++;
+	}else{
+		player.score++;
 	}
 }
 
@@ -514,7 +516,7 @@ function renderArrow(){
 
 	// scale the arrow vectors to match the game scale
 	for(n = 0; n < arrowPoints.length; n++){
-		arrowPoints[n] *= settings.gridScale / 5;
+		arrowPoints[n] *= settings.gridScale >> 3;
 	}
 
 	// drow the arrow
@@ -578,6 +580,7 @@ function renderGame(){
 	for(n = 0; n < blocks.length; n++){
 		blocks[n].draw();
 	}
+	drawStats();
 	switch(gameState){
 		case 'aiming':
 			renderArrow();
@@ -586,7 +589,6 @@ function renderGame(){
 			animateBalls();
 			break;
 	}
-	drawStats();
 
 }
 
@@ -596,6 +598,10 @@ function drawStats(){
 		var marginSize = fontSize / 2;
 		var bottomY = settings.gridScale * settings.gridSize.y - marginSize;
 		var rightX = settings.gridScale * settings.gridSize.x - marginSize / 2;
+		context.fillStyle = 'rgba(160, 160, 160, .6)';
+		context.fillRect(0, settings.gridScale * (settings.gridSize.y - .75), gameCanvas.width, settings.gridScale * .75);
+		context.fillStyle = 'rgba(190, 190, 190, .6)';
+		context.fillRect(0, settings.gridScale * (settings.gridSize.y - .75), gameCanvas.width, settings.gridScale * .125);
 		context.font = fontSize + "px fatternregular";
 		context.textAlign = 'left';
 		context.fillStyle = 'rgba(128, 64, 48, 1)';
