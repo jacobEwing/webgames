@@ -6,7 +6,8 @@ var settings = {
 	minAngle : 7 * Math.PI / 16,
 	maxAngle : 25 * Math.PI / 16,
 	animationFrequency : 24,
-	defaultBallRadius: 15
+	defaultBallRadius: 15,
+	ballRadiusScale : 1 / 75
 };
 
 var gameCanvas, canvasWrapper, gameWrapper, context, player, blockStrength, blocks, gameState;
@@ -103,7 +104,7 @@ function darken(val){
 
 ballClass.prototype.draw = function(){
 	if(this.velocity.dy == 0 && this.velocity.dx == 0) return;
-	var radius = settings.gridScale * this.radius / 75;
+	var radius = settings.gridScale * this.radius * settings.ballRadiusScale;
 	var colour = 'rgb(' + this.colour.red + ', ' + this.colour.green + ', ' + this.colour.blue + ')';
 	var brightColour = 'rgba(' + brighten(this.colour.red) + ', ' + brighten(this.colour.green) + ', ' + brighten(this.colour.blue) + ')';
 	var darkColour = 'rgba(' + darken(this.colour.red) + ', ' + darken(this.colour.green) + ', ' + darken(this.colour.blue) + ')';
@@ -151,6 +152,7 @@ ballClass.prototype.move = function(){
 	var yResolution = settings.gridScale * settings.gridSize.y;
 
 
+	var radius = settings.gridScale * this.radius * settings.ballRadiusScale;
 	var sgndx = Math.sign(this.velocity.dx);
 	var sgndy = Math.sign(this.velocity.dy);
 	var absdx = Math.abs(this.velocity.dx);
@@ -170,9 +172,9 @@ ballClass.prototype.move = function(){
 
 		for(n = 0; n < blocks.length; n++){
 			center = blocks[n].centerPoint();
-			xdist = Math.abs(center.x - this.position.x) - this.radius;
+			xdist = Math.abs(center.x - this.position.x) - radius;
 			if(xdist < halfWidth){
-				ydist = Math.abs(center.y - this.position.y) - this.radius;
+				ydist = Math.abs(center.y - this.position.y) - radius;
 				if(ydist < halfWidth){	
 					if(alreadyHit[n] != undefined){
 						continue;
@@ -226,8 +228,8 @@ ballClass.prototype.move = function(){
 		for(n = 0; n < absdx; n++){
 			this.position.x += sgndx;
 			if(
-			   (this.position.x < this.radius && this.velocity.dx < 0) ||
-			   (this.position.x >= xResolution - this.radius && this.velocity.dx > 0)
+			   (this.position.x < radius && this.velocity.dx < 0) ||
+			   (this.position.x >= xResolution - radius && this.velocity.dx > 0)
 			){
 				sgndx *= -1;
 				this.velocity.dx *= -1;
@@ -239,13 +241,13 @@ ballClass.prototype.move = function(){
 			this.stepTally += absdy;
 			if(this.stepTally > absdx){
 				this.position.y += sgndy;
-				if(this.position.y < this.radius){
+				if(this.position.y < radius){
 					sgndy *= -1;
 					this.velocity.dy *= -1;
 					this.position.y += 2 * sgndy;
 					this.angi *= -1;
 				}
-				if(this.position.y >= yResolution + this.radius){ // +radius to let it go off bottom
+				if(this.position.y >= yResolution + radius){ // +radius to let it go off bottom
 					this.velocity.dy = 0;
 					this.velocity.dx = 0;
 					player.newX = this.position.x;
@@ -257,14 +259,14 @@ ballClass.prototype.move = function(){
 	}else{
 		for(n = 0; n < absdy; n++){
 			this.position.y += sgndy;
-			if(this.position.y < this.radius){
+			if(this.position.y < radius){
 				sgndy *= -1;
 				this.velocity.dy *= -1;
 				this.position.y += 2 * sgndy;
 				this.angi *= -1
 			}
 
-			if(this.position.y >= yResolution + this.radius){ // +radius to let it go off bottom
+			if(this.position.y >= yResolution + radius){ // +radius to let it go off bottom
 				this.velocity.dy = 0;
 				this.velocity.dx = 0;
 				player.newX = this.position.x;
@@ -274,8 +276,8 @@ ballClass.prototype.move = function(){
 			if(this.stepTally > absdy){
 				this.position.x += sgndx;
 				if(
-				   (this.position.x < this.radius && this.velocity.dx < 0) ||
-				   (this.position.x >= xResolution - this.radius && this.velocity.dx > 0)
+				   (this.position.x < radius && this.velocity.dx < 0) ||
+				   (this.position.x >= xResolution - radius && this.velocity.dx > 0)
 				){
 					sgndx *= -1;
 					this.velocity.dx *= -1;
