@@ -2,7 +2,7 @@ var settings = {
 	gridScale : 0, // <-- calculated in "bestCanvasSize()"
 	gridSize : { x : 6 , y : 9},
 	minTileSize : 5,
-	blockProbability : .4,
+	blockProbability : .5,
 	minAngle : 7 * Math.PI / 16,
 	maxAngle : 25 * Math.PI / 16,
 	animationFrequency : 24,
@@ -14,13 +14,15 @@ var gameCanvas, canvasWrapper, gameWrapper, context, player, blockStrength, bloc
 
 
 var playerClass = function(){
-	this.level = 1;
+	this.level = 0;
 	this.x = 0;
 	this.newX = 0;
 	this.angle = 0;
 	this.ballSpeed = 16;
 	this.launchFrequency = Math.floor(settings.defaultBallRadius * 10);
 	this.balls = [];
+	this.score = 0;
+	this.scoreIncrement = 1;
 };
 
 playerClass.prototype.fire = function(){
@@ -42,7 +44,7 @@ playerClass.prototype.launchBalls = function(){
 	var me = this;
 
 	gameState = 'balls moving';
-
+	player.scoreIncrement = 1;
 	var launch = function(){
 		var ball = this.balls[idx++];
 		// set the ball's position to that of the player
@@ -75,6 +77,12 @@ var ballClass = function(){
 	// balls can now rotate as they fly, but for the default ball type, that shouldn't happen
 	this.angle = 0;//Math.random() * 2 * Math.PI;
 	this.angi = 0;//Math.random() < 0.5 ? -.1 : .1;
+
+	// stepTally is used for counting ratios in using Bresenham's line algorithm to trace ball motion.
+	// we need it to be consistent with the object for accuracy.  If it's set to zero with each call
+	// to the ball's move function, then it becomes slightly inaccurate, making the aim often inaccurate
+	// by several pixels.
+	this.stepTally = 0;
 };
 
 ballClass.prototype.pickAColour = function(){
@@ -147,7 +155,9 @@ ballClass.prototype.move = function(){
 	var sgndy = Math.sign(this.velocity.dy);
 	var absdx = Math.abs(this.velocity.dx);
 	var absdy = Math.abs(this.velocity.dy);
-	var n, tally = 0;
+	var n;
+	var minDY = settings.gridScale / 10;
+	if(minDY < 1) minDY = 1;
 
 	var alreadyHit = {};
 
@@ -157,7 +167,6 @@ ballClass.prototype.move = function(){
 		var xdist, ydist;
 		var halfWidth = settings.gridScale >> 1;
 		var cornerRadius = settings.gridScale >> 2;
-		var newVelocity;
 
 		for(n = 0; n < blocks.length; n++){
 			center = blocks[n].centerPoint();
@@ -180,6 +189,7 @@ ballClass.prototype.move = function(){
 							dy : speed * dy / unitLength
 						}
 						this.angi *= -1
+
 					}else{
 						// we're hitting a side, so we'll just negate the velocity on that axis
 						if(xdist >= ydist){
@@ -226,8 +236,8 @@ ballClass.prototype.move = function(){
 			}
 
 
-			tally += absdy;
-			if(tally > absdx){
+			this.stepTally += absdy;
+			if(this.stepTally > absdx){
 				this.position.y += sgndy;
 				if(this.position.y < this.radius){
 					sgndy *= -1;
@@ -240,7 +250,7 @@ ballClass.prototype.move = function(){
 					this.velocity.dx = 0;
 					player.newX = this.position.x;
 				}
-				tally -= absdx;
+				this.stepTally -= absdx;
 			}
 			testBlockCollision.call(this);
 		}
@@ -260,8 +270,8 @@ ballClass.prototype.move = function(){
 				player.newX = this.position.x;
 			}
 
-			tally += absdx;
-			if(tally > absdy){
+			this.stepTally += absdx;
+			if(this.stepTally > absdy){
 				this.position.x += sgndx;
 				if(
 				   (this.position.x < this.radius && this.velocity.dx < 0) ||
@@ -272,7 +282,7 @@ ballClass.prototype.move = function(){
 					this.position.x += 2 * sgndx;
 					this.angi *= -1;
 				}
-				tally -= absdy;
+				this.stepTally -= absdy;
 			}
 			testBlockCollision.call(this);
 		}
@@ -409,6 +419,8 @@ function hitBlock(idx){
 	blocks[idx].strength--;
 	if(blocks[idx].strength <= 0){
 		blocks.splice(idx, 1);
+		player.score += player.scoreIncrement;
+		player.scoreIncrement *= 2;
 	}
 }
 
@@ -416,7 +428,7 @@ function hitBlock(idx){
 ////////////////////////////////
 
 function startRound(){
-	//player.level++;
+	player.level++;
 
 	if(dropBlocks()){
 		doGameOver();
@@ -574,7 +586,29 @@ function renderGame(){
 			animateBalls();
 			break;
 	}
+	drawStats();
 
+}
+
+function drawStats(){
+	context.save();
+		var fontSize = Math.floor(settings.gridScale * .4);
+		var marginSize = fontSize / 2;
+		var bottomY = settings.gridScale * settings.gridSize.y - marginSize;
+		var rightX = settings.gridScale * settings.gridSize.x - marginSize / 2;
+		context.font = fontSize + "px fatternregular";
+		context.textAlign = 'left';
+		context.fillStyle = 'rgba(128, 64, 48, 1)';
+		context.fillText('LEVEL: ' + player.level, marginSize + 3, bottomY + 3);
+		context.fillStyle = 'rgba(255, 196, 128, 1)';
+		context.fillText('LEVEL: ' + player.level, marginSize, bottomY);
+
+		context.textAlign = 'right';
+		context.fillStyle = 'rgb(64, 128, 48, 1)';
+		context.fillText('SCORE: ' + player.score, rightX + 3, bottomY + 3);
+		context.fillStyle = 'rgba(196, 255, 128, 1)';
+		context.fillText('SCORE: ' + player.score, rightX, bottomY);
+	context.restore();
 }
 
 drawBackground = (function(){
