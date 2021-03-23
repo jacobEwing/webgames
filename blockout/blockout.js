@@ -680,7 +680,7 @@ function renderGame(){
 
 function drawStats(){
 	context.save();
-		var fontSize = Math.floor(settings.gridScale * .4);
+		var fontSize = Math.floor(settings.gridScale * .39);
 		var marginSize = fontSize / 2;
 		var bottomY = settings.gridScale * settings.gridSize.y - marginSize;
 		var rightX = settings.gridScale * settings.gridSize.x - marginSize / 2;
@@ -688,7 +688,7 @@ function drawStats(){
 		context.fillRect(0, settings.gridScale * (settings.gridSize.y - .75), gameCanvas.width, settings.gridScale * .75);
 		context.fillStyle = 'rgba(190, 190, 190, .6)';
 		context.fillRect(0, settings.gridScale * (settings.gridSize.y - .75), gameCanvas.width, settings.gridScale * .125);
-		context.font = fontSize + "px KRONIKA";
+		context.font = fontSize + "px rounds_blackregular";
 		context.textAlign = 'left';
 		context.fillStyle = 'rgba(128, 64, 48, 1)';
 		context.fillText('LEVEL: ' + player.level, marginSize + 3, bottomY + 3);
