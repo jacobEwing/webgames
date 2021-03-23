@@ -1,4 +1,18 @@
-A totall rebbot/improvement of "ballz-online" (presumably just ballz")
+credits to add:
+
+font:
+
+Licensing and credit info are available here:
+https://www.1001freefonts.com/poor-story.font
+
+
+Also this one:
+https://www.1001freefonts.com/kronika.font
+
+
+
+=================== initial brainstorm ===========================
+A total rebbot/improvement of "ballz-online" (presumably just ballz")
 it's like breakout, but instead fo having a ball that you bounce on a pad, you
 launch the balls from a single point, hitting the bricks.  The impacts decrease
 the brick's number, and it disappears at zero.  Numbers tend to be the same as

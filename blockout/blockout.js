@@ -6,7 +6,7 @@ var settings = {
 	minAngle : 7 * Math.PI / 16,
 	maxAngle : 25 * Math.PI / 16,
 	animationFrequency : 24,
-	defaultBallRadius: 15,
+	minBallRadius: 10,
 	ballRadiusScale : 1 / 75,
 	bonusBlockChance : 0.1
 };
@@ -21,7 +21,7 @@ var playerClass = function(){
 	this.newX = 0;
 	this.angle = 0;
 	this.ballSpeed = 16;
-	this.launchFrequency = Math.floor(settings.defaultBallRadius * 10);
+	this.launchFrequency = Math.floor(settings.minBallRadius * 10);
 	this.balls = [];
 	this.score = 0;
 	this.scoreIncrement = 1;
@@ -72,7 +72,7 @@ var ballClass = function(){
 	this.position = {x: 0, y : 0};
 	this.velocity = {dx: 0, dy : 0};
 	this.animaionInterval = null;
-	this.radius = settings.defaultBallRadius + Math.random() * settings.defaultBallRadius ;
+	this.radius = settings.minBallRadius + Math.random() * settings.minBallRadius ;
 	this.moving = false;
 	this.colour = {};
 	this.pickAColour();
@@ -320,7 +320,7 @@ var blockClass = function(strength){
 	this.hasBonus = false;
 	this.isBonus = false;
 	// a weird one-off for animating blocks that have a bonus ready to go
-	this.starAngle = 0;
+	this.starAngle = Math.random() * Math.PI;
 };
 
 blockClass.prototype.centerPoint = function(){
@@ -363,104 +363,111 @@ blockClass.prototype.draw = function(x, y){
 	var halfblock = settings.gridScale >> 1;
 	if(x == undefined) x = this.realX();
 	if(y == undefined) y = this.realY();
+	context.save();
+		context.translate(x + halfblock, y + halfblock);
+		if(this.isBonus){
+			context.rotate(Math.sin(this.starAngle * 2) / 10);
+		}
+		// let's draw the surrounding box with rounded corners:
+		x = -halfblock;
+		y = -halfblock;
 
-	// let's draw the surrounding box with rounded corners:
-	context.beginPath();
-	context.fillStyle = this.colour;
-	context.strokeStyle = this.negative;
-	context.lineWidth = settings.gridScale >> 4;
-	context.moveTo(x, y + quarterblock);
-	context.quadraticCurveTo(x, y, x + quarterblock, y);
-	context.lineTo(x + settings.gridScale - quarterblock, y);
+		context.beginPath();
+		context.fillStyle = this.colour;
+		context.strokeStyle = this.negative;
+		context.lineWidth = settings.gridScale >> 4;
+		context.moveTo(x, y + quarterblock);
+		context.quadraticCurveTo(x, y, x + quarterblock, y);
+		context.lineTo(x + settings.gridScale - quarterblock, y);
 
-	context.quadraticCurveTo(x + settings.gridScale, y, x + settings.gridScale, y + quarterblock);
-	context.lineTo(x + settings.gridScale, y + settings.gridScale - quarterblock);
+		context.quadraticCurveTo(x + settings.gridScale, y, x + settings.gridScale, y + quarterblock);
+		context.lineTo(x + settings.gridScale, y + settings.gridScale - quarterblock);
 
-	context.quadraticCurveTo(x + settings.gridScale, y + settings.gridScale, x + settings.gridScale - quarterblock, y + settings.gridScale);
-	context.lineTo(x + quarterblock, y + settings.gridScale);
+		context.quadraticCurveTo(x + settings.gridScale, y + settings.gridScale, x + settings.gridScale - quarterblock, y + settings.gridScale);
+		context.lineTo(x + quarterblock, y + settings.gridScale);
 
-	context.quadraticCurveTo(x, y + settings.gridScale, x, y + settings.gridScale - quarterblock);
-	context.closePath();
-	context.fill();
+		context.quadraticCurveTo(x, y + settings.gridScale, x, y + settings.gridScale - quarterblock);
+		context.closePath();
+		context.fill();
 
-	// add some shading, first with white shading at the top
-	context.beginPath();
-	context.fillStyle = 'rgba(255, 255, 255, .6)';
-	context.moveTo(x, y + settings.gridScale - quarterblock);
-	context.lineTo(x, y + quarterblock);
-	context.quadraticCurveTo(x, y, x + quarterblock, y);
-	context.lineTo(x + settings.gridScale - quarterblock, y);
-	context.quadraticCurveTo(x + settings.gridScale, y, x + settings.gridScale, y + quarterblock);
-	context.bezierCurveTo(
-		x, 
-		y, 
-		x + quarterblock, 
-		y + quarterblock, 
-		x, 
-		y + settings.gridScale - quarterblock
-	);
-
-	context.fill();
-	context.closePath();
-	// and now some dark colour shading at the bottom
-	context.beginPath();
-	context.fillStyle = darkColour;
-	context.moveTo(x + settings.gridScale, y + quarterblock);
-	context.lineTo(x + settings.gridScale, y + settings.gridScale - quarterblock);
-	context.quadraticCurveTo(x + settings.gridScale, y + settings.gridScale, x + settings.gridScale - quarterblock, y + settings.gridScale);
-	context.lineTo(x + quarterblock, y + settings.gridScale);
-	context.quadraticCurveTo(x, y + settings.gridScale, x, y + settings.gridScale - quarterblock);
-	context.bezierCurveTo(
-		x + settings.gridScale,
-		y + settings.gridScale,
-		x + settings.gridScale - quarterblock,
-		y + settings.gridScale - quarterblock,
-		x + settings.gridScale,
-		y + quarterblock
-	);
-
-	context.fill();
-	context.closePath();
-
-	if(this.hasBonus){
-		// if this block has a bonus waiting inside, we add a texas star under the number
-		this.starAngle += .1;
-		texasStar(x + halfblock, y + halfblock, halfblock * .8, this.starAngle);
-	}else if(this.isBonus){
-		this.starAngle += .15
-		texasStar(
-			x + 3 * halfblock / 2,
-			y + 3 * halfblock / 2, 
-			halfblock * Math.abs(Math.sin(1 + this.starAngle)/ 3) + .3, 
-			this.starAngle
+		// add some shading, first with white shading at the top
+		context.beginPath();
+		context.fillStyle = 'rgba(255, 255, 255, .6)';
+		context.moveTo(x, y + settings.gridScale - quarterblock);
+		context.lineTo(x, y + quarterblock);
+		context.quadraticCurveTo(x, y, x + quarterblock, y);
+		context.lineTo(x + settings.gridScale - quarterblock, y);
+		context.quadraticCurveTo(x + settings.gridScale, y, x + settings.gridScale, y + quarterblock);
+		context.bezierCurveTo(
+			x, 
+			y, 
+			x + quarterblock, 
+			y + quarterblock, 
+			x, 
+			y + settings.gridScale - quarterblock
 		);
-		texasStar(
-			x + halfblock,
-			y + halfblock / 2,
-			halfblock * Math.abs(Math.sin(this.starAngle)/ 3) + .3,
-			this.starAngle + 2
+
+		context.fill();
+		context.closePath();
+		// and now some dark colour shading at the bottom
+		context.beginPath();
+		context.fillStyle = darkColour;
+		context.moveTo(x + settings.gridScale, y + quarterblock);
+		context.lineTo(x + settings.gridScale, y + settings.gridScale - quarterblock);
+		context.quadraticCurveTo(x + settings.gridScale, y + settings.gridScale, x + settings.gridScale - quarterblock, y + settings.gridScale);
+		context.lineTo(x + quarterblock, y + settings.gridScale);
+		context.quadraticCurveTo(x, y + settings.gridScale, x, y + settings.gridScale - quarterblock);
+		context.bezierCurveTo(
+			x + settings.gridScale,
+			y + settings.gridScale,
+			x + settings.gridScale - quarterblock,
+			y + settings.gridScale - quarterblock,
+			x + settings.gridScale,
+			y + quarterblock
 		);
-		texasStar(
-			x + halfblock / 2,
-			y + halfblock,
-			halfblock * Math.abs(Math.cos(this.starAngle)/ 3) + .3,
-			this.starAngle + 1
-		);
-		
-	}
 
-	// add some text
-	context.textAlign = 'center';
-	var fontSize = Math.floor(settings.gridScale /  (1 + log10(this.strength) / 2));
-	context.font = fontSize + "px PoorStory";
+		context.fill();
+		context.closePath();
 
-	context.fillStyle = 'rgba(255, 255, 255, .6)';
-	context.fillText(this.strength, x + halfblock + 2, y + halfblock + 2 + fontSize / 3);
+		if(this.hasBonus){
+			// if this block has a bonus waiting inside, we add a texas star under the number
+			this.starAngle += .1;
+			texasStar(x + halfblock, y + halfblock, halfblock * .8, this.starAngle);
+		}else if(this.isBonus){
+			this.starAngle += .15
+			texasStar(
+				x + 3 * halfblock / 2,
+				y + 3 * halfblock / 2, 
+				halfblock * Math.abs(Math.sin(1 + this.starAngle)/ 3) + .3, 
+				this.starAngle
+			);
+			texasStar(
+				x + halfblock,
+				y + halfblock / 2,
+				halfblock * Math.abs(Math.sin(this.starAngle)/ 3) + .3,
+				this.starAngle + 2
+			);
+			texasStar(
+				x + halfblock / 2,
+				y + halfblock,
+				halfblock * Math.abs(Math.cos(this.starAngle)/ 3) + .3,
+				this.starAngle + 1
+			);
+			
+		}
 
-	context.fillStyle = darkColour2;//'rgba(0, 0, 0, 1)';
-	context.fillText(this.strength, x + halfblock, y + halfblock + fontSize / 3);
+		// add some text
+		context.textAlign = 'center';
+		var fontSize = Math.floor(settings.gridScale /  (1 + log10(this.strength) / 2));
+		context.font = fontSize + "px PoorStory";
 
+		context.fillStyle = 'rgba(255, 255, 255, .6)';
+		context.fillText(this.strength, x + halfblock + 2, y + halfblock + 2 + fontSize / 3);
 
+		context.fillStyle = darkColour2;//'rgba(0, 0, 0, 1)';
+		context.fillText(this.strength, x + halfblock, y + halfblock + fontSize / 3);
+
+	context.restore();
 
 
 
@@ -487,10 +494,10 @@ function hitBlock(idx){
 			blocks[idx].hasBonus = false;
 			blocks[idx].isBonus = true;
 		}else if(blocks[idx].isBonus){
-			blocks.splice(idx, 1);
-			player.score += player.scoreIncrement;
 			player.scoreIncrement += blocks[idx].originalStrength;
+			player.score += player.scoreIncrement;
 			console.log("ADD BONUS UPGRADE HERE");
+			blocks.splice(idx, 1);
 		}else{
 			blocks.splice(idx, 1);
 			player.score += player.scoreIncrement;
@@ -677,7 +684,7 @@ function drawStats(){
 		context.fillRect(0, settings.gridScale * (settings.gridSize.y - .75), gameCanvas.width, settings.gridScale * .75);
 		context.fillStyle = 'rgba(190, 190, 190, .6)';
 		context.fillRect(0, settings.gridScale * (settings.gridSize.y - .75), gameCanvas.width, settings.gridScale * .125);
-		context.font = fontSize + "px fatternregular";
+		context.font = fontSize + "px KRONIKA";
 		context.textAlign = 'left';
 		context.fillStyle = 'rgba(128, 64, 48, 1)';
 		context.fillText('LEVEL: ' + player.level, marginSize + 3, bottomY + 3);
@@ -751,7 +758,7 @@ function addBlockRow(){
 					x : n,
 					y : 0
 				};
-				if(Math.random() < settings.bonusBlockChance){
+				if(Math.random() < .5){//settings.bonusBlockChance){
 					blocks[idx].hasBonus = true;
 				}
 			}
@@ -842,6 +849,9 @@ function initialize(callback, step){
 			setTimeout(function(){initialize(callback, 'loadImages');}, 0);
 			break;
 		case 'loadImages':
+			// probably can remove this.  It's used to cache any images
+			// before they're needed, but so far no images are needed, so
+			// we might be good.
 			setTimeout(function(){initialize(callback, 'initPlayer');}, 0);
 			/*
 			var cacheTally = 1;
