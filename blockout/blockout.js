@@ -688,7 +688,7 @@ function drawStats(){
 		context.fillRect(0, settings.gridScale * (settings.gridSize.y - .75), gameCanvas.width, settings.gridScale * .75);
 		context.fillStyle = 'rgba(190, 190, 190, .6)';
 		context.fillRect(0, settings.gridScale * (settings.gridSize.y - .75), gameCanvas.width, settings.gridScale * .125);
-		context.font = fontSize + "px rounds_blackregular";
+		context.font = fontSize + "px jelleeroman";
 		context.textAlign = 'left';
 		context.fillStyle = 'rgba(128, 64, 48, 1)';
 		context.fillText('LEVEL: ' + player.level, marginSize + 3, bottomY + 3);
