@@ -751,7 +751,7 @@ function addBlockRow(){
 					x : n,
 					y : 0
 				};
-				if(Math.random() < .5){//settings.bonusBlockChance){
+				if(Math.random() < settings.bonusBlockChance){
 					blocks[idx].hasBonus = true;
 				}
 			}
