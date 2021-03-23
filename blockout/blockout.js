@@ -7,7 +7,8 @@ var settings = {
 	maxAngle : 25 * Math.PI / 16,
 	animationFrequency : 24,
 	defaultBallRadius: 15,
-	ballRadiusScale : 1 / 75
+	ballRadiusScale : 1 / 75,
+	bonusBlockChance : 0.1
 };
 
 var gameCanvas, canvasWrapper, gameWrapper, context, player, blockStrength, blocks, gameState;
@@ -84,6 +85,7 @@ var ballClass = function(){
 	// to the ball's move function, then it becomes slightly inaccurate, making the aim often inaccurate
 	// by several pixels.
 	this.stepTally = 0;
+
 };
 
 ballClass.prototype.pickAColour = function(){
@@ -209,7 +211,6 @@ ballClass.prototype.move = function(){
 						}
 					}
 					hitBlock(n);
-					//console.log('(' + xdist + ', ' + ydist + ')');
 
 				}else if(alreadyHit[n] != undefined){
 					alreadyHit[n] = undefined;
@@ -297,6 +298,7 @@ ballClass.prototype.move = function(){
 
 var blockClass = function(strength){
 	if(strength == undefined) strength = 1;
+	this.originalStrength = strength
 	this.strength = strength;
 	this.position = {
 		x : 0,
@@ -315,6 +317,10 @@ var blockClass = function(strength){
 		return this.position.y * settings.gridScale;
 	};
 
+	this.hasBonus = false;
+	this.isBonus = false;
+	// a weird one-off for animating blocks that have a bonus ready to go
+	this.starAngle = 0;
 };
 
 blockClass.prototype.centerPoint = function(){
@@ -322,6 +328,32 @@ blockClass.prototype.centerPoint = function(){
 		x : Math.floor((this.position.x + .5) * settings.gridScale),
 		y : Math.floor((this.position.y + .5) * settings.gridScale)
 	};
+}
+
+function texasStar(cx, cy, radius, angle){
+	var numPoints = 5, n, innerRadius = Math.round(radius * .5), ang, x, y, r;
+	context.save();
+		context.beginPath();
+		context.fillStyle = 'rgba(255, 255, 192, .8)';
+		context.strokeStyle = 'rgb(64, 64, 32)';
+		context.lineWidth = settings.gridScale >> 4;
+		context.translate(cx, cy);
+		context.rotate(Math.sin(angle) * .5);
+		for(n = 0; n < numPoints * 2; n++){
+			r = n & 1 ? innerRadius : radius;
+			ang = (Math.PI / numPoints) * n + Math.PI;
+			x = Math.sin(ang) * r;
+			y = Math.cos(ang) * r;
+			if(n == 0){
+				context.moveTo(x, y);
+			}else{
+				context.lineTo(x, y);
+			}
+		}
+		context.closePath();
+		context.stroke();
+		context.fill();
+	context.restore();
 }
 
 blockClass.prototype.draw = function(x, y){
@@ -350,18 +382,6 @@ blockClass.prototype.draw = function(x, y){
 	context.quadraticCurveTo(x, y + settings.gridScale, x, y + settings.gridScale - quarterblock);
 	context.closePath();
 	context.fill();
-
-	// add some text
-	context.textAlign = 'center';
-	var fontSize = Math.floor(settings.gridScale /  (1 + log10(this.strength) / 2));
-	context.font = fontSize + "px PoorStory";
-
-	context.fillStyle = 'rgba(255, 255, 255, .6)';
-	context.fillText(this.strength, x + halfblock + 2, y + halfblock + 2 + fontSize / 3);
-
-	context.fillStyle = darkColour2;//'rgba(0, 0, 0, 1)';
-	context.fillText(this.strength, x + halfblock, y + halfblock + fontSize / 3);
-
 
 	// add some shading, first with white shading at the top
 	context.beginPath();
@@ -402,6 +422,48 @@ blockClass.prototype.draw = function(x, y){
 	context.fill();
 	context.closePath();
 
+	if(this.hasBonus){
+		// if this block has a bonus waiting inside, we add a texas star under the number
+		this.starAngle += .1;
+		texasStar(x + halfblock, y + halfblock, halfblock * .8, this.starAngle);
+	}else if(this.isBonus){
+		this.starAngle += .15
+		texasStar(
+			x + 3 * halfblock / 2,
+			y + 3 * halfblock / 2, 
+			halfblock * Math.abs(Math.sin(1 + this.starAngle)/ 3) + .3, 
+			this.starAngle
+		);
+		texasStar(
+			x + halfblock,
+			y + halfblock / 2,
+			halfblock * Math.abs(Math.sin(this.starAngle)/ 3) + .3,
+			this.starAngle + 2
+		);
+		texasStar(
+			x + halfblock / 2,
+			y + halfblock,
+			halfblock * Math.abs(Math.cos(this.starAngle)/ 3) + .3,
+			this.starAngle + 1
+		);
+		
+	}
+
+	// add some text
+	context.textAlign = 'center';
+	var fontSize = Math.floor(settings.gridScale /  (1 + log10(this.strength) / 2));
+	context.font = fontSize + "px PoorStory";
+
+	context.fillStyle = 'rgba(255, 255, 255, .6)';
+	context.fillText(this.strength, x + halfblock + 2, y + halfblock + 2 + fontSize / 3);
+
+	context.fillStyle = darkColour2;//'rgba(0, 0, 0, 1)';
+	context.fillText(this.strength, x + halfblock, y + halfblock + fontSize / 3);
+
+
+
+
+
 };
 
 // sets the colour for this block.
@@ -420,9 +482,20 @@ blockClass.prototype.pickAColour = function(){
 function hitBlock(idx){
 	blocks[idx].strength--;
 	if(blocks[idx].strength <= 0){
-		blocks.splice(idx, 1);
-		player.score += player.scoreIncrement;
-		player.scoreIncrement ++;
+		if(blocks[idx].hasBonus){
+			blocks[idx].strength = blocks[idx].originalStrength;
+			blocks[idx].hasBonus = false;
+			blocks[idx].isBonus = true;
+		}else if(blocks[idx].isBonus){
+			blocks.splice(idx, 1);
+			player.score += player.scoreIncrement;
+			player.scoreIncrement += blocks[idx].originalStrength;
+			console.log("ADD BONUS UPGRADE HERE");
+		}else{
+			blocks.splice(idx, 1);
+			player.score += player.scoreIncrement;
+			player.scoreIncrement ++;
+		}
 	}else{
 		player.score++;
 	}
@@ -673,11 +746,14 @@ function addBlockRow(){
 		for(n = 0; n < settings.gridSize.x; n++){
 			if(Math.random() < settings.blockProbability){
 				idx = blocks.length;
-				blocks[idx] = new blockClass(blockStrength * (Math.random() < .1 ? 2 : 1));
+				blocks[idx] = new blockClass(blockStrength/* * (Math.random() < .1 ? 2 : 1)*/);
 				blocks[idx].position = {
 					x : n,
 					y : 0
 				};
+				if(Math.random() < .5){//settings.bonusBlockChance){
+					blocks[idx].hasBonus = true;
+				}
 			}
 		}
 	}while(blocks.length == 0);
