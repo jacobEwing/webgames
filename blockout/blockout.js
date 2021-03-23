@@ -300,6 +300,10 @@ var blockClass = function(strength){
 	if(strength == undefined) strength = 1;
 	this.originalStrength = strength
 	this.strength = strength;
+	this.offset = {
+		x : 0,
+		y : 0
+	};
 	this.position = {
 		x : 0,
 		y : 0
@@ -325,8 +329,8 @@ var blockClass = function(strength){
 
 blockClass.prototype.centerPoint = function(){
 	return {
-		x : Math.floor((this.position.x + .5) * settings.gridScale),
-		y : Math.floor((this.position.y + .5) * settings.gridScale)
+		x : Math.floor((this.position.x + .5 + this.offset.x) * settings.gridScale),
+		y : Math.floor((this.position.y + .5 + this.offset.y) * settings.gridScale)
 	};
 }
 
@@ -364,7 +368,7 @@ blockClass.prototype.draw = function(x, y){
 	if(x == undefined) x = this.realX();
 	if(y == undefined) y = this.realY();
 	context.save();
-		context.translate(x + halfblock, y + halfblock);
+		context.translate(x + halfblock + this.offset.x * settings.gridScale, y + halfblock + this.offset.y * settings.gridScale);
 		if(this.isBonus){
 			context.rotate(Math.sin(this.starAngle * 2) / 10);
 		}
@@ -514,17 +518,17 @@ function hitBlock(idx){
 function startRound(){
 	player.level++;
 
-	if(dropBlocks()){
-		doGameOver();
-		return;
-	}
+	dropBlocks(function(gameOver){
+		if(gameOver){
+			doGameOver();
+		}else{
+			// wait for user input
+			gameState = 'aiming';
+			playerTurn();
+		}
+	});
 
-	// add a top row
-	addBlockRow();
 
-	// wait for user input
-	gameState = 'aiming';
-	playerTurn();
 }
 
 function playerTurn(){
@@ -753,12 +757,12 @@ function addBlockRow(){
 		for(n = 0; n < settings.gridSize.x; n++){
 			if(Math.random() < settings.blockProbability){
 				idx = blocks.length;
-				blocks[idx] = new blockClass(blockStrength/* * (Math.random() < .1 ? 2 : 1)*/);
+				blocks[idx] = new blockClass(blockStrength);
 				blocks[idx].position = {
 					x : n,
-					y : 0
+					y : -1 // <-- place it above the game, as they'll be shifting down afterward
 				};
-				if(Math.random() < .5){//settings.bonusBlockChance){
+				if(Math.random() < settings.bonusBlockChance){
 					blocks[idx].hasBonus = true;
 				}
 			}
@@ -766,17 +770,37 @@ function addBlockRow(){
 	}while(blocks.length == 0);
 }
 
-function dropBlocks(){
-	// move all the current blocks down one notch
-	var n;
-	var gameOver = 0;
+function dropBlocks(callback){
+	var n, gameOver = 0;
+	var tally = 0, increment = .02;
+	// add a top row
+	addBlockRow();
+	// move them down and shift their offset up
 	for(n = 0; n < blocks.length; n++){
 		blocks[n].position.y ++;
-		if(blocks[n].position.y == settings.gridSize.y){
-			gameOver = 1;
-		}
+		blocks[n].offset.y --;
 	}
-	return gameOver;
+
+	// drop them by reducing the offset at an accelerating rate
+	var interval = setInterval(function(){
+		for(n = 0; n < blocks.length; n++){
+			blocks[n].offset.y += increment;
+		}
+		tally += increment;
+		increment *= 1.5;
+		if(tally >= 1){
+			clearInterval(interval);
+			for(n = 0; n < blocks.length; n++){
+				blocks[n].offset.y -= tally;
+				blocks[n].offset.y ++;
+				if(blocks[n].position.y == settings.gridSize.y){
+					gameOver = 1;
+				}
+			}
+			// We're all done, let's do the callback
+			callback(gameOver);
+		}
+	}, settings.animationFrequency);
 }
 
 function doGameOver(){
