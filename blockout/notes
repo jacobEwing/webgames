@@ -1,16 +1,26 @@
 credits to add:
 
 font:
-
 Licensing and credit info are available here:
 https://www.1001freefonts.com/poor-story.font
 
-
 Also this one:
-https://www.1001freefonts.com/kronika.font
+https://www.1001fonts.com/jellee-font.html
 
 
+Sound effects:
+Zapsplat.com
+Requires attribution, they suggest something like:
+“Sound effects obtained from https://www.zapsplat.com“
+“Additional sound effects from https://www.zapsplat.com“
 
+			soundEffects = {
+				swish : new Audio(soundPath + 'swish.wav'),//freesoundPath + "200995__lonce__swishupmedium.wav"),
+				gameOver : new Audio(zapPath + "zapsplat_cartoon_musical_descend_18064.mp3"),
+				thud : new Audio(soundPath + 'sideImpact.wav'),
+				blockHit: new Audio(freesoundPath + '426594__mootmcnoodles__ding.wav')
+
+			};
 =================== initial brainstorm ===========================
 A total rebbot/improvement of "ballz-online" (presumably just ballz")
 it's like breakout, but instead fo having a ball that you bounce on a pad, you
@@ -22,6 +32,12 @@ It could be SOOO much better revamped.  The graphics are crapped, so that would
 be an easy improvement.
 
 Also, power-ups.  Some ideas there:
+ - game area increase - a one time boost that increases the area of the game.
+   Increasing height would give more time to destroy blocks, Increasing width
+   would give more blocks per row, increasing difficulty.
+
+ - Splitting the launchpoint, perhaps leaving the balls per launchpoint untouched
+
  - aiming assistance, a line tracing the projected path of the ball
  - make the floor bouncy for ten seconds
  - all balls split on next impact

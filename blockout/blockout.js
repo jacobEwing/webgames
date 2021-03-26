@@ -1,58 +1,337 @@
-var settings = {
-	gridScale : 0, // <-- calculated in "bestCanvasSize()"
-	gridSize : { x : 6 , y : 9},
-	minTileSize : 5,
-	blockProbability : .5,
-	minAngle : 7 * Math.PI / 16,
-	maxAngle : 25 * Math.PI / 16,
-	animationFrequency : 24,
-	minBallRadius: 10,
-	ballRadiusScale : 1 / 75,
-	bonusBlockChance : 0.1
+var game, context, player;
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+// the game class
+/////////////////////////////////////////////////////////////////////////////////////////////
+var gameClass = function(){
+	var self = this;
+
+	// various static settings
+	this.gridScale = 0; // <-- calculated in "bestCanvasSize()"
+	this.gridSize = { x : 6 , y : 9};
+	this.minTileSize = 5;
+	this.blockProbability = .5;
+	this.minAngle = 7 * Math.PI / 16;
+	this.maxAngle = 25 * Math.PI / 16;
+	this.animationFrequency = 24;
+	this.minBallRadius = 10;
+	this.ballRadiusScale = 1 / 75;
+	this.bonusBlockChance = 0.1;
+	this.menuOptions = [
+		{
+			'label' : 'Play',
+			'action' : function(){ self.start(); },
+			'hovering' : 0
+		},
+		{
+			'label' : 'Settings',
+			'action' : function(){alert('Not implemented');},
+			'hovering' : 0
+		},
+		{
+			'label' : 'About',
+			'action' : function(){alert('Not implemented');},
+			'hovering' : 0
+		},
+		{
+			'label' : 'Exit',
+			'action' : function(){alert('Not implemented');},
+			'hovering' : 0
+		}
+	];
+
+	// initialize variables
+	this.canvas = null;
+	this.state = 'initializing';
+	this.blockStrength = 0;
+	this.blocks = [];
+	this.balls = [];
+	this.bgAng = 0;
 };
 
-var gameCanvas, canvasWrapper, gameWrapper, context, player, blockStrength, blocks, gameState;
-var animationInterval;
+gameClass.prototype.drawBackground = function(){
+	var radius =  (this.gridSize.y >> 3) * this.gridScale;// / 5;
+
+	this.bgAng += .01;
+	if(this.bgAng > 4 * Math.PI) this.bgAng -= 4 * Math.PI;
+
+	context.save();
+	context.fillStyle = "#FFC";
+	context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+	context.restore();
+	doBGSine(this.bgAng * 2 + 2, radius / 2, this.canvas.height >> 2, "#EFE0A0"); 
+	doBGSine(this.bgAng, radius, this.canvas.height >> 1, "#A85");
+	doBGSine(this.bgAng / 2 + 1, radius, this.canvas.height * .75, "#863");
+};
 
 
-var playerClass = function(){
+gameClass.prototype.dropBlocks = function(callback){
+	var n, gameOver = 0;
+	var tally = 0, increment = .0012;
+	var me = this;
+
+	// add a top row
+	this.addBlockRow();
+	// move them down and shift their offset up
+	for(n = 0; n < this.blocks.length; n++){
+		this.blocks[n].position.y ++;
+		this.blocks[n].offset.y --;
+	}
+
+	// drop them by reducing the offset at an accelerating rate
+	var interval = setInterval(function(){
+		for(n = 0; n < me.blocks.length; n++){
+			me.blocks[n].offset.y += increment;
+		}
+		tally += increment;
+		increment *= 1.5;
+		if(tally >= 1){
+			clearInterval(interval);
+			for(n = 0; n < me.blocks.length; n++){
+				me.blocks[n].offset.y -= tally;
+				me.blocks[n].offset.y ++;
+				if(me.blocks[n].position.y == me.gridSize.y - 1){
+					gameOver = 1;
+				}
+			}
+			// We're all done, let's do the callback
+			callback(gameOver);
+		}
+	}, this.animationFrequency);
+};
+
+gameClass.prototype.startRound = function(){
+	player.level++;
+	var me = this;
+
+	this.dropBlocks(function(gameOver){
+		if(gameOver){
+			// need to add some "game over" animation
+			console.log('add game over animation');
+			game.state = 'menu';
+			game.initializeMenu();
+		}else{
+			// wait for user input
+			me.state = 'aiming';
+			player.takeTurn();
+		}
+	});
+
+
+};
+
+gameClass.prototype.endRound = function(){
+	this.state = 'endRound';
+	player.x = player.newX;
+	// additional stuff can be put here
+	this.blockStrength++;
+	game.addBall();
+	this.startRound();
+};
+
+gameClass.prototype.render = function(){
+	var n;
+	this.drawBackground();
+	if(this.state != 'menu'){
+		for(n = 0; n < this.blocks.length; n++){
+			this.blocks[n].draw();
+		}
+		drawStats();
+	}
+	switch(this.state){
+		case 'aiming':
+			renderArrow();
+			break;
+		case 'balls moving':
+			this.animateBalls();
+			break;
+		case 'menu':
+			this.drawMenu();
+			break;
+	}
+
+};
+
+gameClass.prototype.animateBalls = function(){
+	var animated = false;
+	var ball, n;
+	for(n = 0; n < this.balls.length; n++){
+		ball = this.balls[n];
+		if(ball.velocity.dx == 0 && ball.velocity.dy == 0){
+			ball.draw();
+			continue;
+		}
+		animated = true;
+
+		ball.move();
+
+		ball.draw();
+
+	}
+
+	if(!animated){
+		this.endRound();
+	}
+};
+
+
+gameClass.prototype.addBall = function(){
+	var ball = new ballClass();
+	ball.position = {
+		x : this.x,
+		y : game.gridScale * game.gridSize.y
+	};
+	this.balls[this.balls.length] = ball;
+};
+
+gameClass.prototype.drawMenu = function(){
+	var spacing = this.gridScale >> 2;
+	var halfblock = this.gridScale >> 1;
+	var height = this.gridScale * this.gridSize.y;
+	var y = (height - this.menuOptions.length * (this.gridScale + spacing)) >> 1;
+	var n;
+	var x = (this.gridSize.x * this.gridScale) >> 1;
+	var colour;
+	context.save()
+		context.textAlign = 'center';
+		for(n = 0; n < this.menuOptions.length; n++){
+			var fontSize = this.gridScale * .8;
+			this.menuOptions[n].x = this.gridScale;
+			this.menuOptions[n].y = y;
+			this.menuOptions[n].width = this.gridScale * (this.gridSize.x - 2);
+			this.menuOptions[n].height = this.gridScale;
+
+			if(this.menuOptions[n].hovering == 1){
+				this.menuOptions[n].x -= this.gridScale >> 3;
+				this.menuOptions[n].y -= this.gridScale >> 3;
+				this.menuOptions[n].width += this.gridScale >> 2;
+				this.menuOptions[n].height += this.gridScale >> 2;
+				fontSize += fontSize >> 2;
+				colour = {red : 200, green : 230, blue : 160};
+			}else{
+				colour = {red : 140, green : 200, blue : 120};
+			}
+
+			context.font = fontSize + "px PoorStory";
+			drawNiceBox(this.menuOptions[n].x, this.menuOptions[n].y, this.menuOptions[n].width, this.menuOptions[n].height, colour);//, {red : 200, green : 192, blue : 160 });
+
+			context.fillStyle = 'rgba(255, 255, 255, .6)';
+			context.fillText(this.menuOptions[n].label, x + 2, y + halfblock + 2 + fontSize / 3);
+
+			context.fillStyle = 'rgba(0, 48, 0, .8)';
+			context.fillText(this.menuOptions[n].label, x, y + halfblock + fontSize / 3);
+			
+			y += this.gridScale + spacing;
+		}
+	context.restore();
+};
+
+// this is just called as a first step in initializing the menu, setting up event triggering etc.
+gameClass.prototype.initializeMenu = function(){
+	var lastButtonState = -1;
+	var mousex, mousey;
+	var currentButton = -1;
+	var me = this;
+	this.canvas.onmousemove = function(evt){
+		var n;
+		mousex = evt.offsetX;
+		mousey = evt.offsetY;
+		currentButton = -1;
+		for(n = 0; n < me.menuOptions.length; n++){
+			if(mousex >= me.menuOptions[n].x && mousex <= me.menuOptions[n].x + me.menuOptions[n].width){
+				if(mousey >= me.menuOptions[n].y && mousey <= me.menuOptions[n].y + me.menuOptions[n].height){
+					currentButton = n;
+					me.menuOptions[n].hovering = 1;
+				}else{
+					me.menuOptions[n].hovering = 0;
+				}
+			}else{
+				me.menuOptions[n].hovering = 0;
+			}
+		}
+	};
+
+	this.canvas.onmousedown = function(){
+		//console.log(currentButton);
+		if(currentButton != -1){
+			if(lastButtonState == -1){
+				me.menuOptions[currentButton].action();
+			}
+		}
+	}
+};
+
+gameClass.prototype.start = function(){
+
+	// turn the main menu events
+	this.canvas.onmousedown = null;
+	this.canvas.onmousemove = null;
+
+	// reset the player, balls, game.blocks, etc.
+	player = new playerClass(this);
+	player.x = Math.ceil(this.gridSize.x * this.gridScale >> 1);
+	this.addBall();
+	player.ballSpeed = this.gridScale / 5;
+	this.blockStrength = 1;
+	this.blocks = [];
+
+	// let the game begin
+	this.startRound();
+};
+
+gameClass.prototype.addBlockRow = function(){
+	var n, idx;
+	do{
+		for(n = 0; n < this.gridSize.x; n++){
+			if(Math.random() < this.blockProbability){
+				idx = this.blocks.length;
+				this.blocks[idx] = new blockClass(this.blockStrength);
+				this.blocks[idx].position = {
+					x : n,
+					y : -1 // <-- place it above the game, as they'll be shifting down afterward
+				};
+				if(Math.random() < this.bonusBlockChance){
+					this.blocks[idx].hasBonus = true;
+				}
+			}
+		}
+	}while(this.blocks.length == 0);
+}
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+// 		the player
+/////////////////////////////////////////////////////////////////////////////////////////////
+var playerClass = function(game){
 	this.level = 0;
 	this.x = 0;
 	this.newX = 0;
 	this.angle = 0;
 	this.ballSpeed = 16;
-	this.launchFrequency = Math.floor(settings.minBallRadius * 10);
-	this.balls = [];
+	this.launchFrequency = Math.floor(game.minBallRadius * 10);
 	this.score = 0;
 	this.scoreIncrement = 1;
+	this.game = game;
 };
 
 playerClass.prototype.fire = function(){
-	gameState = 'launching';
+	game.state = 'launching';
 	this.launchBalls();
-}
-
-playerClass.prototype.addBall = function(){
-	var ball = new ballClass();
-	ball.position = {
-		x : this.x,
-		y : settings.gridScale * settings.gridSize.y
-	};
-	this.balls[this.balls.length] = ball;
 }
 
 playerClass.prototype.launchBalls = function(){
 	var idx = 0;
 	var me = this;
 
-	gameState = 'balls moving';
+	game.state = 'balls moving';
 	player.scoreIncrement = 1;
 	var launch = function(){
-		var ball = this.balls[idx++];
+		var ball = this.game.balls[idx++];
 		// set the ball's position to that of the player
 		ball.position = {
 			x : this.x,
-			y : settings.gridScale * settings.gridSize.y
+			y : game.gridScale * (game.gridSize.y - .5)
 		};
 		// set its velocity correctly
 		ball.velocity = {
@@ -61,17 +340,58 @@ playerClass.prototype.launchBalls = function(){
 		}
 		ball.moving = true;
 		// stop after looping through all the balls
-		if(idx < this.balls.length){
+		if(idx < this.game.balls.length){
 			setTimeout(function(){launch.call(me);}, this.launchFrequency);
 		}
 	};
 	launch.call(this);
 };
 
+playerClass.prototype.takeTurn = function(){
+	var me = this;
+	var mouseState = 0;
+
+	var handleMouseDown = function(e){
+		mouseState = 1;
+
+	}
+
+	var handleMouseUp = function(e){
+		if(mouseState == 1){
+			game.canvas.removeEventListener('mousemove', handleMouseTargeting);
+			game.canvas.removeEventListener('mouseup', handleMouseUp);
+			game.canvas.removeEventListener('mousedown', handleMouseDown);
+			me.angle = rel_ang(me.x, game.gridSize.y * game.gridScale, e.offsetX, e.offsetY);
+			me.scrubAimingAngle();
+			me.fire();
+		}
+		mouseState = 0;
+	};
+
+	game.canvas.addEventListener('mousemove', handleMouseTargeting);
+	game.canvas.addEventListener('mousedown', handleMouseDown);
+	game.canvas.addEventListener('mouseup', handleMouseUp);
+};
+
+playerClass.prototype.aim = function(targetX, targetY){
+	this.angle = rel_ang(this.x, game.gridSize.y * game.gridScale, targetX, targetY);
+	this.scrubAimingAngle();
+};
+
+playerClass.prototype.scrubAimingAngle = function(){
+	if(this.angle > game.minAngle && this.angle < Math.PI) this.angle = game.minAngle;
+	if(this.angle < game.maxAngle && this.angle > Math.PI) this.angle = game.maxAngle;
+};
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+// 		the ball
+/////////////////////////////////////////////////////////////////////////////////////////////
 var ballClass = function(){
 	this.position = {x: 0, y : 0};
 	this.velocity = {dx: 0, dy : 0};
-	this.radius = settings.minBallRadius + Math.random() * settings.minBallRadius ;
+	this.radius = game.minBallRadius + Math.random() * game.minBallRadius ;
 	this.moving = false;
 	this.colour = {};
 	this.pickAColour();
@@ -99,20 +419,13 @@ ballClass.prototype.pickAColour = function(){
 	};
 }
 
-function brighten(val){
-	return (val + 255) >> 1;
-}
-
-function darken(val){
-	return (val + 0) >> 1;
-}
 
 ballClass.prototype.draw = function(){
 	if(this.velocity.dy == 0 && this.velocity.dx == 0) return;
-	var radius = settings.gridScale * this.radius * settings.ballRadiusScale;
+	var radius = game.gridScale * this.radius * game.ballRadiusScale;
 	var colour = 'rgb(' + this.colour.red + ', ' + this.colour.green + ', ' + this.colour.blue + ')';
-	var brightColour = 'rgba(' + brighten(this.colour.red) + ', ' + brighten(this.colour.green) + ', ' + brighten(this.colour.blue) + ')';
-	var darkColour = 'rgba(' + darken(this.colour.red) + ', ' + darken(this.colour.green) + ', ' + darken(this.colour.blue) + ')';
+	var brightColour = 'rgba(' + brightenByte(this.colour.red) + ', ' + brightenByte(this.colour.green) + ', ' + brightenByte(this.colour.blue) + ')';
+	var darkColour = 'rgba(' + darkenByte(this.colour.red) + ', ' + darkenByte(this.colour.green) + ', ' + darkenByte(this.colour.blue) + ')';
 	var brightest = 'rgba(255, 255, 255, 0.6)';
 	var sqrtRad = Math.floor(Math.sqrt(2 * radius * radius));
 	context.save()
@@ -153,17 +466,17 @@ ballClass.prototype.draw = function(){
 };
 
 ballClass.prototype.move = function(){
-	var xResolution = settings.gridScale * settings.gridSize.x;
-	var yResolution = settings.gridScale * settings.gridSize.y;
+	var xResolution = game.gridScale * game.gridSize.x;
+	var yResolution = game.gridScale * game.gridSize.y;
 
 
-	var radius = settings.gridScale * this.radius * settings.ballRadiusScale;
+	var radius = game.gridScale * this.radius * game.ballRadiusScale;
 	var sgndx = Math.sign(this.velocity.dx);
 	var sgndy = Math.sign(this.velocity.dy);
 	var absdx = Math.abs(this.velocity.dx);
 	var absdy = Math.abs(this.velocity.dy);
 	var n;
-	var minDY = settings.gridScale / 10;
+	var minDY = game.gridScale / 10;
 	if(minDY < 1) minDY = 1;
 
 
@@ -171,11 +484,11 @@ ballClass.prototype.move = function(){
 		// we're defining this function locally because we need access to the same variables.
 		var n, center;
 		var xdist, ydist;
-		var halfWidth = settings.gridScale >> 1;
-		var cornerRadius = settings.gridScale >> 2;
+		var halfWidth = game.gridScale >> 1;
+		var cornerRadius = game.gridScale >> 2;
 
-		for(n = 0; n < blocks.length; n++){
-			center = blocks[n].centerPoint();
+		for(n = 0; n < game.blocks.length; n++){
+			center = game.blocks[n].centerPoint();
 			xdist = Math.abs(center.x - this.position.x) - radius;
 			if(xdist < halfWidth){
 				ydist = Math.abs(center.y - this.position.y) - radius;
@@ -212,7 +525,7 @@ ballClass.prototype.move = function(){
 							this.angi *= -1
 						}
 					}
-					hitBlock(n);
+					game.blocks[n].hit();
 
 				}else if(this.alreadyHit[n] != undefined){
 					this.alreadyHit[n] = undefined;
@@ -301,6 +614,9 @@ ballClass.prototype.move = function(){
 };
 
 
+/////////////////////////////////////////////////////////////////////////////////////////////
+//		The blocks
+/////////////////////////////////////////////////////////////////////////////////////////////
 var blockClass = function(strength){
 	if(strength == undefined) strength = 1;
 	this.originalStrength = strength
@@ -319,71 +635,44 @@ var blockClass = function(strength){
 	this.pickAColour();
 
 	this.realX = function(){
-		return this.position.x * settings.gridScale;
+		return this.position.x * game.gridScale;
 	};
 
 	this.realY = function(){
-		return this.position.y * settings.gridScale;
+		return this.position.y * game.gridScale;
 	};
 
 	this.hasBonus = false;
 	this.isBonus = false;
-	// a weird one-off for animating blocks that have a bonus ready to go
+	// a weird one-off for animating game.blocks that have a bonus ready to go
 	this.starAngle = Math.random() * Math.PI;
 };
 
 blockClass.prototype.centerPoint = function(){
 	return {
-		x : Math.floor((this.position.x + .5 + this.offset.x) * settings.gridScale),
-		y : Math.floor((this.position.y + .5 + this.offset.y) * settings.gridScale)
+		x : Math.floor((this.position.x + .5 + this.offset.x) * game.gridScale),
+		y : Math.floor((this.position.y + .5 + this.offset.y) * game.gridScale)
 	};
-}
-
-function texasStar(cx, cy, radius, angle, opacity){
-	if(opacity == undefined) opacity = 0.8;
-	var numPoints = 5, n, innerRadius = Math.round(radius * .5), ang, x, y, r;
-	context.save();
-		context.beginPath();
-		context.fillStyle = 'rgba(255, 255, 192, ' + opacity + ')';
-		context.strokeStyle = 'rgb(64, 64, 32)';
-		context.lineWidth = settings.gridScale >> 4;
-		context.translate(cx, cy);
-		context.rotate(Math.sin(angle) * .5);
-		for(n = 0; n < numPoints * 2; n++){
-			r = n & 1 ? innerRadius : radius;
-			ang = (Math.PI / numPoints) * n + Math.PI;
-			x = Math.sin(ang) * r;
-			y = Math.cos(ang) * r;
-			if(n == 0){
-				context.moveTo(x, y);
-			}else{
-				context.lineTo(x, y);
-			}
-		}
-		context.closePath();
-		context.stroke();
-		context.fill();
-	context.restore();
 }
 
 blockClass.prototype.draw = function(x, y){
 	var darkColour2 = 'rgba(' + (this.rgb.red >> 1) + ', ' + (this.rgb.green >> 1) + ', ' + (this.rgb.blue >> 1) + ', 1)';
-	var halfblock = settings.gridScale >> 1;
+	var halfblock = game.gridScale >> 1;
 	if(x == undefined) x = this.realX();
 	if(y == undefined) y = this.realY();
 	context.save();
-		drawNiceBox(x + this.offset.x * settings.gridScale, y + this.offset.y * settings.gridScale, settings.gridScale, settings.gridScale, this.rgb);
+		drawNiceBox(x + this.offset.x * game.gridScale, y + this.offset.y * game.gridScale, game.gridScale, game.gridScale, this.rgb);
 
 		// for some reason the translation done in drawNiceBox isn't
 		// reverted on restore.  I don't know why, as I do have it being
 		// saved and restored before the translation.  This works
 		// though, so barring further incident I guess it'll do.
-//		context.translate(x + halfblock + this.offset.x * settings.gridScale, y + halfblock + this.offset.y * settings.gridScale);
-		context.translate(this.offset.x * settings.gridScale, this.offset.y * settings.gridScale);
+//		context.translate(x + halfblock + this.offset.x * game.gridScale, y + halfblock + this.offset.y * game.gridScale);
+		context.translate(this.offset.x * game.gridScale, this.offset.y * game.gridScale);
 
 		// add some text
 		context.textAlign = 'center';
-		var fontSize = Math.floor(settings.gridScale /  (1 + log10(this.strength) / 2));
+		var fontSize = Math.floor(game.gridScale /  (1 + log10(this.strength) / 2));
 		context.font = fontSize + "px PoorStory";
 
 		context.fillStyle = 'rgba(255, 255, 255, .6)';
@@ -439,20 +728,21 @@ blockClass.prototype.pickAColour = function(){
 	this.colour = 'rgb(' + this.rgb.red + ', ' + this.rgb.green + ', ' + this.rgb.blue + ')';
 }
 
-function hitBlock(idx){
-	blocks[idx].strength--;
-	if(blocks[idx].strength <= 0){
-		if(blocks[idx].hasBonus){
-			blocks[idx].strength = blocks[idx].originalStrength;
-			blocks[idx].hasBonus = false;
-			blocks[idx].isBonus = true;
-		}else if(blocks[idx].isBonus){
-			player.scoreIncrement += blocks[idx].originalStrength;
+// impact the block with a ball
+blockClass.prototype.hit = function(idx){
+	this.strength--;
+	if(this.strength <= 0){
+		if(this.hasBonus){
+			this.strength = this.originalStrength;
+			this.hasBonus = false;
+			this.isBonus = true;
+		}else if(this.isBonus){
+			player.scoreIncrement += this.originalStrength;
 			player.score += player.scoreIncrement;
 			console.log("ADD BONUS UPGRADE HERE");
-			blocks.splice(idx, 1);
+			blockClass.removeBlock(this);
 		}else{
-			blocks.splice(idx, 1);
+			blockClass.removeBlock(this);
 			player.score += player.scoreIncrement;
 			player.scoreIncrement ++;
 		}
@@ -461,79 +751,81 @@ function hitBlock(idx){
 	}
 }
 
-
-////////////////////////////////
-
-function startRound(){
-	player.level++;
-
-	dropBlocks(function(gameOver){
-		if(gameOver){
-			doGameOver();
-		}else{
-			// wait for user input
-			gameState = 'aiming';
-			playerTurn();
+// delete a block
+blockClass.removeBlock = function(block){
+	for(var idx = 0; idx < game.blocks.length; idx++){
+		if(game.blocks[idx] == block){
+			game.blocks.splice(idx, 1);
+			break;
 		}
-	});
-
-
-}
-
-function playerTurn(){
-	var mouseState = 0;
-
-	var handleMouseDown = function(e){
-		mouseState = 1;
-
 	}
-
-	var handleMouseUp = function(e){
-		if(mouseState == 1){
-			gameCanvas.removeEventListener('mousemove', handleMouseTargeting);
-			gameCanvas.removeEventListener('mouseup', handleMouseUp);
-			gameCanvas.removeEventListener('mousedown', handleMouseDown);
-			player.angle = rel_ang(player.x, settings.gridSize.y * settings.gridScale, e.offsetX, e.offsetY);
-			player.angle = scrubAimingAngle(player.angle);
-			player.fire();
-		}
-		mouseState = 0;
-	};
-
-	gameCanvas.addEventListener('mousemove', handleMouseTargeting);
-	gameCanvas.addEventListener('mousedown', handleMouseDown);
-	gameCanvas.addEventListener('mouseup', handleMouseUp);
 }
 
 
+/////////////////////////////////////////////////////////////////////////////////////////////
+// 		Initial game setup
+/////////////////////////////////////////////////////////////////////////////////////////////
+function initialize(step){
+	if(step == undefined){
+		step = 'initGame';
+	}
+	switch(step){
+		case 'initGame':
+			game = new gameClass;
+			setTimeout(function(){initialize('initCanvas');}, 0);
+			break;
+		case 'initCanvas':
+			var width, height, bestSize;
+			game.canvas = document.getElementById('gameCanvas');
+
+			// get the right size for the canvas
+			try{
+				bestSize = bestCanvasSize();
+			}catch(e){
+				die(e);
+				return;
+			}
+
+			game.canvas.width = bestSize.width;
+			game.canvas.height = bestSize.height;
+			game.gridScale = bestSize.scale;
+
+			// get drawing context
+			context = game.canvas.getContext('2d');
+			setTimeout(function(){initialize('finish');}, 0);
+			break;
+		case 'finish':
+			game.state = 'menu';
+			setInterval(function(){game.render();}, game.animationFrequency);
+			game.initializeMenu();
+			break;
+		default:
+			throw 'initialize: invalid step name "' + step + '"';
+	}
+}
+
+window.onload = function(){
+	initialize();
+};
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+//		Function definitions
+/////////////////////////////////////////////////////////////////////////////////////////////
 var handleMouseTargeting = (function(){
 	var lastTime = 0;
 	return function(e){
 		// only update the arrow with the animation frequency at the most
 		var dateTime = new Date();
 		var time = dateTime.getTime();
-		if(time < lastTime + settings.animationFrequency){
+		if(time < lastTime + game.animationFrequency){
 			return;
 		}
 		lastTime = time;
 
 		// get the relative angle between the current location and the mouse pointer
-		doAiming(e.offsetX, e.offsetY);
+		player.aim(e.offsetX, e.offsetY);
 	}
 })();
-
-function scrubAimingAngle(angle){
-	if(angle > settings.minAngle && angle < Math.PI) angle = settings.minAngle;
-	if(angle < settings.maxAngle && angle > Math.PI) angle = settings.maxAngle;
-	return angle;
-}
-
-function doAiming(targetX, targetY){
-	// calculate the correct angle
-	player.angle = scrubAimingAngle(rel_ang(
-		player.x, settings.gridSize.y * settings.gridScale, targetX, targetY
-	));
-}
 
 function renderArrow(){
 	var arrowPoints = [
@@ -541,7 +833,7 @@ function renderArrow(){
 	];
 	var n;
 	var px = player.x;
-	var py = settings.gridSize.y * settings.gridScale
+	var py = (game.gridSize.y - .5) * game.gridScale
 
 	var arrowStyle = context.createLinearGradient(0, 0, 170, 0);
 	arrowStyle.addColorStop(0, "#FEA");
@@ -551,7 +843,7 @@ function renderArrow(){
 
 	// scale the arrow vectors to match the game scale
 	for(n = 0; n < arrowPoints.length; n++){
-		arrowPoints[n] *= settings.gridScale >> 3;
+		arrowPoints[n] *= game.gridScale >> 3;
 	}
 
 	// drow the arrow
@@ -578,158 +870,33 @@ function renderArrow(){
 
 }
 
-function animateBalls(){
-	var animated = false;
-	var ball, n;
-	for(n = 0; n < player.balls.length; n++){
-		ball = player.balls[n];
-		if(ball.velocity.dx == 0 && ball.velocity.dy == 0){
-			ball.draw();
-			continue;
-		}
-		animated = true;
+function drawStats(){
+	context.save();
+		var fontSize = Math.floor(game.gridScale * .39);
+		var marginSize = fontSize / 2;
+		var bottomY = game.gridScale * game.gridSize.y - marginSize;
+		var rightX = game.gridScale * game.gridSize.x - marginSize / 2;
+		context.fillStyle = 'rgba(160, 160, 160, .6)';
+		context.fillRect(0, game.gridScale * (game.gridSize.y - .75), game.canvas.width, game.gridScale * .75);
+		context.fillStyle = 'rgba(190, 190, 190, .6)';
+		context.fillRect(0, game.gridScale * (game.gridSize.y - .75), game.canvas.width, game.gridScale * .125);
+		context.font = fontSize + "px jelleeroman";
+		context.textAlign = 'left';
+		context.fillStyle = 'rgba(128, 64, 48, 1)';
+		context.fillText('LEVEL: ' + player.level, marginSize + 3, bottomY + 3);
+		context.fillStyle = 'rgba(255, 196, 128, 1)';
+		context.fillText('LEVEL: ' + player.level, marginSize, bottomY);
 
-		ball.move();
-
-		ball.draw();
-
-	}
-
-	if(!animated){
-		endRound();
-	}
-}
-
-function endRound(){
-	gameState = 'endRound';
-	player.x = player.newX;
-	// additional stuff can be put here
-	blockStrength++;
-	player.addBall();
-	startRound();
-}
-
-function renderGame(){
-	var n;
-	drawBackground();
-	if(gameState != 'menu'){
-		for(n = 0; n < blocks.length; n++){
-			blocks[n].draw();
-		}
-		drawStats();
-	}
-	switch(gameState){
-		case 'aiming':
-			renderArrow();
-			break;
-		case 'balls moving':
-			animateBalls();
-			break;
-		case 'menu':
-			drawGameMenu();
-			break;
-	}
-
-}
-
-var menuOptions = [
-	{
-		'label' : 'Play',
-		'action' : startGame,
-		'hovering' : 0
-	},
-	{
-		'label' : 'Settings',
-		'action' : function(){alert('Not implemented');},
-		'hovering' : 0
-	},
-	{
-		'label' : 'About',
-		'action' : function(){alert('Not implemented');},
-		'hovering' : 0
-	},
-	{
-		'label' : 'Exit',
-		'action' : function(){alert('Not implemented');},
-		'hovering' : 0
-	}
-];
-function drawGameMenu(){
-	var spacing = settings.gridScale >> 2;
-	var halfblock = settings.gridScale >> 1;
-	var height = settings.gridScale * settings.gridSize.y;
-	var y = (height - menuOptions.length * (settings.gridScale + spacing)) >> 1;
-	var n;
-	var x = (settings.gridSize.x * settings.gridScale) >> 1;
-	var colour;
-	context.save()
-		context.textAlign = 'center';
-		for(n = 0; n < menuOptions.length; n++){
-			var fontSize = settings.gridScale * .8;
-			menuOptions[n].x = settings.gridScale;
-			menuOptions[n].y = y;
-			menuOptions[n].width = settings.gridScale * (settings.gridSize.x - 2);
-			menuOptions[n].height = settings.gridScale;
-
-			if(menuOptions[n].hovering == 1){
-				menuOptions[n].x -= settings.gridScale >> 3;
-				menuOptions[n].y -= settings.gridScale >> 3;
-				menuOptions[n].width += settings.gridScale >> 2;
-				menuOptions[n].height += settings.gridScale >> 2;
-				fontSize += fontSize >> 2;
-				colour = {red : 200, green : 230, blue : 160};
-			}else{
-				colour = {red : 140, green : 200, blue : 120};
-			}
-
-			context.font = fontSize + "px PoorStory";
-			drawNiceBox(menuOptions[n].x, menuOptions[n].y, menuOptions[n].width, menuOptions[n].height, colour);//, {red : 200, green : 192, blue : 160 });
-
-			context.fillStyle = 'rgba(255, 255, 255, .6)';
-			context.fillText(menuOptions[n].label, x + 2, y + halfblock + 2 + fontSize / 3);
-
-			context.fillStyle = 'rgba(0, 48, 0, .8)';
-			context.fillText(menuOptions[n].label, x, y + halfblock + fontSize / 3);
-			
-			y += settings.gridScale + spacing;
-		}
+		context.textAlign = 'right';
+		context.fillStyle = 'rgb(48, 64, 32, 1)';
+		context.fillText('SCORE: ' + player.score, rightX + 3, bottomY + 3);
+		context.fillStyle = 'rgba(196, 255, 128, 1)';
+		context.fillText('SCORE: ' + player.score, rightX, bottomY);
 	context.restore();
 }
 
-// this is just called as a first step in initializing the menu, setting up event triggering etc.
-function initializeMenu(){
-	var lastButtonState = -1;
-	var mousex, mousey;
-	var currentButton = -1;
-	gameCanvas.onmousemove = function(evt){
-		var n;
-		mousex = evt.offsetX;
-		mousey = evt.offsetY;
-		currentButton = -1;
-		for(n = 0; n < menuOptions.length; n++){
-			if(mousex >= menuOptions[n].x && mousex <= menuOptions[n].x + menuOptions[n].width){
-				if(mousey >= menuOptions[n].y && mousey <= menuOptions[n].y + menuOptions[n].height){
-					currentButton = n;
-					menuOptions[n].hovering = 1;
-				}else{
-					menuOptions[n].hovering = 0;
-				}
-			}else{
-				menuOptions[n].hovering = 0;
-			}
-		}
-	};
 
-	gameCanvas.onmousedown = function(){
-		//console.log(currentButton);
-		if(currentButton != -1){
-			if(lastButtonState == -1){
-				menuOptions[currentButton].action();
-			}
-		}
-	}
-}
-
+// render a nicely shaded rectangle with rounded corners
 function drawNiceBox(x, y, width, height, colour){
 	var edgeBias = height < width ? height >> 3 : width >> 3;
 
@@ -800,60 +967,13 @@ function drawNiceBox(x, y, width, height, colour){
 	context.restore();
 }
 
-function drawStats(){
-	context.save();
-		var fontSize = Math.floor(settings.gridScale * .39);
-		var marginSize = fontSize / 2;
-		var bottomY = settings.gridScale * settings.gridSize.y - marginSize;
-		var rightX = settings.gridScale * settings.gridSize.x - marginSize / 2;
-		context.fillStyle = 'rgba(160, 160, 160, .6)';
-		context.fillRect(0, settings.gridScale * (settings.gridSize.y - .75), gameCanvas.width, settings.gridScale * .75);
-		context.fillStyle = 'rgba(190, 190, 190, .6)';
-		context.fillRect(0, settings.gridScale * (settings.gridSize.y - .75), gameCanvas.width, settings.gridScale * .125);
-		context.font = fontSize + "px jelleeroman";
-		context.textAlign = 'left';
-		context.fillStyle = 'rgba(128, 64, 48, 1)';
-		context.fillText('LEVEL: ' + player.level, marginSize + 3, bottomY + 3);
-		context.fillStyle = 'rgba(255, 196, 128, 1)';
-		context.fillText('LEVEL: ' + player.level, marginSize, bottomY);
-
-		context.textAlign = 'right';
-		context.fillStyle = 'rgb(48, 64, 32, 1)';
-		context.fillText('SCORE: ' + player.score, rightX + 3, bottomY + 3);
-		context.fillStyle = 'rgba(196, 255, 128, 1)';
-		context.fillText('SCORE: ' + player.score, rightX, bottomY);
-	context.restore();
-}
-
-drawBackground = (function(){
-	var ang = 0;
-	var radius = null;//settings.gridScale;
-	return function(){
-		if(radius === null){
-			radius =  (settings.gridSize.y >> 3) * settings.gridScale;// / 5;
-		}
-		ang += .01;
-		if(ang > 4 * Math.PI) ang -= 4 * Math.PI;
-
-		//context.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
-
-		context.save();
-		context.fillStyle = "#FFC";
-		context.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
-		context.restore();
-		doBGSine(ang * 2 + 2, radius / 2, gameCanvas.height >> 2, "#EFE0A0"); 
-		doBGSine(ang, radius, gameCanvas.height >> 1, "#A85");
-		doBGSine(ang  / 2 + 1, radius, gameCanvas.height * .75, "#863");
-
-
-	};
-})();
-
+// render a sine wave with the bottom side filled in with colour.  Used for
+// background animation
 function doBGSine(ang, radius, midpoint, colour){
 	var x, y;
-	var stepSize = settings.gridScale * .1;
+	var stepSize = game.gridScale * .1;
 	var myAng = ang;
-	var myAngi = settings.gridScale * .0005;
+	var myAngi = game.gridScale * .0005;
 	context.save();
 		context.fillStyle = colour;
 		context.beginPath();
@@ -865,159 +985,37 @@ function doBGSine(ang, radius, midpoint, colour){
 			myAng += myAngi;
 
 			context.lineTo(x, y);
-		}while(x < gameCanvas.width);
-		context.lineTo(gameCanvas.width, gameCanvas.height);
-		context.lineTo(0, gameCanvas.height);
+		}while(x < game.canvas.width);
+		context.lineTo(game.canvas.width, game.canvas.height);
+		context.lineTo(0, game.canvas.height);
 		context.fill();
 
 	context.restore();
 }
 
-function addBlockRow(){
-	var n, idx;
-	do{
-		for(n = 0; n < settings.gridSize.x; n++){
-			if(Math.random() < settings.blockProbability){
-				idx = blocks.length;
-				blocks[idx] = new blockClass(blockStrength);
-				blocks[idx].position = {
-					x : n,
-					y : -1 // <-- place it above the game, as they'll be shifting down afterward
-				};
-				if(Math.random() < settings.bonusBlockChance){
-					blocks[idx].hasBonus = true;
-				}
-			}
-		}
-	}while(blocks.length == 0);
-}
 
-function dropBlocks(callback){
-	var n, gameOver = 0;
-	var tally = 0, increment = .0012;
-	// add a top row
-	addBlockRow();
-	// move them down and shift their offset up
-	for(n = 0; n < blocks.length; n++){
-		blocks[n].position.y ++;
-		blocks[n].offset.y --;
-	}
-
-	// drop them by reducing the offset at an accelerating rate
-	var interval = setInterval(function(){
-		for(n = 0; n < blocks.length; n++){
-			blocks[n].offset.y += increment;
-		}
-		tally += increment;
-		increment *= 1.5;
-		if(tally >= 1){
-			clearInterval(interval);
-			for(n = 0; n < blocks.length; n++){
-				blocks[n].offset.y -= tally;
-				blocks[n].offset.y ++;
-				if(blocks[n].position.y == settings.gridSize.y){
-					gameOver = 1;
-				}
-			}
-			// We're all done, let's do the callback
-			callback(gameOver);
-		}
-	}, settings.animationFrequency);
-}
-
-function doGameOver(){
-	console.log('Game Over!');
-	// WRITE ME - for now this will just restart the game, but in the
-	// future it should bring you a menu prompt that will ultimately lead
-	// to the initial game load as well.
-	//showMenu();
-	gameState = 'menu';
-	initializeMenu();
-}
-
-function startGame(){
-
-	// turn the main menu events
-	gameCanvas.onmousedown = null;
-	gameCanvas.onmousemove = null;
-
-	// reset the player, balls, blocks, etc.
-	player = new playerClass();
-	player.x = Math.ceil(settings.gridSize.x * settings.gridScale >> 1);
-	player.addBall();
-	player.ballSpeed = settings.gridScale / 5;
-	blockStrength = 1;
-	blocks = [];
-
-	// let the game begin
-	startRound();
-}
-
-/////////////////////////////////
+// calculate the best fitting canvas for the available space
 function bestCanvasSize(){
+	var gameWrapper = document.getElementById('gameWrapper');
 	var parentWidth = gameWrapper.clientWidth;
 	var parentHeight = gameWrapper.clientHeight;
 	var marginScale = .2;
 
-	var gridScale = Math.floor(parentHeight / (settings.gridSize.y + marginScale));
-	if((settings.gridSize.x + marginScale) * gridScale > parentWidth){
-		gridScale = Math.floor(parentWidth / (settings.gridSize.x + marginScale));
+	var gridScale = Math.floor(parentHeight / (game.gridSize.y + marginScale));
+	if((game.gridSize.x + marginScale) * gridScale > parentWidth){
+		gridScale = Math.floor(parentWidth / (game.gridSize.x + marginScale));
 	}
 
-	if(gridScale < settings.minTileSize){
+	if(gridScale < game.minTileSize){
 		throw "Could not create an area large enough for this game";
 	}
 
 	return {
 		scale : gridScale,
-		width : settings.gridSize.x * gridScale,
-		height: settings.gridSize.y * gridScale
+		width : game.gridSize.x * gridScale,
+		height: game.gridSize.y * gridScale
 	};
 }
-
-function initialize(step){
-	if(step == undefined){
-		step = 'createObjects';
-	}
-	gameState = step;
-	switch(step){
-		case 'createObjects':
-			setTimeout(function(){initialize('initCanvas');}, 0);
-			blockStrength = 1;
-			break;
-		case 'initCanvas':
-			var width, height, bestSize;
-			canvasWrapper = document.getElementById('canvasWrapper');
-			gameWrapper = document.getElementById('gameWrapper');
-			gameCanvas = document.getElementById('gameCanvas');
-
-			// get the right size for the canvas
-			try{
-				bestSize = bestCanvasSize();
-			}catch(e){
-				die(e);
-				return;
-			}
-
-			gameCanvas.width = bestSize.width;
-			gameCanvas.height = bestSize.height;
-			settings.gridScale = bestSize.scale;
-
-			// get drawing context
-			context = gameCanvas.getContext('2d');
-			setTimeout(function(){initialize('finish');}, 0);
-			break;
-		case 'finish':
-			gameState = 'menu';
-			animationInterval = setInterval(renderGame, settings.animationFrequency);
-			initializeMenu();
-			break;
-		default:
-			throw 'initialize: invalid step name "' + step + '"';
-	}
-}
-
-window.onload = function(){initialize();};
 
 // grabbed from stack overflow: https://stackoverflow.com/questions/550574/how-to-terminate-the-script-in-javascript
 // this function will terminate flow in the program.
@@ -1056,3 +1054,42 @@ function die(status) {
 function log10(value){
 	return Math.log(value) / Math.log(10);
 }
+
+// Average a value toward 255.  Meant for handling byte values in colours
+function brightenByte(val){
+	return (val + 255) >> 1;
+}
+
+// Average toward zero.  Same reason
+function darkenByte(val){
+	return (val + 0) >> 1;
+}
+
+// render a texas star.  Used in several places
+function texasStar(cx, cy, radius, angle, opacity){
+	if(opacity == undefined) opacity = 0.8;
+	var numPoints = 5, n, innerRadius = Math.round(radius * .5), ang, x, y, r;
+	context.save();
+		context.beginPath();
+		context.fillStyle = 'rgba(255, 255, 192, ' + opacity + ')';
+		context.strokeStyle = 'rgb(64, 64, 32)';
+		context.lineWidth = game.gridScale >> 4;
+		context.translate(cx, cy);
+		context.rotate(Math.sin(angle) * .5);
+		for(n = 0; n < numPoints * 2; n++){
+			r = n & 1 ? innerRadius : radius;
+			ang = (Math.PI / numPoints) * n + Math.PI;
+			x = Math.sin(ang) * r;
+			y = Math.cos(ang) * r;
+			if(n == 0){
+				context.moveTo(x, y);
+			}else{
+				context.lineTo(x, y);
+			}
+		}
+		context.closePath();
+		context.stroke();
+		context.fill();
+	context.restore();
+}
+
