@@ -59,9 +59,17 @@
 	</style>
 	<script type="text/javascript" src="geometry.js"></script>
 	<script type="text/javascript" src="blockout.js"></script>
+	<script type="text/javascript">
+		function start(){
+			var button = document.getElementById('startButton');
+			button.parentElement.removeChild(button);
+			initialize();
+		}
+	</script>
 </head>
 <body>
 	<div id="gameWrapper">
+		<button id="startButton" style="font-size:30px" onclick='start()'>start</button>
 		<div id="canvasWrapper">
 			<canvas id="gameCanvas"></canvas>
 		</div>

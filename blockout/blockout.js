@@ -1,5 +1,6 @@
 var game, context, player;
 
+var soundEffects, music, muted = false, musicVolume = .5, effectsVolume = 1;
 /////////////////////////////////////////////////////////////////////////////////////////////
 // the game class
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -35,7 +36,7 @@ var gameClass = function(){
 		},
 		{
 			'label' : 'Exit',
-			'action' : function(){alert('Not implemented');},
+			'action' : function(){ document.location.href = window.location;},
 			'hovering' : 0
 		}
 	];
@@ -69,7 +70,7 @@ gameClass.prototype.dropBlocks = function(callback){
 	var n, gameOver = 0;
 	var tally = 0, increment = .0012;
 	var me = this;
-
+	playSound('swish');
 	// add a top row
 	this.addBlockRow();
 	// move them down and shift their offset up
@@ -107,6 +108,7 @@ gameClass.prototype.startRound = function(){
 	this.dropBlocks(function(gameOver){
 		if(gameOver){
 			// need to add some "game over" animation
+			playSound('gameOver');
 			console.log('add game over animation');
 			game.state = 'menu';
 			game.initializeMenu();
@@ -497,7 +499,7 @@ ballClass.prototype.move = function(){
 						continue;
 					}
 					this.alreadyHit[n] = 1;
-
+					playSound('blockHit');
 					if(Math.abs(xdist - ydist) < cornerRadius){
 						var speed = distance(this.velocity.dx, this.velocity.dy);
 						var dx = this.position.x - center.x;
@@ -547,6 +549,7 @@ ballClass.prototype.move = function(){
 			   (this.position.x < radius && this.velocity.dx < 0) ||
 			   (this.position.x >= xResolution - radius && this.velocity.dx > 0)
 			){
+				playSound('thud');
 				sgndx *= -1;
 				this.velocity.dx *= -1;
 				this.position.x += 2 * sgndx;
@@ -561,6 +564,7 @@ ballClass.prototype.move = function(){
 			if(this.stepTally > absdx){
 				this.position.y += sgndy;
 				if(this.position.y < radius){
+					playSound('thud');
 					sgndy *= -1;
 					this.velocity.dy *= -1;
 					this.position.y += 2 * sgndy;
@@ -579,6 +583,7 @@ ballClass.prototype.move = function(){
 		for(n = 0; n < absdy; n++){
 			this.position.y += sgndy;
 			if(this.position.y < radius){
+				playSound('thud');
 				sgndy *= -1;
 				this.velocity.dy *= -1;
 				this.position.y += 2 * sgndy;
@@ -598,6 +603,7 @@ ballClass.prototype.move = function(){
 				   (this.position.x < radius && this.velocity.dx < 0) ||
 				   (this.position.x >= xResolution - radius && this.velocity.dx > 0)
 				){
+					playSound('thud');
 					sgndx *= -1;
 					this.velocity.dx *= -1;
 					this.position.x += 2 * sgndx;
@@ -792,6 +798,39 @@ function initialize(step){
 
 			// get drawing context
 			context = game.canvas.getContext('2d');
+
+			setTimeout(function(){initialize('loadSounds');}, 0);
+			break;
+		case 'loadSounds':
+			// we'll load the sounds first to get the music started ASAP
+			music = [
+				new Audio('assets/music/Wintergatan\ -\ Wintergatan\ -\ 05\ Biking\ Is\ Better.mp3'),
+				new Audio('assets/music/Wintergatan\ -\ Wintergatan\ -\ 07\ Starmachine2000.mp3')
+			];
+			for(n in music){
+				music[n].volume = musicVolume;
+				music[n].addEventListener("ended", function(){
+					music.push(music.shift());
+					music[0].play();
+				});
+			}
+
+			var soundPath = 'assets/sounds/';
+			var zapPath = soundPath + 'zapsplat/';
+			var freesoundPath = soundPath + 'freesound/';
+			soundEffects = {
+				swish : new Audio(soundPath + 'swish.wav'),
+				gameOver : new Audio(zapPath + "cartoon_fail_strings_trumpet.mp3"),
+				thud : new Audio(soundPath + 'sideImpact.wav'),
+				blockHit: new Audio(freesoundPath + '539169__eminyildirim__glass-hit.wav')
+
+			};
+			for(n in soundEffects){
+				soundEffects[n].volume = effectsVolume;
+			}
+
+			soundOn();
+
 			setTimeout(function(){initialize('finish');}, 0);
 			break;
 		case 'finish':
@@ -803,10 +842,14 @@ function initialize(step){
 			throw 'initialize: invalid step name "' + step + '"';
 	}
 }
+/*
+
+We actually want this active, but for now we want to trigger it with a button for sound to work properly
 
 window.onload = function(){
 	initialize();
 };
+*/
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 //		Function definitions
@@ -1093,3 +1136,44 @@ function texasStar(cx, cy, radius, angle, opacity){
 	context.restore();
 }
 
+
+// @@@@@@@@@@@@@@@@@@@@@@@ copied from swix 
+function playSound(soundName, force){
+	if(force == undefined) force = 0;
+	if(!muted || force){
+		var sound = soundEffects[soundName].cloneNode();
+		sound.volume = effectsVolume;
+		sound.play();
+	}
+}
+
+function soundOn(){
+
+	var playPromise = music[0].play();
+
+	if (playPromise !== undefined) {
+		playPromise.then(function() {
+			muted = false;
+//			$('#soundCheckmark').html('On&nbsp;');
+		}).catch(function(error) {
+			muted = true;
+//			$('#soundCheckmark').html('Off');
+			console.log(error);
+		});
+	}else{
+		muted = false;
+//		$('#soundCheckmark').html('On&nbsp;');
+	}
+
+}
+
+function soundOff(){
+	music[0].pause();
+	muted = true;
+	//	$('#soundCheckmark').html('Off');
+}
+
+function toggleSound(){
+	muted ? soundOn() : soundOff();
+}
+//  /@@@@@@@@@@@@@@@@@@@@@@@@@@@
