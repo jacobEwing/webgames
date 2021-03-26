@@ -12,7 +12,7 @@ var settings = {
 };
 
 var gameCanvas, canvasWrapper, gameWrapper, context, player, blockStrength, blocks, gameState;
-
+var animationInterval;
 
 
 var playerClass = function(){
@@ -71,11 +71,11 @@ playerClass.prototype.launchBalls = function(){
 var ballClass = function(){
 	this.position = {x: 0, y : 0};
 	this.velocity = {dx: 0, dy : 0};
-	this.animaionInterval = null;
 	this.radius = settings.minBallRadius + Math.random() * settings.minBallRadius ;
 	this.moving = false;
 	this.colour = {};
 	this.pickAColour();
+
 	// balls can now rotate as they fly, but for the default ball type, that shouldn't happen
 	this.angle = 0;//Math.random() * 2 * Math.PI;
 	this.angi = 0;//Math.random() < 0.5 ? -.1 : .1;
@@ -85,6 +85,9 @@ var ballClass = function(){
 	// to the ball's move function, then it becomes slightly inaccurate, making the aim often inaccurate
 	// by several pixels.
 	this.stepTally = 0;
+
+	// used to avoid getting stuck in the same block bouncing back and forth.
+	this.alreadyHit = {};
 
 };
 
@@ -163,7 +166,6 @@ ballClass.prototype.move = function(){
 	var minDY = settings.gridScale / 10;
 	if(minDY < 1) minDY = 1;
 
-	var alreadyHit = {};
 
 	var testBlockCollision = function(){
 		// we're defining this function locally because we need access to the same variables.
@@ -178,10 +180,10 @@ ballClass.prototype.move = function(){
 			if(xdist < halfWidth){
 				ydist = Math.abs(center.y - this.position.y) - radius;
 				if(ydist < halfWidth){	
-					if(alreadyHit[n] != undefined){
+					if(this.alreadyHit[n] != undefined){
 						continue;
 					}
-					alreadyHit[n] = 1;
+					this.alreadyHit[n] = 1;
 
 					if(Math.abs(xdist - ydist) < cornerRadius){
 						var speed = distance(this.velocity.dx, this.velocity.dy);
@@ -212,11 +214,11 @@ ballClass.prototype.move = function(){
 					}
 					hitBlock(n);
 
-				}else if(alreadyHit[n] != undefined){
-					alreadyHit[n] = undefined;
+				}else if(this.alreadyHit[n] != undefined){
+					this.alreadyHit[n] = undefined;
 				}
-			}else if(alreadyHit[n] != undefined){
-				alreadyHit[n] = undefined;
+			}else if(this.alreadyHit[n] != undefined){
+				this.alreadyHit[n] = undefined;
 			}
 		}
 	}
@@ -236,6 +238,9 @@ ballClass.prototype.move = function(){
 				this.velocity.dx *= -1;
 				this.position.x += 2 * sgndx;
 				this.angi *= -1;
+				if(Math.abs(this.velocity.dy) < 1){
+					this.velocity.dy += 1 * (Math.random() < .5 ? 1 : -1);
+				}
 			}
 
 
@@ -334,11 +339,12 @@ blockClass.prototype.centerPoint = function(){
 	};
 }
 
-function texasStar(cx, cy, radius, angle){
+function texasStar(cx, cy, radius, angle, opacity){
+	if(opacity == undefined) opacity = 0.8;
 	var numPoints = 5, n, innerRadius = Math.round(radius * .5), ang, x, y, r;
 	context.save();
 		context.beginPath();
-		context.fillStyle = 'rgba(255, 255, 192, .8)';
+		context.fillStyle = 'rgba(255, 255, 192, ' + opacity + ')';
 		context.strokeStyle = 'rgb(64, 64, 32)';
 		context.lineWidth = settings.gridScale >> 4;
 		context.translate(cx, cy);
@@ -361,82 +367,35 @@ function texasStar(cx, cy, radius, angle){
 }
 
 blockClass.prototype.draw = function(x, y){
-	var darkColour = 'rgba(' + (this.rgb.red >> 1) + ', ' + (this.rgb.green >> 1) + ', ' + (this.rgb.blue >> 1) + ', 0.6)';
 	var darkColour2 = 'rgba(' + (this.rgb.red >> 1) + ', ' + (this.rgb.green >> 1) + ', ' + (this.rgb.blue >> 1) + ', 1)';
-	var quarterblock = settings.gridScale >> 3;
 	var halfblock = settings.gridScale >> 1;
 	if(x == undefined) x = this.realX();
 	if(y == undefined) y = this.realY();
 	context.save();
-		context.translate(x + halfblock + this.offset.x * settings.gridScale, y + halfblock + this.offset.y * settings.gridScale);
-		if(this.isBonus){
-			context.rotate(Math.sin(this.starAngle * 2) / 10);
-		}
-		// let's draw the surrounding box with rounded corners:
-		x = -halfblock;
-		y = -halfblock;
+		drawNiceBox(x + this.offset.x * settings.gridScale, y + this.offset.y * settings.gridScale, settings.gridScale, settings.gridScale, this.rgb);
 
-		context.beginPath();
-		context.fillStyle = this.colour;
-		context.strokeStyle = this.negative;
-		context.lineWidth = settings.gridScale >> 4;
-		context.moveTo(x, y + quarterblock);
-		context.quadraticCurveTo(x, y, x + quarterblock, y);
-		context.lineTo(x + settings.gridScale - quarterblock, y);
+		// for some reason the translation done in drawNiceBox isn't
+		// reverted on restore.  I don't know why, as I do have it being
+		// saved and restored before the translation.  This works
+		// though, so barring further incident I guess it'll do.
+//		context.translate(x + halfblock + this.offset.x * settings.gridScale, y + halfblock + this.offset.y * settings.gridScale);
+		context.translate(this.offset.x * settings.gridScale, this.offset.y * settings.gridScale);
 
-		context.quadraticCurveTo(x + settings.gridScale, y, x + settings.gridScale, y + quarterblock);
-		context.lineTo(x + settings.gridScale, y + settings.gridScale - quarterblock);
+		// add some text
+		context.textAlign = 'center';
+		var fontSize = Math.floor(settings.gridScale /  (1 + log10(this.strength) / 2));
+		context.font = fontSize + "px PoorStory";
 
-		context.quadraticCurveTo(x + settings.gridScale, y + settings.gridScale, x + settings.gridScale - quarterblock, y + settings.gridScale);
-		context.lineTo(x + quarterblock, y + settings.gridScale);
-
-		context.quadraticCurveTo(x, y + settings.gridScale, x, y + settings.gridScale - quarterblock);
-		context.closePath();
-		context.fill();
-
-		// add some shading, first with white shading at the top
-		context.beginPath();
 		context.fillStyle = 'rgba(255, 255, 255, .6)';
-		context.moveTo(x, y + settings.gridScale - quarterblock);
-		context.lineTo(x, y + quarterblock);
-		context.quadraticCurveTo(x, y, x + quarterblock, y);
-		context.lineTo(x + settings.gridScale - quarterblock, y);
-		context.quadraticCurveTo(x + settings.gridScale, y, x + settings.gridScale, y + quarterblock);
-		context.bezierCurveTo(
-			x, 
-			y, 
-			x + quarterblock, 
-			y + quarterblock, 
-			x, 
-			y + settings.gridScale - quarterblock
-		);
+		context.fillText(this.strength, x + halfblock + 2, y + halfblock + 2 + fontSize / 3);
 
-		context.fill();
-		context.closePath();
-		// and now some dark colour shading at the bottom
-		context.beginPath();
-		context.fillStyle = darkColour;
-		context.moveTo(x + settings.gridScale, y + quarterblock);
-		context.lineTo(x + settings.gridScale, y + settings.gridScale - quarterblock);
-		context.quadraticCurveTo(x + settings.gridScale, y + settings.gridScale, x + settings.gridScale - quarterblock, y + settings.gridScale);
-		context.lineTo(x + quarterblock, y + settings.gridScale);
-		context.quadraticCurveTo(x, y + settings.gridScale, x, y + settings.gridScale - quarterblock);
-		context.bezierCurveTo(
-			x + settings.gridScale,
-			y + settings.gridScale,
-			x + settings.gridScale - quarterblock,
-			y + settings.gridScale - quarterblock,
-			x + settings.gridScale,
-			y + quarterblock
-		);
-
-		context.fill();
-		context.closePath();
+		context.fillStyle = darkColour2;//'rgba(0, 0, 0, 1)';
+		context.fillText(this.strength, x + halfblock, y + halfblock + fontSize / 3);
 
 		if(this.hasBonus){
 			// if this block has a bonus waiting inside, we add a texas star under the number
 			this.starAngle += .1;
-			texasStar(x + halfblock, y + halfblock, halfblock * .8, this.starAngle);
+			texasStar(x + halfblock, y + halfblock, halfblock * .8, this.starAngle, 0.4);
 		}else if(this.isBonus){
 			this.starAngle += .15
 			texasStar(
@@ -460,16 +419,6 @@ blockClass.prototype.draw = function(x, y){
 			
 		}
 
-		// add some text
-		context.textAlign = 'center';
-		var fontSize = Math.floor(settings.gridScale /  (1 + log10(this.strength) / 2));
-		context.font = fontSize + "px PoorStory";
-
-		context.fillStyle = 'rgba(255, 255, 255, .6)';
-		context.fillText(this.strength, x + halfblock + 2, y + halfblock + 2 + fontSize / 3);
-
-		context.fillStyle = darkColour2;//'rgba(0, 0, 0, 1)';
-		context.fillText(this.strength, x + halfblock, y + halfblock + fontSize / 3);
 
 	context.restore();
 
@@ -663,10 +612,12 @@ function endRound(){
 function renderGame(){
 	var n;
 	drawBackground();
-	for(n = 0; n < blocks.length; n++){
-		blocks[n].draw();
+	if(gameState != 'menu'){
+		for(n = 0; n < blocks.length; n++){
+			blocks[n].draw();
+		}
+		drawStats();
 	}
-	drawStats();
 	switch(gameState){
 		case 'aiming':
 			renderArrow();
@@ -674,8 +625,179 @@ function renderGame(){
 		case 'balls moving':
 			animateBalls();
 			break;
+		case 'menu':
+			drawGameMenu();
+			break;
 	}
 
+}
+
+var menuOptions = [
+	{
+		'label' : 'Play',
+		'action' : startGame,
+		'hovering' : 0
+	},
+	{
+		'label' : 'Settings',
+		'action' : function(){alert('Not implemented');},
+		'hovering' : 0
+	},
+	{
+		'label' : 'About',
+		'action' : function(){alert('Not implemented');},
+		'hovering' : 0
+	},
+	{
+		'label' : 'Exit',
+		'action' : function(){alert('Not implemented');},
+		'hovering' : 0
+	}
+];
+function drawGameMenu(){
+	var spacing = settings.gridScale >> 2;
+	var halfblock = settings.gridScale >> 1;
+	var height = settings.gridScale * settings.gridSize.y;
+	var y = (height - menuOptions.length * (settings.gridScale + spacing)) >> 1;
+	var n;
+	var x = (settings.gridSize.x * settings.gridScale) >> 1;
+	var colour;
+	context.save()
+		context.textAlign = 'center';
+		for(n = 0; n < menuOptions.length; n++){
+			var fontSize = settings.gridScale * .8;
+			menuOptions[n].x = settings.gridScale;
+			menuOptions[n].y = y;
+			menuOptions[n].width = settings.gridScale * (settings.gridSize.x - 2);
+			menuOptions[n].height = settings.gridScale;
+
+			if(menuOptions[n].hovering == 1){
+				menuOptions[n].x -= settings.gridScale >> 3;
+				menuOptions[n].y -= settings.gridScale >> 3;
+				menuOptions[n].width += settings.gridScale >> 2;
+				menuOptions[n].height += settings.gridScale >> 2;
+				fontSize += fontSize >> 2;
+				colour = {red : 200, green : 230, blue : 160};
+			}else{
+				colour = {red : 140, green : 200, blue : 120};
+			}
+
+			context.font = fontSize + "px PoorStory";
+			drawNiceBox(menuOptions[n].x, menuOptions[n].y, menuOptions[n].width, menuOptions[n].height, colour);//, {red : 200, green : 192, blue : 160 });
+
+			context.fillStyle = 'rgba(255, 255, 255, .6)';
+			context.fillText(menuOptions[n].label, x + 2, y + halfblock + 2 + fontSize / 3);
+
+			context.fillStyle = 'rgba(0, 48, 0, .8)';
+			context.fillText(menuOptions[n].label, x, y + halfblock + fontSize / 3);
+			
+			y += settings.gridScale + spacing;
+		}
+	context.restore();
+}
+
+// this is just called as a first step in initializing the menu, setting up event triggering etc.
+function initializeMenu(){
+	var lastButtonState = -1;
+	var mousex, mousey;
+	var currentButton = -1;
+	gameCanvas.onmousemove = function(evt){
+		var n;
+		mousex = evt.offsetX;
+		mousey = evt.offsetY;
+		currentButton = -1;
+		for(n = 0; n < menuOptions.length; n++){
+			if(mousex >= menuOptions[n].x && mousex <= menuOptions[n].x + menuOptions[n].width){
+				if(mousey >= menuOptions[n].y && mousey <= menuOptions[n].y + menuOptions[n].height){
+					currentButton = n;
+					menuOptions[n].hovering = 1;
+				}else{
+					menuOptions[n].hovering = 0;
+				}
+			}else{
+				menuOptions[n].hovering = 0;
+			}
+		}
+	};
+
+	gameCanvas.onmousedown = function(){
+		//console.log(currentButton);
+		if(currentButton != -1){
+			if(lastButtonState == -1){
+				menuOptions[currentButton].action();
+			}
+		}
+	}
+}
+
+function drawNiceBox(x, y, width, height, colour){
+	var edgeBias = height < width ? height >> 3 : width >> 3;
+
+	var darkColour = 'rgba(' + (colour.red >> 1) + ', ' + (colour.green >> 1) + ', ' + (colour.blue >> 1) + ', 0.6)';
+
+	var colour = 'rgb('+ colour.red + ',' + colour.green + ',' + colour.blue + ')';
+	var x2 = x + width, y2 = y + height;
+	
+	context.save();
+
+		context.beginPath();
+		context.fillStyle = colour;
+		context.moveTo(x, y + edgeBias);
+		context.quadraticCurveTo(x, y, x + edgeBias, y);
+		context.lineTo(x2 - edgeBias, y);
+
+		context.quadraticCurveTo(x2, y, x2, y + edgeBias);
+		context.lineTo(x2, y2 - edgeBias);
+
+		context.quadraticCurveTo(x2, y2, x2 - edgeBias, y2);
+		context.lineTo(x + edgeBias, y2);
+
+		context.quadraticCurveTo(x, y2, x, y2 - edgeBias);
+		context.closePath();
+		context.fill();
+
+		// add some shading, first with white shading at the top
+		context.beginPath();
+		context.fillStyle = 'rgba(255, 255, 255, .6)';
+		context.moveTo(x, y2 - edgeBias);
+		context.lineTo(x, y + edgeBias);
+		context.quadraticCurveTo(x, y, x + edgeBias, y);
+		context.lineTo(x2 - edgeBias, y);
+		context.quadraticCurveTo(x2, y, x2, y + edgeBias);
+		context.bezierCurveTo(
+			x, 
+			y, 
+			x + edgeBias, 
+			y + edgeBias, 
+			x, 
+			y2 - edgeBias
+		);
+
+		context.closePath();
+		context.fill();
+
+
+		// and now some dark colour shading at the bottom
+		context.beginPath();
+		context.fillStyle = darkColour;
+		context.moveTo(x2, y + edgeBias);
+		context.lineTo(x2, y2 - edgeBias);
+		context.quadraticCurveTo(x2, y2, x2 - edgeBias, y2);
+		context.lineTo(x + edgeBias, y2);
+		context.quadraticCurveTo(x, y2, x, y2 - edgeBias);
+		context.bezierCurveTo(
+			x2,
+			y2,
+			x2 - edgeBias,
+			y2 - edgeBias,
+			x2,
+			y + edgeBias
+		);
+
+		context.fill();
+		context.closePath();
+
+	context.restore();
 }
 
 function drawStats(){
@@ -696,7 +818,7 @@ function drawStats(){
 		context.fillText('LEVEL: ' + player.level, marginSize, bottomY);
 
 		context.textAlign = 'right';
-		context.fillStyle = 'rgb(64, 128, 48, 1)';
+		context.fillStyle = 'rgb(48, 64, 32, 1)';
 		context.fillText('SCORE: ' + player.score, rightX + 3, bottomY + 3);
 		context.fillStyle = 'rgba(196, 255, 128, 1)';
 		context.fillText('SCORE: ' + player.score, rightX, bottomY);
@@ -772,7 +894,7 @@ function addBlockRow(){
 
 function dropBlocks(callback){
 	var n, gameOver = 0;
-	var tally = 0, increment = .02;
+	var tally = 0, increment = .0012;
 	// add a top row
 	addBlockRow();
 	// move them down and shift their offset up
@@ -808,10 +930,27 @@ function doGameOver(){
 	// WRITE ME - for now this will just restart the game, but in the
 	// future it should bring you a menu prompt that will ultimately lead
 	// to the initial game load as well.
-	initialize(function(){
-		blocks = [];
-		startRound();
-	});
+	//showMenu();
+	gameState = 'menu';
+	initializeMenu();
+}
+
+function startGame(){
+
+	// turn the main menu events
+	gameCanvas.onmousedown = null;
+	gameCanvas.onmousemove = null;
+
+	// reset the player, balls, blocks, etc.
+	player = new playerClass();
+	player.x = Math.ceil(settings.gridSize.x * settings.gridScale >> 1);
+	player.addBall();
+	player.ballSpeed = settings.gridScale / 5;
+	blockStrength = 1;
+	blocks = [];
+
+	// let the game begin
+	startRound();
 }
 
 /////////////////////////////////
@@ -824,7 +963,6 @@ function bestCanvasSize(){
 	if((settings.gridSize.x + marginScale) * gridScale > parentWidth){
 		gridScale = Math.floor(parentWidth / (settings.gridSize.x + marginScale));
 	}
-//	debugger;
 
 	if(gridScale < settings.minTileSize){
 		throw "Could not create an area large enough for this game";
@@ -837,15 +975,14 @@ function bestCanvasSize(){
 	};
 }
 
-function initialize(callback, step){
+function initialize(step){
 	if(step == undefined){
 		step = 'createObjects';
 	}
 	gameState = step;
 	switch(step){
 		case 'createObjects':
-			player = new playerClass();
-			setTimeout(function(){initialize(callback, 'initCanvas');}, 0);
+			setTimeout(function(){initialize('initCanvas');}, 0);
 			blockStrength = 1;
 			break;
 		case 'initCanvas':
@@ -865,58 +1002,22 @@ function initialize(callback, step){
 			gameCanvas.width = bestSize.width;
 			gameCanvas.height = bestSize.height;
 			settings.gridScale = bestSize.scale;
-			player.ballSpeed = settings.gridScale / 5;
 
 			// get drawing context
 			context = gameCanvas.getContext('2d');
-
-			setTimeout(function(){initialize(callback, 'loadImages');}, 0);
+			setTimeout(function(){initialize('finish');}, 0);
 			break;
-		case 'loadImages':
-			// probably can remove this.  It's used to cache any images
-			// before they're needed, but so far no images are needed, so
-			// we might be good.
-			setTimeout(function(){initialize(callback, 'initPlayer');}, 0);
-			/*
-			var cacheTally = 1;
-			var loadCallback = function(){
-				cacheTally --;
-				if(cacheTally == 0){
-					setTimeout(function(){initialize(callback, 'initPlayer');}, 0);
-				}
-			};
-			var img = new Image();
-			img.onload = loadCallback;
-			img.src = "assets/images/OrangeArrow.png";
-			*/
-/*
-			//var pattern = context.createPattern(img, "repeat");
-			//context.fillStyle = pattern;
-*/
-
-			break;
-		case 'initPlayer':
-			player.x = Math.ceil(settings.gridSize.x * settings.gridScale >> 1);
-			player.addBall();
-			setTimeout(function(){initialize(callback, 'finish initializing');}, 0);
-			break;
-		case 'finish initializing':
-			// We'll use a callback here to allow the use of this function to re-initialize the canvas
-			// without resetting the game statse.  That will be done with initialize("initCanvas");
-			callback();
+		case 'finish':
+			gameState = 'menu';
+			animationInterval = setInterval(renderGame, settings.animationFrequency);
+			initializeMenu();
 			break;
 		default:
 			throw 'initialize: invalid step name "' + step + '"';
 	}
 }
 
-window.onload = function(){
-	initialize(function(){
-		blocks = [];
-		setInterval(renderGame, settings.animationFrequency);
-		startRound();
-	});
-};
+window.onload = function(){initialize();};
 
 // grabbed from stack overflow: https://stackoverflow.com/questions/550574/how-to-terminate-the-script-in-javascript
 // this function will terminate flow in the program.
