@@ -149,6 +149,12 @@ gameClass.prototype.render = function(){
 			break;
 		case 'menu':
 			this.drawMenuStars();
+
+			// draw the title
+			context.save();
+			context.moveTo(0, 0);
+			drawShape('title', context);
+
 			this.drawMenu();
 			break;
 	}
@@ -200,15 +206,18 @@ gameClass.prototype.drawMenuStars = function(){
 			[0, 0],
 			[-.1, 1],
 			[1.05, .7],
-			[.5, -.04],
-			[1, 1],
-			[.8, .2],
+			[.415, -.0255],
+			[1.1, 1.1],
+			[.975, .925],
+			[1.0, .2],
 			[.03, .8],
 			[-.01, .5],
 			[.7, 1.05],
-			[.2, .25],
+			[.35, .3],
 			[.3, 1.1],
-			[1.1, -.05]
+			[1.1, -.05],
+			[1.15, 0.4],
+			[-.15, 0.2]
 		];
 		this.bgStars = [];
 		myRandom(1); // <-- setting a random seed for consistent "randomness".
@@ -237,7 +246,7 @@ gameClass.prototype.drawMenu = function(){
 	var spacing = this.gridScale >> 2;
 	var topMargin = this.gridScale * .45;
 	var height = this.gridScale * this.gridSize.y;
-	var y = (height >> 2) + (height - this.menuOptions.length * (this.gridScale + spacing)) >> 1;
+	var y = height * .3/*(height >> 2)*/ + (height - this.menuOptions.length * (this.gridScale + spacing)) >> 1;
 	var n;
 	var x = (this.gridSize.x * this.gridScale) >> 1;
 	var colour;
