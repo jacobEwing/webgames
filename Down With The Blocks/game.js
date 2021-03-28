@@ -1,6 +1,6 @@
 var game, context, player;
 
-var soundEffects, music, muted = false, musicVolume = 0 * .5, effectsVolume = 1;
+var soundEffects, music, muted = false, musicVolume = 0 * .5, effectsVolume = 0 * 1;
 /////////////////////////////////////////////////////////////////////////////////////////////
 // the game class
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -338,7 +338,11 @@ gameClass.prototype.start = function(){
 	this.blocks = [];
 
 	// let the game begin
-	this.startRound();
+	// we'll do this instead of calling startround, as this lets the blocks
+	// visibly drop instead of appearing in the first row instantly.
+	this.state = 'aiming';
+	player.takeTurn();
+	this.dropBlocks(function(){});
 };
 
 gameClass.prototype.addBlockRow = function(){
