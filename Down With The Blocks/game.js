@@ -9,6 +9,7 @@ var gameClass = function(){
 
 	// various static settings
 	this.gridScale = 0; // <-- calculated in "bestCanvasSize()"
+	this.textShadowOffset = 0; // <-- ditto
 	this.gridSize = { x : 6 , y : 9};
 	this.minTileSize = 5;
 	this.blockProbability = .5;
@@ -274,7 +275,7 @@ gameClass.prototype.drawMenu = function(){
 			drawNiceBox(this.menuOptions[n].x, this.menuOptions[n].y, this.menuOptions[n].width, this.menuOptions[n].height, colour);//, {red : 200, green : 192, blue : 160 });
 
 			context.fillStyle = 'rgba(255, 255, 255, .6)';
-			context.fillText(this.menuOptions[n].label, x + 2, y + topMargin + 2 + fontSize / 3);
+			context.fillText(this.menuOptions[n].label, x + game.textShadowOffset, y + topMargin + game.textShadowOffset + fontSize / 3);
 
 			context.fillStyle = 'rgba(0, 48, 0, .8)';
 			context.fillText(this.menuOptions[n].label, x, y + topMargin + fontSize / 3);
@@ -741,7 +742,7 @@ blockClass.prototype.draw = function(x, y){
 		context.font = fontSize + "px PoorStory";
 
 		context.fillStyle = 'rgba(255, 255, 255, .6)';
-		context.fillText(this.strength, x + halfblock + 2, y + halfblock + 2 + fontSize / 3);
+		context.fillText(this.strength, x + halfblock + game.textShadowOffset, y + halfblock + game.textShadowOffset + fontSize / 3);
 
 		context.fillStyle = darkColour2;//'rgba(0, 0, 0, 1)';
 		context.fillText(this.strength, x + halfblock, y + halfblock + fontSize / 3);
@@ -853,6 +854,7 @@ function initialize(step){
 			game.canvas.width = bestSize.width;
 			game.canvas.height = bestSize.height;
 			game.gridScale = bestSize.scale;
+			game.textShadowOffset = game.gridScale * game.gridSize.x * .004;
 
 			// get drawing context
 			context = game.canvas.getContext('2d');
@@ -1003,6 +1005,7 @@ function drawStats(){
 		var marginSize = fontSize / 2;
 		var bottomY = game.gridScale * game.gridSize.y - marginSize;
 		var rightX = game.gridScale * game.gridSize.x - marginSize / 2;
+
 		context.fillStyle = 'rgba(160, 160, 160, .6)';
 		context.fillRect(0, game.gridScale * (game.gridSize.y - .75), game.canvas.width, game.gridScale * .75);
 		context.fillStyle = 'rgba(190, 190, 190, .6)';
@@ -1010,13 +1013,13 @@ function drawStats(){
 		context.font = fontSize + "px jelleeroman";
 		context.textAlign = 'left';
 		context.fillStyle = 'rgba(128, 64, 48, 1)';
-		context.fillText('LEVEL: ' + player.level, marginSize + 3, bottomY + 3);
+		context.fillText('LEVEL: ' + player.level, marginSize + game.textShadowOffset * 2, bottomY + game.textShadowOffset);
 		context.fillStyle = 'rgba(255, 196, 128, 1)';
 		context.fillText('LEVEL: ' + player.level, marginSize, bottomY);
 
 		context.textAlign = 'right';
 		context.fillStyle = 'rgb(48, 64, 32, 1)';
-		context.fillText('SCORE: ' + player.score, rightX + 3, bottomY + 3);
+		context.fillText('SCORE: ' + player.score, rightX + game.textShadowOffset * -2, bottomY + game.textShadowOffset);
 		context.fillStyle = 'rgba(196, 255, 128, 1)';
 		context.fillText('SCORE: ' + player.score, rightX, bottomY);
 	context.restore();
