@@ -1,6 +1,6 @@
 var game, context, player;
 
-var soundEffects, music, muted = false, musicVolume = .5, effectsVolume = 1;
+var soundEffects, music, muted = false, musicVolume = 0 * .5, effectsVolume = 1;
 /////////////////////////////////////////////////////////////////////////////////////////////
 // the game class
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -148,9 +148,11 @@ gameClass.prototype.render = function(){
 			this.animateBalls();
 			break;
 		case 'menu':
+			this.drawMenuStars();
 			this.drawMenu();
 			break;
 	}
+	context.moveTo(0, 0);
 
 };
 
@@ -186,11 +188,56 @@ gameClass.prototype.addBall = function(){
 	this.balls[this.balls.length] = ball;
 };
 
+gameClass.prototype.drawMenuStars = function(){
+	var n;
+	var w = this.gridScale * this.gridSize.x * .8;
+	var h = this.gridScale * this.gridSize.y * .8;
+	var minx = w * .125; // <-- .125 because an eight of .8 is .1, and .8 + 2 * .1 = 1.
+	var miny = h * .125;
+
+	if(this.bgStars == undefined){
+		var pointList = [
+			[0, 0],
+			[-.1, 1],
+			[1.05, .7],
+			[.5, -.04],
+			[1, 1],
+			[.8, .2],
+			[.03, .8],
+			[-.01, .5],
+			[.7, 1.05],
+			[.2, .25],
+			[.3, 1.1],
+			[1.1, -.05]
+		];
+		this.bgStars = [];
+		myRandom(1); // <-- setting a random seed for consistent "randomness".
+		// first we need to generate the stars
+		for(n = 0; n < pointList.length; n++){
+			this.bgStars[n] = {
+				x : pointList[n][0],
+				y : pointList[n][1],
+				radius: (Math.sin(myRandom() * Math.PI) + 2) / 6,
+				angle: myRandom() * Math.PI,
+				angi: (myRandom() < .5 ? 1 : -1) * (.2 + myRandom() * .1)
+			};
+		}
+//		debugger;
+	}
+
+	// render the stars
+	for(n in this.bgStars){
+		texasStar(this.bgStars[n].x * w + minx, this.bgStars[n].y * h + miny, this.bgStars[n].radius * this.gridScale, Math.sin(this.bgStars[n].angle), 1);
+		this.bgStars[n].angle += this.bgStars[n].angi;
+//		debugger;
+	}
+};
+
 gameClass.prototype.drawMenu = function(){
 	var spacing = this.gridScale >> 2;
-	var halfblock = this.gridScale >> 1;
+	var topMargin = this.gridScale * .45;
 	var height = this.gridScale * this.gridSize.y;
-	var y = (height - this.menuOptions.length * (this.gridScale + spacing)) >> 1;
+	var y = (height >> 2) + (height - this.menuOptions.length * (this.gridScale + spacing)) >> 1;
 	var n;
 	var x = (this.gridSize.x * this.gridScale) >> 1;
 	var colour;
@@ -218,10 +265,10 @@ gameClass.prototype.drawMenu = function(){
 			drawNiceBox(this.menuOptions[n].x, this.menuOptions[n].y, this.menuOptions[n].width, this.menuOptions[n].height, colour);//, {red : 200, green : 192, blue : 160 });
 
 			context.fillStyle = 'rgba(255, 255, 255, .6)';
-			context.fillText(this.menuOptions[n].label, x + 2, y + halfblock + 2 + fontSize / 3);
+			context.fillText(this.menuOptions[n].label, x + 2, y + topMargin + 2 + fontSize / 3);
 
 			context.fillStyle = 'rgba(0, 48, 0, .8)';
-			context.fillText(this.menuOptions[n].label, x, y + halfblock + fontSize / 3);
+			context.fillText(this.menuOptions[n].label, x, y + topMargin + fontSize / 3);
 			
 			y += this.gridScale + spacing;
 		}
@@ -243,6 +290,9 @@ gameClass.prototype.initializeMenu = function(){
 			if(mousex >= me.menuOptions[n].x && mousex <= me.menuOptions[n].x + me.menuOptions[n].width){
 				if(mousey >= me.menuOptions[n].y && mousey <= me.menuOptions[n].y + me.menuOptions[n].height){
 					currentButton = n;
+					if(!me.menuOptions[n].hovering){
+						playSound('whoosh');
+					}
 					me.menuOptions[n].hovering = 1;
 				}else{
 					me.menuOptions[n].hovering = 0;
@@ -791,7 +841,6 @@ function initialize(step){
 				die(e);
 				return;
 			}
-
 			game.canvas.width = bestSize.width;
 			game.canvas.height = bestSize.height;
 			game.gridScale = bestSize.scale;
@@ -822,7 +871,8 @@ function initialize(step){
 				swish : new Audio(soundPath + 'swish.wav'),
 				gameOver : new Audio(zapPath + "cartoon_fail_strings_trumpet.mp3"),
 				thud : new Audio(soundPath + 'sideImpact.wav'),
-				blockHit: new Audio(freesoundPath + '539169__eminyildirim__glass-hit.wav')
+				blockHit: new Audio(freesoundPath + '539169__eminyildirim__glass-hit.wav'),
+				whoosh : new Audio(zapPath + "zapsplat_foley_wood_bambo_swoosh_through_air_001_modded.mp3")
 
 			};
 			for(n in soundEffects){
@@ -834,6 +884,7 @@ function initialize(step){
 			setTimeout(function(){initialize('finish');}, 0);
 			break;
 		case 'finish':
+			window.onresize = handleResize;
 			game.state = 'menu';
 			setInterval(function(){game.render();}, game.animationFrequency);
 			game.initializeMenu();
@@ -854,6 +905,30 @@ window.onload = function(){
 /////////////////////////////////////////////////////////////////////////////////////////////
 //		Function definitions
 /////////////////////////////////////////////////////////////////////////////////////////////
+function handleResize(){
+	var width, height, bestSize;
+	//game.canvas = document.getElementById('gameCanvas');
+
+	// get the right size for the canvas
+	try{
+		bestSize = bestCanvasSize();
+	}catch(e){
+		die(e);
+		return;
+	}
+	if(player != undefined){
+		player.x *= bestSize.width / game.canvas.width;
+		player.ballSpeed = bestSize.scale / 5;
+	}
+	game.canvas.width = bestSize.width;
+	game.canvas.height = bestSize.height;
+	game.gridScale = bestSize.scale;
+
+
+	// get drawing context
+	context = game.canvas.getContext('2d');
+
+}
 var handleMouseTargeting = (function(){
 	var lastTime = 0;
 	return function(e){
@@ -1111,7 +1186,7 @@ function darkenByte(val){
 // render a texas star.  Used in several places
 function texasStar(cx, cy, radius, angle, opacity){
 	if(opacity == undefined) opacity = 0.8;
-	var numPoints = 5, n, innerRadius = Math.round(radius * .5), ang, x, y, r;
+	var numPoints = 5, n, innerRadius = Math.round(radius * .45), ang, x, y, r;
 	context.save();
 		context.beginPath();
 		context.fillStyle = 'rgba(255, 255, 192, ' + opacity + ')';
@@ -1176,4 +1251,15 @@ function soundOff(){
 function toggleSound(){
 	muted ? soundOn() : soundOff();
 }
+
+
+var myRandom = (function(){
+	var seed = 2;
+	return function(newSeed) {
+		if(newSeed != undefined) seed = 1 * newSeed;
+
+		var x = Math.sin(seed++) * 10000;
+		return x - Math.floor(x);
+	}
+})();
 //  /@@@@@@@@@@@@@@@@@@@@@@@@@@@
