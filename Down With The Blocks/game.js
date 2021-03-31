@@ -18,7 +18,7 @@ var gameClass = function(){
 	this.animationFrequency = 24;
 	this.minBallRadius = 10;
 	this.ballRadiusScale = 1 / 75;
-	this.bonusBlockChance = 0.1;
+	this.bonusBlockChance = 0.05;
 	this.menuOptions = [
 		{
 			'label' : 'Play',
@@ -49,6 +49,7 @@ var gameClass = function(){
 	this.blocks = [];
 	this.balls = [];
 	this.bgAng = 0;
+	this.bonuses = [];
 };
 
 gameClass.prototype.drawBackground = function(){
@@ -159,6 +160,17 @@ gameClass.prototype.render = function(){
 			this.drawMenu();
 			break;
 	}
+	for(n = 0; n < this.bonuses.length; n++){
+		this.bonuses[n].move();
+		this.bonuses[n].draw();
+		if(this.bonuses[n].reachedBottom){
+			console.log 'awarding ' + n;
+			this.bonuses[n].awardPlayer();
+			this.bonuses.splice(n, 1);
+			n--;
+		}
+	}
+
 	context.moveTo(0, 0);
 
 };
@@ -314,7 +326,6 @@ gameClass.prototype.initializeMenu = function(){
 	};
 
 	this.canvas.onmousedown = function(){
-		//console.log(currentButton);
 		if(currentButton != -1){
 			if(lastButtonState == -1){
 				me.menuOptions[currentButton].action();
@@ -332,10 +343,11 @@ gameClass.prototype.start = function(){
 	// reset the player, balls, game.blocks, etc.
 	player = new playerClass(this);
 	player.x = Math.ceil(this.gridSize.x * this.gridScale >> 1);
-	this.addBall();
 	player.ballSpeed = this.gridScale / 5;
 	this.blockStrength = 1;
 	this.blocks = [];
+	this.balls = [];
+	this.addBall();
 
 	// let the game begin
 	// we'll do this instead of calling startround, as this lets the blocks
@@ -461,10 +473,11 @@ var ballClass = function(){
 	this.moving = false;
 	this.colour = {};
 	this.pickAColour();
+	this.powerUp = null;
 
 	// balls can now rotate as they fly, but for the default ball type, that shouldn't happen
 	this.angle = 0;//Math.random() * 2 * Math.PI;
-	this.angi = 0;//Math.random() < 0.5 ? -.1 : .1;
+	this.angi = Math.random() < 0.5 ? -.1 : .1;
 
 	// stepTally is used for counting ratios in using Bresenham's line algorithm to trace ball motion.
 	// we need it to be consistent with the object for accuracy.  If it's set to zero with each call
@@ -488,48 +501,82 @@ ballClass.prototype.pickAColour = function(){
 
 ballClass.prototype.draw = function(){
 	if(this.velocity.dy == 0 && this.velocity.dx == 0) return;
-	var radius = game.gridScale * this.radius * game.ballRadiusScale;
-	var colour = 'rgb(' + this.colour.red + ', ' + this.colour.green + ', ' + this.colour.blue + ')';
-	var brightColour = 'rgba(' + brightenByte(this.colour.red) + ', ' + brightenByte(this.colour.green) + ', ' + brightenByte(this.colour.blue) + ')';
-	var darkColour = 'rgba(' + darkenByte(this.colour.red) + ', ' + darkenByte(this.colour.green) + ', ' + darkenByte(this.colour.blue) + ')';
-	var brightest = 'rgba(255, 255, 255, 0.6)';
-	var sqrtRad = Math.floor(Math.sqrt(2 * radius * radius));
-	context.save()
-		context.translate(this.position.x, this.position.y);
-		context.rotate(this.angle);
-		// first draw the circle
-		context.fillStyle = colour;
-		context.beginPath();
-		context.arc(0, 0, radius, 0, 2 * Math.PI);
-		context.fill();
-		context.closePath();
+	if(this.powerUp == 'bomb'){
+		context.save();
+			var scale = .5;
+			context.translate(this.position.x, this.position.y);
+			context.scale(scale, scale);
+			context.rotate(this.angle);
+			drawBomb(context);
 
-		// shade it on the top left
-		context.fillStyle = brightColour;
-		context.beginPath();
-		context.arc(0, 0, radius, 3 * Math.PI / 4, 7 * Math.PI / 4);
-		context.bezierCurveTo(0,  -radius / 3,  -radius / 3, 0,  -sqrtRad / 2, sqrtRad / 2);
-		context.closePath();
-		context.fill();
+		context.restore();
+	}else{
+		var radius = game.gridScale * this.radius * game.ballRadiusScale;
+		var colour = 'rgb(' + this.colour.red + ', ' + this.colour.green + ', ' + this.colour.blue + ')';
+		var brightColour = 'rgba(' + brightenByte(this.colour.red) + ', ' + brightenByte(this.colour.green) + ', ' + brightenByte(this.colour.blue) + ')';
+		var darkColour = 'rgba(' + darkenByte(this.colour.red) + ', ' + darkenByte(this.colour.green) + ', ' + darkenByte(this.colour.blue) + ')';
+		var brightest = 'rgba(255, 255, 255, 0.6)';
+		var sqrtRad = Math.floor(Math.sqrt(2 * radius * radius));
+		context.save()
+			context.translate(this.position.x, this.position.y);
+			//context.rotate(this.angle);
+			// first draw the circle
+			context.fillStyle = colour;
+			context.beginPath();
+			context.arc(0, 0, radius, 0, 2 * Math.PI);
+			context.fill();
+			context.closePath();
 
-		// and on the bottom right
-		context.fillStyle = darkColour;
-		context.beginPath();
-		context.arc(0, 0, radius, -Math.PI / 4, 3 * Math.PI / 4);
-		context.bezierCurveTo(0, radius, radius, 0, sqrtRad / 2, -sqrtRad / 2);
-		context.closePath();
-		context.fill();
+			// shade it on the top left
+			context.fillStyle = brightColour;
+			context.beginPath();
+			context.arc(0, 0, radius, 3 * Math.PI / 4, 7 * Math.PI / 4);
+			context.bezierCurveTo(0,  -radius / 3,  -radius / 3, 0,  -sqrtRad / 2, sqrtRad / 2);
+			context.closePath();
+			context.fill();
 
-		// shade it on the top left
-		context.fillStyle = brightest;
-		context.beginPath();
-		context.arc(0, 0, radius, 3 * Math.PI / 4, 7 * Math.PI / 4);
-		context.bezierCurveTo(0, -radius, -radius, 0,  -sqrtRad / 2, sqrtRad / 2);
-		context.closePath();
-		context.fill();
+			// and on the bottom right
+			context.fillStyle = darkColour;
+			context.beginPath();
+			context.arc(0, 0, radius, -Math.PI / 4, 3 * Math.PI / 4);
+			context.bezierCurveTo(0, radius, radius, 0, sqrtRad / 2, -sqrtRad / 2);
+			context.closePath();
+			context.fill();
 
-	context.restore();
+			// shade it on the top left
+			context.fillStyle = brightest;
+			context.beginPath();
+			context.arc(0, 0, radius, 3 * Math.PI / 4, 7 * Math.PI / 4);
+			context.bezierCurveTo(0, -radius, -radius, 0,  -sqrtRad / 2, sqrtRad / 2);
+			context.closePath();
+			context.fill();
+
+		context.restore();
+	}
 };
+
+ballClass.prototype.hitBlock = function(block){
+	var n;
+	switch(this.powerUp){
+		case 'bomb':
+			var dx, dy;
+			for(n = 0; n < game.blocks.length; n++){
+				dx = Math.abs(game.blocks[n].position.x - block.position.x);
+				dy = Math.abs(game.blocks[n].position.y - block.position.y);
+				if(dx + dy == 1){
+					game.blocks[n].hit(4);
+				}else if(dx == 1 && dy == 1){
+					game.blocks[n].hit(2);
+				}else if((dx == 2 && dy <= 1) || (dy == 2 && dx <= 1)){
+					game.blocks[n].hit(1)
+				}
+				block.hit(20);
+			}
+			break;
+		default:
+			block.hit(1);
+	}
+}
 
 ballClass.prototype.move = function(){
 	var xResolution = game.gridScale * game.gridSize.x;
@@ -591,7 +638,7 @@ ballClass.prototype.move = function(){
 							this.angi *= -1
 						}
 					}
-					game.blocks[n].hit();
+					this.hitBlock(game.blocks[n]);
 
 				}else if(this.alreadyHit[n] != undefined){
 					this.alreadyHit[n] = undefined;
@@ -799,8 +846,8 @@ blockClass.prototype.pickAColour = function(){
 }
 
 // impact the block with a ball
-blockClass.prototype.hit = function(idx){
-	this.strength--;
+blockClass.prototype.hit = function(strength){
+	this.strength -= strength;
 	if(this.strength <= 0){
 		if(this.hasBonus){
 			this.strength = this.originalStrength;
@@ -809,7 +856,10 @@ blockClass.prototype.hit = function(idx){
 		}else if(this.isBonus){
 			player.scoreIncrement += this.originalStrength;
 			player.score += player.scoreIncrement;
-			console.log("ADD BONUS UPGRADE HERE");
+
+			// add a bonus 
+			var bonus = new bonusClass((this.position.x + .5) * game.gridScale, (this.position.y + .5) * game.gridScale);
+			game.bonuses[game.bonuses.length] = bonus;
 			blockClass.removeBlock(this);
 		}else{
 			blockClass.removeBlock(this);
@@ -829,6 +879,94 @@ blockClass.removeBlock = function(block){
 			break;
 		}
 	}
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+// 		A class for representing bonuses coming from blocks
+/////////////////////////////////////////////////////////////////////////////////////////////
+var bonusClass = function(blockx, blocky){
+	this.radius = game.gridScale / 2;
+	this.angle = Math.random() * Math.PI;
+	this.position = {x : blockx, y : blocky};
+	this.velocity = {
+		dx : 50 * (player.x - blockx) / (game.gridScale * blocky),
+		dy : -game.gridScale / 8
+	};
+	this.velocity.dx *= game.gridScale / 8;
+	this.reachedBottom = false;
+	var bonusTypes = [
+		//'scoreMultiplier'
+		'bomb'
+	];
+	this.bonusType = bonusTypes[Math.floor(Math.random() * bonusTypes.length)];
+};
+
+
+bonusClass.prototype.draw = function(){
+	switch(this.bonusType){
+		case 'bomb':
+			context.save();
+			context.translate(this.position.x, this.position.y);
+			context.rotate(this.angle);
+			context.scale(.8, .8);
+			drawBomb(context);
+			context.restore();
+			break;
+		default:
+			texasStar(this.position.x, this.position.y, this.radius, this.angle, 1);
+	}
+	/*
+	texasStar(this.x1, this.y1, game.gridScale / 3, 0, 1);
+	texasStar(this.x2, this.y2, game.gridScale / 3, 0, 1);
+	texasStar(this.x3, this.y3, game.gridScale / 3, 0, 1);
+	*/
+}
+
+bonusClass.prototype.move = function(){
+	this.position.x += this.velocity.dx;
+	this.position.y += this.velocity.dy;
+	this.position.y < this.velocity.dy;
+	this.velocity.dy += game.gridScale / 100;
+	this.angle += .1;
+	if(this.position.x < 0 && this.velocity.dx < 0){
+		this.velocity.dx *= -1;
+	}
+	if(this.position.x > game.gridScale * game.gridSize.x){
+		this.velocity.dx *= -1;
+	}
+	if(this.position.y > game.gridSize.y * game.gridScale){
+		this.reachedBottom = true;
+		
+	}
+}
+
+bonusClass.prototype.awardPlayer = function(){
+	switch(this.bonusType){
+		case 'bomb':
+			//this.awardBomb();
+			game.addBall();
+			game.balls[game.balls.length - 1].powerUp = 'bomb';
+	}
+}
+
+bonusClass.prototype.awardBomb = function(){
+	var n, idx, goodIndex = -1;
+	var offset = Math.floor(Math.random() * game.balls.length);
+
+	for(n = 0; n < game.balls.length && goodIndex == -1; n++){
+		idx = (offset + n) % game.balls.length;
+		if(game.balls[idx].powerUp == null){
+			goodIndex = idx;
+		}
+	}
+	console.log('goodIndex = ' + goodIndex);
+	if(goodIndex == -1){
+		// All balls have power-ups.  Add a new ball.
+		game.addBall();
+		goodIndex = game.balls.length - 1;
+	}
+
+	game.balls[goodIndex].powerUp = this.bonusType;
 }
 
 
@@ -938,6 +1076,7 @@ function handleResize(){
 	game.canvas.width = bestSize.width;
 	game.canvas.height = bestSize.height;
 	game.gridScale = bestSize.scale;
+	game.textShadowOffset = game.gridScale * game.gridSize.x * .004;
 
 
 	// get drawing context
@@ -1017,9 +1156,9 @@ function drawStats(){
 		context.font = fontSize + "px jelleeroman";
 		context.textAlign = 'left';
 		context.fillStyle = 'rgba(128, 64, 48, 1)';
-		context.fillText('LEVEL: ' + player.level, marginSize + game.textShadowOffset * 2, bottomY + game.textShadowOffset);
+		context.fillText('LEVEL: ' + (player.level + 1), marginSize + game.textShadowOffset * 2, bottomY + game.textShadowOffset);
 		context.fillStyle = 'rgba(255, 196, 128, 1)';
-		context.fillText('LEVEL: ' + player.level, marginSize, bottomY);
+		context.fillText('LEVEL: ' + (player.level + 1), marginSize, bottomY);
 
 		context.textAlign = 'right';
 		context.fillStyle = 'rgb(48, 64, 32, 1)';
@@ -1225,6 +1364,14 @@ function texasStar(cx, cy, radius, angle, opacity){
 		context.stroke();
 		context.fill();
 	context.restore();
+	/*
+	context.save();
+		context.translate(cx, cy);
+		context.rotate(Math.sin(angle) * .5);
+		drawShape('volume', context);
+
+	context.restore();
+	*/
 }
 
 
