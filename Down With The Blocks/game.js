@@ -164,7 +164,6 @@ gameClass.prototype.render = function(){
 		this.bonuses[n].move();
 		this.bonuses[n].draw();
 		if(this.bonuses[n].reachedBottom){
-			console.log 'awarding ' + n;
 			this.bonuses[n].awardPlayer();
 			this.bonuses.splice(n, 1);
 			n--;
@@ -959,7 +958,6 @@ bonusClass.prototype.awardBomb = function(){
 			goodIndex = idx;
 		}
 	}
-	console.log('goodIndex = ' + goodIndex);
 	if(goodIndex == -1){
 		// All balls have power-ups.  Add a new ball.
 		game.addBall();
