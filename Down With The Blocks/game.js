@@ -19,6 +19,7 @@ var gameClass = function(){
 	this.minBallRadius = 10;
 	this.ballRadiusScale = 1 / 75;
 	this.bonusBlockChance = 0.05;
+	this.defaultBallSpeed = 16;
 	this.menuOptions = [
 		{
 			'label' : 'Play',
@@ -186,8 +187,13 @@ gameClass.prototype.animateBalls = function(){
 		animated = true;
 
 		ball.move();
-
-		ball.draw();
+		if(ball.powerUp == 'temporary' && ball.velocity.dx == 0 && ball.velocity.dy == 0){
+			ball[n] = undefined;
+			this.balls.splice(n, 1);
+			n--;
+		}else{
+			ball.draw();
+		}
 
 	}
 
@@ -197,12 +203,40 @@ gameClass.prototype.animateBalls = function(){
 };
 
 
-gameClass.prototype.addBall = function(){
+gameClass.prototype.addBall = function(params){
+	if(params == undefined) params = {};
 	var ball = new ballClass();
+
 	ball.position = {
 		x : this.x,
 		y : game.gridScale * game.gridSize.y
 	};
+
+	for(var p in params){
+		switch(p){
+			case 'position':
+				ball.position = {
+					x : params.position.x,
+					y : params.position.y
+				};
+				break;
+			case 'velocity':
+				ball.velocity = {
+					dx : params.velocity.dx,
+					dy : params.velocity.dy
+				};
+				break;
+			case 'colour':
+				ball.colour = {
+					red : params.colour.red,
+					green : params.colour.green,
+					blue : params.colour.blue
+				}
+				break;
+			default:
+				ball[p] = params[p];
+		}
+	}
 	this.balls[this.balls.length] = ball;
 };
 
@@ -385,7 +419,7 @@ var playerClass = function(game){
 	this.x = 0;
 	this.newX = 0;
 	this.angle = 0;
-	this.ballSpeed = 16;
+	this.ballSpeed = game.defaultBallSpeed;
 	this.launchFrequency = Math.floor(game.minBallRadius * 10);
 	this.score = 0;
 	this.scoreIncrement = 1;
@@ -405,6 +439,9 @@ playerClass.prototype.launchBalls = function(){
 	player.scoreIncrement = 1;
 	var launch = function(){
 		var ball = this.game.balls[idx++];
+		if(ball.powerUp == 'temporary'){
+			return;
+		}
 		// set the ball's position to that of the player
 		ball.position = {
 			x : this.x,
@@ -555,9 +592,11 @@ ballClass.prototype.draw = function(){
 };
 
 ballClass.prototype.hitBlock = function(block){
-	var n;
+	var n, x, y;
 	switch(this.powerUp){
-		case 'bomb':
+		case 'aesotuhaoesutnh':
+//		case 'bomb':
+			/*
 			var dx, dy;
 			for(n = 0; n < game.blocks.length; n++){
 				dx = Math.abs(game.blocks[n].position.x - block.position.x);
@@ -570,6 +609,41 @@ ballClass.prototype.hitBlock = function(block){
 					game.blocks[n].hit(1)
 				}
 				block.hit(20);
+
+			}
+			*/
+			var numchunks = 18, ang;
+			block.hit(1);
+			this.moving = false
+			for(n = 0; n < numchunks; n++){
+				ang = n * 2 * Math.PI / numchunks;
+
+				game.addBall({
+					position : {
+						x : this.position.x,
+						y : this.position.y
+					},
+					velocity : {
+						dx : Math.sin(ang) * game.defaultBallSpeed,
+						dy : Math.cos(ang) * game.defaultBallSpeed
+					},
+					colour : {
+						red : 64,
+						green : 64,
+						blue : 64
+					},
+					powerUp : 'temporary',
+					radius : game.minBallRadius,
+					moving : true
+				});
+			}
+
+			// finally, we need to remove this bomb ball
+			for(n = 0; n < game.balls.length; n++){
+				if(Object.is(this, game.balls[n])){
+					game.balls.splice(n, 1);
+					break;
+				}
 			}
 			break;
 		default:
@@ -599,8 +673,20 @@ ballClass.prototype.move = function(){
 		var halfWidth = game.gridScale >> 1;
 		var cornerRadius = game.gridScale >> 2;
 
+		// Instead of looping through game.blocks, we instead need to loop through a
+		// clone of that array.  Without doing so, we can run into cases where
+		// game.blocks can get spliced as a block is destroyed, but the index continues
+		// onward, failing to test the next block in the array.  Instead, we'll
+		// duplicate the array here, which points to the same objects and keeps them at
+		// the same array indices, and is destroyed at the end, giving us a consistent
+		// list of block objects while the master list is edited.
+		var testBlocks = [];
 		for(n = 0; n < game.blocks.length; n++){
-			center = game.blocks[n].centerPoint();
+			testBlocks[n] = game.blocks[n];
+		}
+
+		for(n = 0; n < testBlocks.length; n++){
+			center = testBlocks[n].centerPoint();
 			xdist = Math.abs(center.x - this.position.x) - radius;
 			if(xdist < halfWidth){
 				ydist = Math.abs(center.y - this.position.y) - radius;
@@ -637,7 +723,7 @@ ballClass.prototype.move = function(){
 							this.angi *= -1
 						}
 					}
-					this.hitBlock(game.blocks[n]);
+					this.hitBlock(testBlocks[n]);
 
 				}else if(this.alreadyHit[n] != undefined){
 					this.alreadyHit[n] = undefined;
@@ -760,6 +846,7 @@ var blockClass = function(strength){
 
 	this.hasBonus = false;
 	this.isBonus = false;
+	this.isTemporay = false;
 	// a weird one-off for animating game.blocks that have a bonus ready to go
 	this.starAngle = Math.random() * Math.PI;
 };
@@ -853,12 +940,38 @@ blockClass.prototype.hit = function(strength){
 			this.hasBonus = false;
 			this.isBonus = true;
 		}else if(this.isBonus){
+		
 			player.scoreIncrement += this.originalStrength;
 			player.score += player.scoreIncrement;
-
+/*
 			// add a bonus 
 			var bonus = new bonusClass((this.position.x + .5) * game.gridScale, (this.position.y + .5) * game.gridScale);
 			game.bonuses[game.bonuses.length] = bonus;
+			blockClass.removeBlock(this);
+*/
+			var numchunks = 18, ang;
+			for(n = 0; n < numchunks; n++){
+				ang = n * 2 * Math.PI / numchunks;
+
+				game.addBall({
+					position : {
+						x : (this.position.x + .5) * game.gridScale,
+						y : (this.position.y + .5) * game.gridScale
+					},
+					velocity : {
+						dx : Math.sin(ang) * game.defaultBallSpeed,
+						dy : Math.cos(ang) * game.defaultBallSpeed
+					},
+					colour : {
+						red : 64,
+						green : 64,
+						blue : 64
+					},
+					powerUp : 'temporary',
+					radius : game.minBallRadius,
+					moving : true
+				});
+			}
 			blockClass.removeBlock(this);
 		}else{
 			blockClass.removeBlock(this);
