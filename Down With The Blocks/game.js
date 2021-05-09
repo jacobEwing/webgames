@@ -18,7 +18,7 @@ var gameClass = function(){
 	this.animationFrequency = 24;
 	this.minBallRadius = 10;
 	this.ballRadiusScale = 1 / 75;
-	this.bonusBlockChance = 0.05;
+	this.bonusBlockChance = 0.5;
 	this.defaultBallSpeed = 16;
 	this.menuOptions = [
 		{
@@ -187,7 +187,7 @@ gameClass.prototype.animateBalls = function(){
 		animated = true;
 
 		ball.move();
-		if(ball.powerUp == 'temporary' && ball.velocity.dx == 0 && ball.velocity.dy == 0){
+		if(ball.temporary && ball.velocity.dx == 0 && ball.velocity.dy == 0){
 			ball[n] = undefined;
 			this.balls.splice(n, 1);
 			n--;
@@ -402,14 +402,12 @@ gameClass.prototype.addBlockRow = function(){
 					y : -1 // <-- place it above the game, as they'll be shifting down afterward
 				};
 				if(Math.random() < this.bonusBlockChance){
-					this.blocks[idx].hasBonus = true;
+					this.blocks[idx].pickABonus();
 				}
 			}
 		}
 	}while(this.blocks.length == 0);
 }
-
-
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 // 		the player
@@ -439,7 +437,8 @@ playerClass.prototype.launchBalls = function(){
 	player.scoreIncrement = 1;
 	var launch = function(){
 		var ball = this.game.balls[idx++];
-		if(ball.powerUp == 'temporary'){
+
+		if(ball.temporary){
 			return;
 		}
 		// set the ball's position to that of the player
@@ -509,7 +508,7 @@ var ballClass = function(){
 	this.moving = false;
 	this.colour = {};
 	this.pickAColour();
-	this.powerUp = null;
+	this.temporary = false;
 
 	// balls can now rotate as they fly, but for the default ball type, that shouldn't happen
 	this.angle = 0;//Math.random() * 2 * Math.PI;
@@ -534,10 +533,12 @@ ballClass.prototype.pickAColour = function(){
 	};
 }
 
-
 ballClass.prototype.draw = function(){
 	if(this.velocity.dy == 0 && this.velocity.dx == 0) return;
+	/*
 	if(this.powerUp == 'bomb'){
+		/// this is actually not needed unless I want to restore bomb balls
+
 		context.save();
 			var scale = .5;
 			context.translate(this.position.x, this.position.y);
@@ -547,6 +548,7 @@ ballClass.prototype.draw = function(){
 
 		context.restore();
 	}else{
+	*/
 		var radius = game.gridScale * this.radius * game.ballRadiusScale;
 		var colour = 'rgb(' + this.colour.red + ', ' + this.colour.green + ', ' + this.colour.blue + ')';
 		var brightColour = 'rgba(' + brightenByte(this.colour.red) + ', ' + brightenByte(this.colour.green) + ', ' + brightenByte(this.colour.blue) + ')';
@@ -588,30 +590,30 @@ ballClass.prototype.draw = function(){
 			context.fill();
 
 		context.restore();
-	}
+	//}
 };
 
 ballClass.prototype.hitBlock = function(block){
 	var n, x, y;
+	/*
 	switch(this.powerUp){
-		case 'aesotuhaoesutnh':
-//		case 'bomb':
-			/*
+		case 'bomb':
+			
 			var dx, dy;
-			for(n = 0; n < game.blocks.length; n++){
-				dx = Math.abs(game.blocks[n].position.x - block.position.x);
-				dy = Math.abs(game.blocks[n].position.y - block.position.y);
-				if(dx + dy == 1){
-					game.blocks[n].hit(4);
-				}else if(dx == 1 && dy == 1){
-					game.blocks[n].hit(2);
-				}else if((dx == 2 && dy <= 1) || (dy == 2 && dx <= 1)){
-					game.blocks[n].hit(1)
-				}
-				block.hit(20);
+//			for(n = 0; n < game.blocks.length; n++){
+//				dx = Math.abs(game.blocks[n].position.x - block.position.x);
+//				dy = Math.abs(game.blocks[n].position.y - block.position.y);
+//				if(dx + dy == 1){
+//					game.blocks[n].hit(4);
+//				}else if(dx == 1 && dy == 1){
+//					game.blocks[n].hit(2);
+//				}else if((dx == 2 && dy <= 1) || (dy == 2 && dx <= 1)){
+//					game.blocks[n].hit(1)
+//				}
+//				block.hit(20);
 
-			}
-			*/
+//			}
+			
 			var numchunks = 18, ang;
 			block.hit(1);
 			this.moving = false
@@ -647,8 +649,11 @@ ballClass.prototype.hitBlock = function(block){
 			}
 			break;
 		default:
-			block.hit(1);
-	}
+*/
+
+	block.hit(1);
+
+//	}
 }
 
 ballClass.prototype.move = function(){
@@ -846,6 +851,7 @@ var blockClass = function(strength){
 
 	this.hasBonus = false;
 	this.isBonus = false;
+	this.bonusType = null;
 	this.isTemporay = false;
 	// a weird one-off for animating game.blocks that have a bonus ready to go
 	this.starAngle = Math.random() * Math.PI;
@@ -859,7 +865,8 @@ blockClass.prototype.centerPoint = function(){
 }
 
 blockClass.prototype.draw = function(x, y){
-	var darkColour2 = 'rgba(' + (this.rgb.red >> 1) + ', ' + (this.rgb.green >> 1) + ', ' + (this.rgb.blue >> 1) + ', 1)';
+	var fontColour = 'rgba(' + (this.rgb.red >> 1) + ', ' + (this.rgb.green >> 1) + ', ' + (this.rgb.blue >> 1) + ', 1)';
+	var shadeColour = 'rgba(255, 255, 255, .6)';
 	var halfblock = game.gridScale >> 1;
 	if(x == undefined) x = this.realX();
 	if(y == undefined) y = this.realY();
@@ -873,22 +880,9 @@ blockClass.prototype.draw = function(x, y){
 //		context.translate(x + halfblock + this.offset.x * game.gridScale, y + halfblock + this.offset.y * game.gridScale);
 		context.translate(this.offset.x * game.gridScale, this.offset.y * game.gridScale);
 
-		// add some text
-		context.textAlign = 'center';
-		var fontSize = Math.floor(game.gridScale /  (1 + log10(this.strength) / 2));
-		context.font = fontSize + "px PoorStory";
-
-		context.fillStyle = 'rgba(255, 255, 255, .6)';
-		context.fillText(this.strength, x + halfblock + game.textShadowOffset, y + halfblock + game.textShadowOffset + fontSize / 3);
-
-		context.fillStyle = darkColour2;//'rgba(0, 0, 0, 1)';
-		context.fillText(this.strength, x + halfblock, y + halfblock + fontSize / 3);
 
 		if(this.hasBonus){
 			// if this block has a bonus waiting inside, we add a texas star under the number
-			this.starAngle += .1;
-			texasStar(x + halfblock, y + halfblock, halfblock * .8, this.starAngle, 0.4);
-		}else if(this.isBonus){
 			this.starAngle += .15
 			texasStar(
 				x + 3 * halfblock / 2,
@@ -908,15 +902,60 @@ blockClass.prototype.draw = function(x, y){
 				halfblock * Math.abs(Math.cos(this.starAngle)/ 3) + .3,
 				this.starAngle + 1
 			);
+		}else if(this.isBonus){
+			this.starAngle += .15
+			context.save();
+				switch(this.bonusType){
+					case 'bomb':
+						context.translate(x + halfblock + Math.sin(this.starAngle) * halfblock / 4, y + halfblock);
+						context.rotate(Math.sin(this.starAngle));
+						context.scale(0.9, 0.9);
+						drawShape('bomb', context);
+						fontColour = 'rgba(48, 48, 48, 1)';
+						shadeColour = 'rgba(96, 96, 96, 1)';
+						break;
+					case 'faster':
+						context.translate(x + halfblock + Math.sin(this.starAngle) * halfblock / 4, y + halfblock);
+						context.scale(0.9, 0.9);
+						drawShape('faster', context);
+						fontColour = 'rgba(48, 48, 48, 1)';
+						shadeColour = 'rgba(96, 96, 96, 1)';
+						break;
+				}
+
+				//texasStar(x + halfblock, y + halfblock, halfblock * .8, this.starAngle, 0.4);
+			context.restore();
 			
 		}
 
+		// add some text
+		context.textAlign = 'center';
+		var fontSize = Math.floor(game.gridScale /  (1 + log10(this.strength) / 2));
+		context.font = fontSize + "px PoorStory";
+
+		context.fillStyle = shadeColour;
+		context.fillText(this.strength, x + halfblock + game.textShadowOffset, y + halfblock + game.textShadowOffset + fontSize / 3);
+
+		context.fillStyle = fontColour;//'rgba(0, 0, 0, 1)';
+		context.fillText(this.strength, x + halfblock, y + halfblock + fontSize / 3);
 
 	context.restore();
 
 
 
 };
+
+// select which type of bonus this block is carrying
+blockClass.prototype.pickABonus = function(){
+	this.hasBonus = true;
+
+	var chance = Math.random();
+	if(chance < 0.5){
+		this.bonusType = 'bomb';
+	}else{
+		this.bonusType = 'faster';
+	}
+}
 
 // sets the colour for this block.
 blockClass.prototype.pickAColour = function(){
@@ -939,38 +978,14 @@ blockClass.prototype.hit = function(strength){
 			this.strength = this.originalStrength;
 			this.hasBonus = false;
 			this.isBonus = true;
-		}else if(this.isBonus){
-		
-			player.scoreIncrement += this.originalStrength;
-			player.score += player.scoreIncrement;
-/*
-			// add a bonus 
-			var bonus = new bonusClass((this.position.x + .5) * game.gridScale, (this.position.y + .5) * game.gridScale);
-			game.bonuses[game.bonuses.length] = bonus;
-			blockClass.removeBlock(this);
-*/
-			var numchunks = 18, ang;
-			for(n = 0; n < numchunks; n++){
-				ang = n * 2 * Math.PI / numchunks;
-
-				game.addBall({
-					position : {
-						x : (this.position.x + .5) * game.gridScale,
-						y : (this.position.y + .5) * game.gridScale
-					},
-					velocity : {
-						dx : Math.sin(ang) * game.defaultBallSpeed,
-						dy : Math.cos(ang) * game.defaultBallSpeed
-					},
-					colour : {
-						red : 64,
-						green : 64,
-						blue : 64
-					},
-					powerUp : 'temporary',
-					radius : game.minBallRadius,
-					moving : true
-				});
+		}else if(this.isBonus !== false){
+			switch(this.bonusType){	
+				case 'bomb':
+					this.bombBonus();
+					break;
+				case 'faster':
+					this.speedBonus();
+					break;
 			}
 			blockClass.removeBlock(this);
 		}else{
@@ -980,6 +995,48 @@ blockClass.prototype.hit = function(strength){
 		}
 	}else{
 		player.score++;
+	}
+}
+
+blockClass.prototype.speedBonus = function(){a
+	// will probably need to tweak these contstants a bit
+	player.ballSpeed += .05;
+	player.launchFrequency *= .95;
+	
+}
+
+blockClass.prototype.bombBonus = function(){
+	player.scoreIncrement += this.originalStrength;
+	player.score += player.scoreIncrement;
+/*
+	// add a bonus 
+	var bonus = new bonusClass((this.position.x + .5) * game.gridScale, (this.position.y + .5) * game.gridScale);
+	game.bonuses[game.bonuses.length] = bonus;
+	blockClass.removeBlock(this);
+*/
+	var numchunks = 18, ang, n;
+	for(n = 0; n < numchunks; n++){
+		ang = n * 2 * Math.PI / numchunks;
+
+		game.addBall({
+			position : {
+				x : (this.position.x + .5) * game.gridScale,
+				y : (this.position.y + .5) * game.gridScale
+			},
+			velocity : {
+				dx : Math.sin(ang) * player.ballSpeed,
+				dy : Math.cos(ang) * player.ballSpeed
+			},
+			colour : {
+				red : 64,
+				green : 64,
+				blue : 64
+			},
+			temporary : true,
+			//powerUp : 'temporary',
+			radius : game.minBallRadius,
+			moving : true
+		});
 	}
 }
 
@@ -994,8 +1051,15 @@ blockClass.removeBlock = function(block){
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
-// 		A class for representing bonuses coming from blocks
+// 		A class for representing bonus objects coming from blocks
 /////////////////////////////////////////////////////////////////////////////////////////////
+
+/* @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+   It turns out I'm not using this class yet, although I may want it in the future.
+   We'll hold on to the class for now in case the need arises, and if it's not used, I'll
+   delete it in the end.
+*/
+/*
 var bonusClass = function(blockx, blocky){
 	this.radius = game.gridScale / 2;
 	this.angle = Math.random() * Math.PI;
@@ -1008,7 +1072,8 @@ var bonusClass = function(blockx, blocky){
 	this.reachedBottom = false;
 	var bonusTypes = [
 		//'scoreMultiplier'
-		'bomb'
+		'bomb',
+		'faster'
 	];
 	this.bonusType = bonusTypes[Math.floor(Math.random() * bonusTypes.length)];
 };
@@ -1027,11 +1092,9 @@ bonusClass.prototype.draw = function(){
 		default:
 			texasStar(this.position.x, this.position.y, this.radius, this.angle, 1);
 	}
-	/*
-	texasStar(this.x1, this.y1, game.gridScale / 3, 0, 1);
-	texasStar(this.x2, this.y2, game.gridScale / 3, 0, 1);
-	texasStar(this.x3, this.y3, game.gridScale / 3, 0, 1);
-	*/
+//	texasStar(this.x1, this.y1, game.gridScale / 3, 0, 1);
+//	texasStar(this.x2, this.y2, game.gridScale / 3, 0, 1);
+//	texasStar(this.x3, this.y3, game.gridScale / 3, 0, 1);
 }
 
 bonusClass.prototype.move = function(){
@@ -1055,6 +1118,7 @@ bonusClass.prototype.move = function(){
 bonusClass.prototype.awardPlayer = function(){
 	switch(this.bonusType){
 		case 'bomb':
+			// this is old stuff
 			//this.awardBomb();
 			game.addBall();
 			game.balls[game.balls.length - 1].powerUp = 'bomb';
@@ -1079,7 +1143,7 @@ bonusClass.prototype.awardBomb = function(){
 
 	game.balls[goodIndex].powerUp = this.bonusType;
 }
-
+*/
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 // 		Initial game setup

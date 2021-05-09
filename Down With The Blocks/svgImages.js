@@ -15,6 +15,9 @@ function drawShape(shapeName, context){
 		case 'hexcell':
 			drawHexCell(context);
 			break;
+		case 'faster':
+			drawFaster(context);
+			break;
 		default:
 			throw 'svgImages:drawShape(): invalid image name';
 	}
@@ -342,7 +345,7 @@ function drawBomb(ctx){
 	ctx.lineCap = 'round';
 	ctx.miterLimit = 4;
 	ctx.lineWidth = 0.070115;
-	ctx.fillStyle = 'rgb(0, 0, 0)';
+	ctx.fillStyle = 'rgb(60, 60, 60)';
 	ctx.rect(104.964600, 102.342260, 15.344608, 8.315475);
 	ctx.fill();
 	
@@ -352,7 +355,7 @@ function drawBomb(ctx){
 	ctx.lineCap = 'round';
 	ctx.miterLimit = 4;
 	ctx.lineWidth = 0.070115;
-	ctx.fillStyle = 'rgb(0, 0, 0)';
+	ctx.fillStyle = 'rgb(60, 60, 60)';
 	ctx.arc(112.636900, 141.651780, 35.151787, 0.000000, 6.28318531, 1);
 	ctx.fill();
 	
@@ -793,4 +796,139 @@ function drawTitle(ctx){
 	ctx.restore();
 
 
+}
+function oldDrawFaster(ctx){
+	/**** custom lines to center and scale the object properly ***/
+	var scale = game.gridScale / 100;
+	ctx.scale(scale, scale);
+	ctx.translate(-50, -50); //<-- translate to center of actual vector image area
+
+// #path1889
+	ctx.beginPath();
+	ctx.globalAlpha = 1.0;
+	ctx.lineJoin = 'round';
+	ctx.lineCap = 'round';
+	ctx.miterLimit = 4;
+	ctx.lineWidth = 21.411024;
+	ctx.fillStyle = 'rgb(145, 196, 239)';
+	ctx.moveTo(34.227037, 15.970485);
+	ctx.lineTo(92.996573, 15.440155);
+	ctx.bezierCurveTo(93.317260, 15.437255, 93.575454, 15.698336, 93.575454, 16.019036);
+	ctx.lineTo(93.575454, 83.980964);
+	ctx.bezierCurveTo(93.575454, 84.301664, 93.317273, 84.559845, 92.996573, 84.559845);
+	ctx.lineTo(33.873484, 84.559845);
+	ctx.bezierCurveTo(33.552784, 84.559845, 0.060585, 49.972195, 0.060585, 49.972195);
+	ctx.lineTo(0.060585, 49.972195);
+	ctx.lineTo(0.060585, 49.972195);
+	ctx.bezierCurveTo(0.060585, 49.972195, 33.906350, 15.973379, 34.227037, 15.970485);
+	ctx.fill();
+	
+// #rect1872
+	ctx.beginPath();
+	ctx.globalAlpha = 1.0;
+	ctx.lineJoin = 'round';
+	ctx.lineCap = 'round';
+	ctx.miterLimit = 4;
+	ctx.lineWidth = 21.023001;
+	ctx.fillStyle = 'rgb(110, 177, 234)';
+	ctx.moveTo(36.181867, 15.970485);
+	ctx.lineTo(92.840588, 15.440155);
+	ctx.bezierCurveTo(93.149757, 15.437255, 93.398678, 15.698336, 93.398678, 16.019036);
+	ctx.lineTo(93.398678, 83.980964);
+	ctx.bezierCurveTo(93.398678, 84.301664, 93.149770, 84.559845, 92.840588, 84.559845);
+	ctx.lineTo(35.841013, 84.559845);
+	ctx.bezierCurveTo(35.531832, 84.559845, 3.242565, 49.972195, 3.242565, 49.972195);
+	ctx.lineTo(3.242565, 49.972195);
+	ctx.lineTo(3.242565, 49.972195);
+	ctx.bezierCurveTo(3.242565, 49.972195, 35.872699, 15.973379, 36.181867, 15.970485);
+	ctx.fill();
+	
+// #g1878
+	ctx.save();
+	ctx.transform(1.000000, 0.000000, 0.000000, 1.000000, 2.821836, 0.000000);
+	
+// #path1438
+	ctx.beginPath();
+	ctx.lineJoin = 'miter';
+	ctx.strokeStyle = 'rgb(162, 230, 255)';
+	ctx.lineCap = 'butt';
+	ctx.miterLimit = 4;
+	ctx.lineWidth = 4.381716;
+	ctx.moveTo(35.460042, 77.014818);
+	ctx.lineTo(8.214284, 50.108216);
+	ctx.lineTo(35.346989, 22.975511);
+	ctx.stroke();
+	
+// #path1438-1
+	ctx.beginPath();
+	ctx.lineJoin = 'miter';
+	ctx.lineWidth = 4.381716;
+	ctx.strokeStyle = 'rgba(162, 230, 255, 0.6)';
+	ctx.lineCap = 'butt';
+	ctx.miterLimit = 4;
+	ctx.moveTo(61.585363, 77.014818);
+	ctx.lineTo(34.339602, 50.108216);
+	ctx.lineTo(61.472310, 22.975511);
+	ctx.stroke();
+	
+// #path1438-2
+	ctx.beginPath();
+	ctx.lineJoin = 'miter';
+	ctx.lineWidth = 4.381716;
+	ctx.strokeStyle = 'rgba(162, 230, 255, 0.3)';
+	ctx.lineCap = 'butt';
+	ctx.miterLimit = 4;
+	ctx.moveTo(87.710680, 77.014818);
+	ctx.lineTo(60.464919, 50.108216);
+	ctx.lineTo(87.597626, 22.975511);
+	ctx.stroke();
+	ctx.restore();
+}
+	/*************************************************************/
+function drawFaster(ctx){
+	/**** custom lines to center and scale the object properly ***/
+	var scale = game.gridScale / 100;
+	ctx.scale(scale, scale);
+	ctx.translate(-50, -50); //<-- translate to center of actual vector image area
+	/*************************************************************/
+	var red = 66;
+	var green = 111;
+	var blue = 128;
+
+    	
+// #path1438
+	ctx.beginPath();
+	ctx.lineJoin = 'round';
+	ctx.strokeStyle = 'rgb(' + red + ', ' + green + ', ' + blue + ')';
+	ctx.lineCap = 'round';
+	ctx.miterLimit = 4;
+	ctx.lineWidth = 12.877028;
+	ctx.moveTo(35.011284, 78.336122);
+	ctx.lineTo(6.438244, 50.118762);
+	ctx.lineTo(34.892724, 21.664282);
+	ctx.stroke();
+	
+// #path1438-1
+	ctx.beginPath();
+	ctx.lineJoin = 'round';
+	ctx.lineWidth = 12.877028;
+	ctx.strokeStyle = 'rgb(' + red + ', ' + green + ', ' + blue + ', 0.6)';
+	ctx.lineCap = 'round';
+	ctx.miterLimit = 4;
+	ctx.moveTo(64.253664, 78.336122);
+	ctx.lineTo(35.680624, 50.118762);
+	ctx.lineTo(64.135104, 21.664282);
+	ctx.stroke();
+	
+// #path1438-2
+	ctx.beginPath();
+	ctx.lineJoin = 'round';
+	ctx.lineWidth = 12.877028;
+	ctx.strokeStyle = 'rgb(' + red +  ', ' + green + ', ' + blue + ', 0.3)';
+	ctx.lineCap = 'round';
+	ctx.miterLimit = 4;
+	ctx.moveTo(93.496054, 78.336122);
+	ctx.lineTo(64.923004, 50.118762);
+	ctx.lineTo(93.377494, 21.664282);
+	ctx.stroke();
 }
