@@ -18,7 +18,7 @@ var gameClass = function(){
 	this.animationFrequency = 24;
 	this.minBallRadius = 10;
 	this.ballRadiusScale = 1 / 75;
-	this.bonusBlockChance = 0.5;
+	this.bonusBlockChance = 0.05;
 	this.defaultBallSpeed = 16;
 	this.menuOptions = [
 		{
@@ -998,8 +998,7 @@ blockClass.prototype.hit = function(strength){
 	}
 }
 
-blockClass.prototype.speedBonus = function(){a
-	// will probably need to tweak these contstants a bit
+blockClass.prototype.speedBonus = function(){
 	player.ballSpeed += .05;
 	player.launchFrequency *= .95;
 	
