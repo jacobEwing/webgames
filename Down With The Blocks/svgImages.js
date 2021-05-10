@@ -1,22 +1,23 @@
 /*
 	These functions were built by drawing vector images and using available tools to convert them to javascript
 */
-function drawShape(shapeName, context){
+function drawShape(shapeName, context, params){
+	if(params == undefined) params = {};
 	switch(shapeName){
 		case 'bomb':
-			drawBomb(context);
+			drawBomb(context, params);
 			break;
 		case 'volume':
-			drawVolume(context);
+			drawVolume(context, params);
 			break;
 		case 'title':
-			drawTitle(context);
+			drawTitle(context, params);
 			break;
 		case 'hexcell':
-			drawHexCell(context);
+			drawHexCell(context, params);
 			break;
 		case 'faster':
-			drawFaster(context);
+			drawFaster(context, params);
 			break;
 		default:
 			throw 'svgImages:drawShape(): invalid image name';
@@ -885,15 +886,15 @@ function oldDrawFaster(ctx){
 	ctx.restore();
 }
 	/*************************************************************/
-function drawFaster(ctx){
+function drawFaster(ctx, params){
 	/**** custom lines to center and scale the object properly ***/
 	var scale = game.gridScale / 100;
 	ctx.scale(scale, scale);
 	ctx.translate(-50, -50); //<-- translate to center of actual vector image area
 	/*************************************************************/
-	var red = 66;
-	var green = 111;
-	var blue = 128;
+	var red = 768 + params.red >> 2;
+	var green = 768 + params.green >> 2;
+	var blue = 768 + params.blue >> 2;
 
     	
 // #path1438
@@ -912,7 +913,7 @@ function drawFaster(ctx){
 	ctx.beginPath();
 	ctx.lineJoin = 'round';
 	ctx.lineWidth = 12.877028;
-	ctx.strokeStyle = 'rgb(' + red + ', ' + green + ', ' + blue + ', 0.6)';
+	ctx.strokeStyle = 'rgba(' + red + ', ' + green + ', ' + blue + ', 0.6)';
 	ctx.lineCap = 'round';
 	ctx.miterLimit = 4;
 	ctx.moveTo(64.253664, 78.336122);
@@ -924,7 +925,7 @@ function drawFaster(ctx){
 	ctx.beginPath();
 	ctx.lineJoin = 'round';
 	ctx.lineWidth = 12.877028;
-	ctx.strokeStyle = 'rgb(' + red +  ', ' + green + ', ' + blue + ', 0.3)';
+	ctx.strokeStyle = 'rgba(' + red +  ', ' + green + ', ' + blue + ', 0.3)';
 	ctx.lineCap = 'round';
 	ctx.miterLimit = 4;
 	ctx.moveTo(93.496054, 78.336122);

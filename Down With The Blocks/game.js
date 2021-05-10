@@ -64,7 +64,7 @@ gameClass.prototype.drawBackground = function(){
 	context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 	context.restore();
 	doBGSine(this.bgAng * 2 + 2, radius / 2, this.canvas.height >> 2, "#EFE0A0"); 
-	doBGSine(this.bgAng, radius, this.canvas.height >> 1, "#A85");
+	doBGSine(-this.bgAng, radius, this.canvas.height >> 1, "#A85");
 	doBGSine(this.bgAng / 2 + 1, radius, this.canvas.height * .75, "#863");
 };
 
@@ -917,7 +917,7 @@ blockClass.prototype.draw = function(x, y){
 					case 'faster':
 						context.translate(x + halfblock + Math.sin(this.starAngle) * halfblock / 4, y + halfblock);
 						context.scale(0.9, 0.9);
-						drawShape('faster', context);
+						drawShape('faster', context, this.rgb);
 						fontColour = 'rgba(48, 48, 48, 1)';
 						shadeColour = 'rgba(96, 96, 96, 1)';
 						break;
