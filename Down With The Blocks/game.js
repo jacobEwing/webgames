@@ -18,7 +18,7 @@ var gameClass = function(){
 	this.animationFrequency = 24;
 	this.minBallRadius = 10;
 	this.ballRadiusScale = 1 / 75;
-	this.bonusBlockChance = 0.05;
+	this.bonusBlockChance = 0.1;
 	this.defaultBallSpeed = 16;
 	this.menuOptions = [
 		{
@@ -535,125 +535,54 @@ ballClass.prototype.pickAColour = function(){
 
 ballClass.prototype.draw = function(){
 	if(this.velocity.dy == 0 && this.velocity.dx == 0) return;
-	/*
-	if(this.powerUp == 'bomb'){
-		/// this is actually not needed unless I want to restore bomb balls
 
-		context.save();
-			var scale = .5;
-			context.translate(this.position.x, this.position.y);
-			context.scale(scale, scale);
-			context.rotate(this.angle);
-			drawBomb(context);
+	var radius = game.gridScale * this.radius * game.ballRadiusScale;
+	var colour = 'rgb(' + this.colour.red + ', ' + this.colour.green + ', ' + this.colour.blue + ')';
+	var brightColour = 'rgba(' + brightenByte(this.colour.red) + ', ' + brightenByte(this.colour.green) + ', ' + brightenByte(this.colour.blue) + ')';
+	var darkColour = 'rgba(' + darkenByte(this.colour.red) + ', ' + darkenByte(this.colour.green) + ', ' + darkenByte(this.colour.blue) + ')';
+	var brightest = 'rgba(255, 255, 255, 0.6)';
+	var sqrtRad = Math.floor(Math.sqrt(2 * radius * radius));
+	context.save()
+		context.translate(this.position.x, this.position.y);
+		//context.rotate(this.angle);
+		// first draw the circle
+		context.fillStyle = colour;
+		context.beginPath();
+		context.arc(0, 0, radius, 0, 2 * Math.PI);
+		context.fill();
+		context.closePath();
 
-		context.restore();
-	}else{
-	*/
-		var radius = game.gridScale * this.radius * game.ballRadiusScale;
-		var colour = 'rgb(' + this.colour.red + ', ' + this.colour.green + ', ' + this.colour.blue + ')';
-		var brightColour = 'rgba(' + brightenByte(this.colour.red) + ', ' + brightenByte(this.colour.green) + ', ' + brightenByte(this.colour.blue) + ')';
-		var darkColour = 'rgba(' + darkenByte(this.colour.red) + ', ' + darkenByte(this.colour.green) + ', ' + darkenByte(this.colour.blue) + ')';
-		var brightest = 'rgba(255, 255, 255, 0.6)';
-		var sqrtRad = Math.floor(Math.sqrt(2 * radius * radius));
-		context.save()
-			context.translate(this.position.x, this.position.y);
-			//context.rotate(this.angle);
-			// first draw the circle
-			context.fillStyle = colour;
-			context.beginPath();
-			context.arc(0, 0, radius, 0, 2 * Math.PI);
-			context.fill();
-			context.closePath();
+		// shade it on the top left
+		context.fillStyle = brightColour;
+		context.beginPath();
+		context.arc(0, 0, radius, 3 * Math.PI / 4, 7 * Math.PI / 4);
+		context.bezierCurveTo(0,  -radius / 3,  -radius / 3, 0,  -sqrtRad / 2, sqrtRad / 2);
+		context.closePath();
+		context.fill();
 
-			// shade it on the top left
-			context.fillStyle = brightColour;
-			context.beginPath();
-			context.arc(0, 0, radius, 3 * Math.PI / 4, 7 * Math.PI / 4);
-			context.bezierCurveTo(0,  -radius / 3,  -radius / 3, 0,  -sqrtRad / 2, sqrtRad / 2);
-			context.closePath();
-			context.fill();
+		// and on the bottom right
+		context.fillStyle = darkColour;
+		context.beginPath();
+		context.arc(0, 0, radius, -Math.PI / 4, 3 * Math.PI / 4);
+		context.bezierCurveTo(0, radius, radius, 0, sqrtRad / 2, -sqrtRad / 2);
+		context.closePath();
+		context.fill();
 
-			// and on the bottom right
-			context.fillStyle = darkColour;
-			context.beginPath();
-			context.arc(0, 0, radius, -Math.PI / 4, 3 * Math.PI / 4);
-			context.bezierCurveTo(0, radius, radius, 0, sqrtRad / 2, -sqrtRad / 2);
-			context.closePath();
-			context.fill();
+		// shade it on the top left
+		context.fillStyle = brightest;
+		context.beginPath();
+		context.arc(0, 0, radius, 3 * Math.PI / 4, 7 * Math.PI / 4);
+		context.bezierCurveTo(0, -radius, -radius, 0,  -sqrtRad / 2, sqrtRad / 2);
+		context.closePath();
+		context.fill();
 
-			// shade it on the top left
-			context.fillStyle = brightest;
-			context.beginPath();
-			context.arc(0, 0, radius, 3 * Math.PI / 4, 7 * Math.PI / 4);
-			context.bezierCurveTo(0, -radius, -radius, 0,  -sqrtRad / 2, sqrtRad / 2);
-			context.closePath();
-			context.fill();
-
-		context.restore();
-	//}
+	context.restore();
 };
 
 ballClass.prototype.hitBlock = function(block){
 	var n, x, y;
-	/*
-	switch(this.powerUp){
-		case 'bomb':
-			
-			var dx, dy;
-//			for(n = 0; n < game.blocks.length; n++){
-//				dx = Math.abs(game.blocks[n].position.x - block.position.x);
-//				dy = Math.abs(game.blocks[n].position.y - block.position.y);
-//				if(dx + dy == 1){
-//					game.blocks[n].hit(4);
-//				}else if(dx == 1 && dy == 1){
-//					game.blocks[n].hit(2);
-//				}else if((dx == 2 && dy <= 1) || (dy == 2 && dx <= 1)){
-//					game.blocks[n].hit(1)
-//				}
-//				block.hit(20);
+	block.hit(1, this);
 
-//			}
-			
-			var numchunks = 18, ang;
-			block.hit(1);
-			this.moving = false
-			for(n = 0; n < numchunks; n++){
-				ang = n * 2 * Math.PI / numchunks;
-
-				game.addBall({
-					position : {
-						x : this.position.x,
-						y : this.position.y
-					},
-					velocity : {
-						dx : Math.sin(ang) * game.defaultBallSpeed,
-						dy : Math.cos(ang) * game.defaultBallSpeed
-					},
-					colour : {
-						red : 64,
-						green : 64,
-						blue : 64
-					},
-					powerUp : 'temporary',
-					radius : game.minBallRadius,
-					moving : true
-				});
-			}
-
-			// finally, we need to remove this bomb ball
-			for(n = 0; n < game.balls.length; n++){
-				if(Object.is(this, game.balls[n])){
-					game.balls.splice(n, 1);
-					break;
-				}
-			}
-			break;
-		default:
-*/
-
-	block.hit(1);
-
-//	}
 }
 
 ballClass.prototype.move = function(){
@@ -971,7 +900,7 @@ blockClass.prototype.pickAColour = function(){
 }
 
 // impact the block with a ball
-blockClass.prototype.hit = function(strength){
+blockClass.prototype.hit = function(strength, ball){
 	this.strength -= strength;
 	if(this.strength <= 0){
 		if(this.hasBonus){
@@ -981,7 +910,7 @@ blockClass.prototype.hit = function(strength){
 		}else if(this.isBonus !== false){
 			switch(this.bonusType){	
 				case 'bomb':
-					this.bombBonus();
+					this.bombBonus(ball);
 					break;
 				case 'faster':
 					this.speedBonus();
@@ -1004,7 +933,7 @@ blockClass.prototype.speedBonus = function(){
 	
 }
 
-blockClass.prototype.bombBonus = function(){
+blockClass.prototype.bombBonus = function(ball){
 	player.scoreIncrement += this.originalStrength;
 	player.score += player.scoreIncrement;
 /*
@@ -1048,101 +977,6 @@ blockClass.removeBlock = function(block){
 		}
 	}
 }
-
-/////////////////////////////////////////////////////////////////////////////////////////////
-// 		A class for representing bonus objects coming from blocks
-/////////////////////////////////////////////////////////////////////////////////////////////
-
-/* @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-   It turns out I'm not using this class yet, although I may want it in the future.
-   We'll hold on to the class for now in case the need arises, and if it's not used, I'll
-   delete it in the end.
-*/
-/*
-var bonusClass = function(blockx, blocky){
-	this.radius = game.gridScale / 2;
-	this.angle = Math.random() * Math.PI;
-	this.position = {x : blockx, y : blocky};
-	this.velocity = {
-		dx : 50 * (player.x - blockx) / (game.gridScale * blocky),
-		dy : -game.gridScale / 8
-	};
-	this.velocity.dx *= game.gridScale / 8;
-	this.reachedBottom = false;
-	var bonusTypes = [
-		//'scoreMultiplier'
-		'bomb',
-		'faster'
-	];
-	this.bonusType = bonusTypes[Math.floor(Math.random() * bonusTypes.length)];
-};
-
-
-bonusClass.prototype.draw = function(){
-	switch(this.bonusType){
-		case 'bomb':
-			context.save();
-			context.translate(this.position.x, this.position.y);
-			context.rotate(this.angle);
-			context.scale(.8, .8);
-			drawBomb(context);
-			context.restore();
-			break;
-		default:
-			texasStar(this.position.x, this.position.y, this.radius, this.angle, 1);
-	}
-//	texasStar(this.x1, this.y1, game.gridScale / 3, 0, 1);
-//	texasStar(this.x2, this.y2, game.gridScale / 3, 0, 1);
-//	texasStar(this.x3, this.y3, game.gridScale / 3, 0, 1);
-}
-
-bonusClass.prototype.move = function(){
-	this.position.x += this.velocity.dx;
-	this.position.y += this.velocity.dy;
-	this.position.y < this.velocity.dy;
-	this.velocity.dy += game.gridScale / 100;
-	this.angle += .1;
-	if(this.position.x < 0 && this.velocity.dx < 0){
-		this.velocity.dx *= -1;
-	}
-	if(this.position.x > game.gridScale * game.gridSize.x){
-		this.velocity.dx *= -1;
-	}
-	if(this.position.y > game.gridSize.y * game.gridScale){
-		this.reachedBottom = true;
-		
-	}
-}
-
-bonusClass.prototype.awardPlayer = function(){
-	switch(this.bonusType){
-		case 'bomb':
-			// this is old stuff
-			//this.awardBomb();
-			game.addBall();
-			game.balls[game.balls.length - 1].powerUp = 'bomb';
-	}
-}
-
-bonusClass.prototype.awardBomb = function(){
-	var n, idx, goodIndex = -1;
-	var offset = Math.floor(Math.random() * game.balls.length);
-
-	for(n = 0; n < game.balls.length && goodIndex == -1; n++){
-		idx = (offset + n) % game.balls.length;
-		if(game.balls[idx].powerUp == null){
-			goodIndex = idx;
-		}
-	}
-	if(goodIndex == -1){
-		// All balls have power-ups.  Add a new ball.
-		game.addBall();
-		goodIndex = game.balls.length - 1;
-	}
-
-	game.balls[goodIndex].powerUp = this.bonusType;
-}
-*/
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 // 		Initial game setup
