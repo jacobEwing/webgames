@@ -26,6 +26,10 @@ Requires attribution, they suggest something like:
 				blockHit: new Audio(freesoundPath + '426594__mootmcnoodles__ding.wav')
 
 			};
+
+Music:
+All music shared freely by Wintergatan for other artists to integrate in their works
+
 =================== initial brainstorm ===========================
 A total rebbot/improvement of "ballz-online" (presumably just ballz")
 it's like breakout, but instead fo having a ball that you bounce on a pad, you
@@ -37,6 +41,7 @@ It could be SOOO much better revamped.  The graphics are crapped, so that would
 be an easy improvement.
 
 Also, power-ups.  Some ideas there:
+ - 
  - lasers shoot up/down/left/right, blasting through every block in their path
  - game area increase - a one time boost that increases the area of the game.
    Increasing height would give more time to destroy blocks, Increasing width
@@ -46,6 +51,8 @@ Also, power-ups.  Some ideas there:
 
  - aiming assistance, a line tracing the projected path of the ball
  - make the floor bouncy for ten seconds
+ - balls that can bounce off the floor a certain number of times, with a number
+   showing how many times they have left
  - all balls split on next impact
  - gun
  - fireballs for more damage
@@ -65,8 +72,3 @@ Also, power-ups.  Some ideas there:
  - Animated scrolling background of various textures
  - Perhaps not square bricks.. Maybe not even numbers, although I think they're
    important.
- - perhaps instead of the balls being launched from the first fall spot, the
-   mouse would move the pad left and right until the button is pressed, at
-   which point motion changes the angle.
- - The balls can be of varying colours.  Perhaps the blocks that provide them
-   can be of varying colours, which determine the colour of the balls.
