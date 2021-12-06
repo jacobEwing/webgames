@@ -64,7 +64,7 @@ class gameClass{
 		do{
 			$keyCode = "";
 			for($n = 0; $n < 6; $n++){
-				$keyCode .= $validChars{rand() % strlen($validChars)};
+				$keyCode .= $validChars[rand() % strlen($validChars)];
 			}
 			$this->keyCode = $keyCode;
 			$data = mysql_fetch_array(mysql_query("SELECT COUNT(*) as tally FROM games WHERE keycode = '$keyCode'"));
@@ -74,7 +74,7 @@ class gameClass{
 		// now we can generate the hosting code.  No need to guarantee uniqueness
 		$this->hostCode = "";
 		for($n = 0; $n < 6; $n++){
-			$this->hostCode .= $validChars{rand() % strlen($validChars)};
+			$this->hostCode .= $validChars[rand() % strlen($validChars)];
 		}
 
 		// we now have the new code, let's save it and pass it back to the client
