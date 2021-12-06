@@ -157,6 +157,7 @@ gameClass.prototype.render = function(){
 			context.save();
 			context.moveTo(0, 0);
 			drawShape('title', context);
+			context.restore();
 
 			this.drawMenu();
 			break;
