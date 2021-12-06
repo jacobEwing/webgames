@@ -295,7 +295,11 @@ gameClass.prototype.drawMenuStars = function(){
 			[.3, 1.1],
 			[1.1, -.05],
 			[1.15, 0.4],
-			[-.15, 0.2]
+			[-.15, 0.2],
+			[0.7, 0.4],
+			[0.4, 0.6],
+			[0.7, 0.7],
+			[0.35, 0.9]
 		];
 		this.bgStars = [];
 		myRandom(1); // <-- setting a random seed for consistent "randomness".
