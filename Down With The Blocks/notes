@@ -41,29 +41,29 @@ It could be SOOO much better revamped.  The graphics are crapped, so that would
 be an easy improvement.
 
 Also, power-ups.  Some ideas there:
- - 
+ - fireball that burns through blocks - one ball and one time only
+ - bonus ball - give you an additional ball for more power
  - lasers shoot up/down/left/right, blasting through every block in their path
- - game area increase - a one time boost that increases the area of the game.
-   Increasing height would give more time to destroy blocks, Increasing width
-   would give more blocks per row, increasing difficulty.
-
- - Splitting the launchpoint, perhaps leaving the balls per launchpoint untouched
-
  - aiming assistance, a line tracing the projected path of the ball
  - make the floor bouncy for ten seconds
- - balls that can bounce off the floor a certain number of times, with a number
-   showing how many times they have left
- - all balls split on next impact
- - gun
- - fireballs for more damage
- - set launch point
- - double game speed
- - halve game speed
- - brief gravity control
- - damage multiplier
+ - gun - maybe for ten seconds, or maybe only usable when you are not launching balls and balls are in the air.
+ - temporary damage multiplier (next launch, or maybe
  - balls are destroyed on impact with bricks, giving 10X or some other factor
    of the normal damage
  - Balls are launched by holding mouse, with direction changing with mouse motion
+
+More MAYBE ideas:
+- game area increase - a one time boost that increases the area of the game.
+   Increasing height would give more time to destroy blocks, Increasing width
+   would give more blocks per row, increasing difficulty.
+ - Splitting the launchpoint, perhaps leaving the balls per launchpoint untouched
+ - brief gravity control
+ - balls that can bounce off the floor a certain number of times, with a number
+   showing how many times they have left
+ - all balls split on next impact
+ - set launch point
+ - double game speed
+ - halve game speed
 
 
  Some other touch-ups:

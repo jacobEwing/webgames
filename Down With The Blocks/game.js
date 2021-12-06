@@ -1,6 +1,6 @@
 var game, context, player;
 
-var soundEffects, music, muted = false, musicVolume = 0 * .5, effectsVolume = 1;
+var soundEffects, music, muted = false, musicVolume = .6, effectsVolume = .9;
 /////////////////////////////////////////////////////////////////////////////////////////////
 // the game class
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -20,28 +20,58 @@ var gameClass = function(){
 	this.ballRadiusScale = 1 / 75;
 	this.bonusBlockChance = 0.1;
 	this.defaultBallSpeed = 16;
-	this.menuOptions = [
-		{
-			'label' : 'Play',
-			'action' : function(){ self.start(); },
-			'hovering' : 0
-		},
-		{
-			'label' : 'Settings',
-			'action' : function(){alert('Not implemented');},
-			'hovering' : 0
-		},
-		{
-			'label' : 'About',
-			'action' : function(){alert('Not implemented');},
-			'hovering' : 0
-		},
-		{
-			'label' : 'Exit',
-			'action' : function(){ document.location.href = window.location;},
-			'hovering' : 0
-		}
-	];
+	this.menuOptions = {
+		'main' : [
+			{
+				'label' : 'Play',
+				'action' : function(){ self.start(); },
+				'hovering' : 0
+			},
+			{
+				'label' : 'Settings',
+				'action' : function(){alert('Not implemented');},
+				'hovering' : 0
+			},
+			{
+				'label' : 'About',
+				'action' : function(){
+					game.canvas.onmousedown = null;
+					game.canvas.onmousemove = null;
+					game.currentMenu = 'about';
+					initializeMenu(game.menuOptions.about );
+				},
+				'hovering' : 0
+			},
+			{
+				'label' : 'Exit',
+				'action' : function(){ document.location.href = document.referrer;},
+				'hovering' : 0
+			}
+		],
+		'about' : [
+			{
+				'label' : 'How to Play',
+				'action' : function(){alert('Not implemented');},
+				'hovering' : 0
+			},			
+			{
+				'label' : 'Credits',
+				'action' : function(){alert('Not implemented');},
+				'hovering' : 0
+			},			
+			{
+				'label' : 'Main Menu',
+				'action' : function(){
+					game.canvas.onmousedown = null;
+					game.canvas.onmousemove = null;
+					game.currentMenu = 'main';
+					initializeMenu(game.menuOptions.main );
+				},
+				'hovering' : 0
+			}
+
+		]
+	};
 
 	// initialize variables
 	this.canvas = null;
@@ -114,7 +144,8 @@ gameClass.prototype.startRound = function(){
 			playSound('gameOver');
 			console.log('add game over animation');
 			game.state = 'menu';
-			game.initializeMenu();
+			game.currentMenu = 'main';
+			initializeMenu(game.menuOptions.main);
 		}else{
 			// wait for user input
 			me.state = 'aiming';
@@ -159,7 +190,7 @@ gameClass.prototype.render = function(){
 			drawShape('title', context);
 			context.restore();
 
-			this.drawMenu();
+			drawMenu(this.menuOptions[this.currentMenu]);
 			break;
 	}
 	for(n = 0; n < this.bonuses.length; n++){
@@ -289,28 +320,28 @@ gameClass.prototype.drawMenuStars = function(){
 	}
 };
 
-gameClass.prototype.drawMenu = function(){
-	var spacing = this.gridScale >> 2;
-	var topMargin = this.gridScale * .45;
-	var height = this.gridScale * this.gridSize.y;
-	var y = height * .3/*(height >> 2)*/ + (height - this.menuOptions.length * (this.gridScale + spacing)) >> 1;
+function drawMenu(menuOptions){
+	var spacing = game.gridScale >> 2;
+	var topMargin = game.gridScale * .45;
+	var height = game.gridScale * game.gridSize.y;
+	var y = height * .3/*(height >> 2)*/ + (height - menuOptions.length * (game.gridScale + spacing)) >> 1;
 	var n;
-	var x = (this.gridSize.x * this.gridScale) >> 1;
+	var x = (game.gridSize.x * game.gridScale) >> 1;
 	var colour;
 	context.save()
 		context.textAlign = 'center';
-		for(n = 0; n < this.menuOptions.length; n++){
-			var fontSize = this.gridScale * .8;
-			this.menuOptions[n].x = this.gridScale;
-			this.menuOptions[n].y = y;
-			this.menuOptions[n].width = this.gridScale * (this.gridSize.x - 2);
-			this.menuOptions[n].height = this.gridScale;
+		for(n = 0; n < menuOptions.length; n++){
+			var fontSize = game.gridScale * .8;
+			menuOptions[n].x = game.gridScale;
+			menuOptions[n].y = y;
+			menuOptions[n].width = game.gridScale * (game.gridSize.x - 2);
+			menuOptions[n].height = game.gridScale;
 
-			if(this.menuOptions[n].hovering == 1){
-				this.menuOptions[n].x -= this.gridScale >> 3;
-				this.menuOptions[n].y -= this.gridScale >> 3;
-				this.menuOptions[n].width += this.gridScale >> 2;
-				this.menuOptions[n].height += this.gridScale >> 2;
+			if(menuOptions[n].hovering == 1){
+				menuOptions[n].x -= game.gridScale >> 3;
+				menuOptions[n].y -= game.gridScale >> 3;
+				menuOptions[n].width += game.gridScale >> 2;
+				menuOptions[n].height += game.gridScale >> 2;
 				fontSize += fontSize >> 2;
 				colour = {red : 200, green : 230, blue : 160};
 			}else{
@@ -318,51 +349,50 @@ gameClass.prototype.drawMenu = function(){
 			}
 
 			context.font = fontSize + "px PoorStory";
-			drawNiceBox(this.menuOptions[n].x, this.menuOptions[n].y, this.menuOptions[n].width, this.menuOptions[n].height, colour);//, {red : 200, green : 192, blue : 160 });
+			drawNiceBox(menuOptions[n].x, menuOptions[n].y, menuOptions[n].width, menuOptions[n].height, colour);//, {red : 200, green : 192, blue : 160 });
 
 			context.fillStyle = 'rgba(255, 255, 255, .6)';
-			context.fillText(this.menuOptions[n].label, x + game.textShadowOffset, y + topMargin + game.textShadowOffset + fontSize / 3);
+			context.fillText(menuOptions[n].label, x + game.textShadowOffset, y + topMargin + game.textShadowOffset + fontSize / 3);
 
 			context.fillStyle = 'rgba(0, 48, 0, .8)';
-			context.fillText(this.menuOptions[n].label, x, y + topMargin + fontSize / 3);
+			context.fillText(menuOptions[n].label, x, y + topMargin + fontSize / 3);
 			
-			y += this.gridScale + spacing;
+			y += game.gridScale + spacing;
 		}
 	context.restore();
 };
 
 // this is just called as a first step in initializing the menu, setting up event triggering etc.
-gameClass.prototype.initializeMenu = function(){
+function initializeMenu(menuOptions){
 	var lastButtonState = -1;
 	var mousex, mousey;
 	var currentButton = -1;
-	var me = this;
-	this.canvas.onmousemove = function(evt){
+	game.canvas.onmousemove = function(evt){
 		var n;
 		mousex = evt.offsetX;
 		mousey = evt.offsetY;
 		currentButton = -1;
-		for(n = 0; n < me.menuOptions.length; n++){
-			if(mousex >= me.menuOptions[n].x && mousex <= me.menuOptions[n].x + me.menuOptions[n].width){
-				if(mousey >= me.menuOptions[n].y && mousey <= me.menuOptions[n].y + me.menuOptions[n].height){
+		for(n = 0; n < menuOptions.length; n++){
+			if(mousex >= menuOptions[n].x && mousex <= menuOptions[n].x + menuOptions[n].width){
+				if(mousey >= menuOptions[n].y && mousey <= menuOptions[n].y + menuOptions[n].height){
 					currentButton = n;
-					if(!me.menuOptions[n].hovering){
+					if(!menuOptions[n].hovering){
 						playSound('whoosh');
 					}
-					me.menuOptions[n].hovering = 1;
+					menuOptions[n].hovering = 1;
 				}else{
-					me.menuOptions[n].hovering = 0;
+					menuOptions[n].hovering = 0;
 				}
 			}else{
-				me.menuOptions[n].hovering = 0;
+				menuOptions[n].hovering = 0;
 			}
 		}
 	};
 
-	this.canvas.onmousedown = function(){
+	game.canvas.onmousedown = function(){
 		if(currentButton != -1){
 			if(lastButtonState == -1){
-				me.menuOptions[currentButton].action();
+				menuOptions[currentButton].action();
 			}
 		}
 	}
@@ -482,21 +512,20 @@ function initialize(step){
 		case 'finish':
 			window.onresize = handleResize;
 			game.state = 'menu';
+			game.currentMenu = 'main';
 			setInterval(function(){game.render();}, game.animationFrequency);
-			game.initializeMenu();
+			initializeMenu(game.menuOptions.main);
 			break;
 		default:
 			throw 'initialize: invalid step name "' + step + '"';
 	}
 }
-/*
 
-We actually want this active, but for now we want to trigger it with a button for sound to work properly
 
 window.onload = function(){
 	initialize();
 };
-*/
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 //		Function definitions
