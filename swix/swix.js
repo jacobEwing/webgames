@@ -294,6 +294,10 @@ function settingsShowMainMenu(){
 	});
 }
 
+function exitGame(){
+	history.go(-1);
+}
+
 var startGame = function(){
 	var loadingAnim, n, widget;
 	return function(step){
