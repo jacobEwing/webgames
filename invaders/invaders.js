@@ -219,9 +219,12 @@ function takeDamage(amount, reduceShield){
 		if(life[numLives - 1].power <= 0){
 			numLives--;
 			life[numLives].update();
-			if(numLives == 0) endGame();
 		}
-		life[numLives - 1].update();
+		if(numLives == 0){
+			endGame();
+		}else{
+			life[numLives - 1].update();
+		}
 	}
 }
 
@@ -1429,7 +1432,8 @@ function handleKeypress(state, e){
 			togglePause();
 			break;
 		case 9: case 83: case 115:
-			if(gameState != 'paused' && gameState != 'confirming' && gameState != 'unpausing' && gameState != 'pausing'){
+			//if(gameState != 'paused' && gameState != 'confirming' && gameState != 'unpausing' && gameState != 'pausing' && gameState != 'loading'){
+			if(gameState == 'active'){
 				skipLevel();
 			}
 			break;

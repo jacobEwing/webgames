@@ -7,7 +7,7 @@ if(array_key_exists('action', $_GET)){
 			$level = intval($_POST['level']);
 			$result = loadLevel($level);
 			if($result){
-				echo json_encode($result['map']);
+				echo jsonEncode($result['map']);
 			}
 			break;
 		case 'settings':
@@ -35,48 +35,47 @@ if(array_key_exists('action', $_GET)){
 	exit;
 }
 
-if(!function_exists('json_encode')){
-	function json_encode($a = false){
-		// Some basic debugging to ensure we have something returned
-		if (is_null($a)) return 'null';
-		if ($a === false) return 'false';
-		if ($a === true) return 'true';
-		if (is_scalar($a))
+// this is entirely in place for backwards compatability with the antiquated php version on the server in use
+function jsonEncode($a = false){
+	// Some basic debugging to ensure we have something returned
+	if (is_null($a)) return 'null';
+	if ($a === false) return 'false';
+	if ($a === true) return 'true';
+	if (is_scalar($a))
+	{
+		if (is_float($a))
 		{
-			if (is_float($a))
-			{
-				// Always use "." for floats.
-				return floatval(str_replace(",", ".", strval($a)));
-			}
+			// Always use "." for floats.
+			return floatval(str_replace(",", ".", strval($a)));
+		}
 
-			if (is_string($a))
-			{
-				static $jsonReplaces = array(array("\\", "/", "\n", "\t", "\r", "\b", "\f", '"'), array('\\\\', '\\/', '\\n', '\\t', '\\r', '\\b', '\\f', '\"'));
-				return '"' . str_replace($jsonReplaces[0], $jsonReplaces[1], $a) . '"';
-			}
-			else
-				return $a;
-		}
-		$isList = true;
-		for ($i = 0; reset($a); $i++){
-			if (key($a) !== $i)
-			{
-				$isList = false;
-				break;
-			}
-		}
-		$result = array();
-		if ($isList){
-			foreach ($a as $v) $result[] = json_encode($v);
-			return '[' . join(',', $result) . ']';
+		if (is_string($a))
+		{
+			static $jsonReplaces = array(array("\\", "/", "\n", "\t", "\r", "\b", "\f", '"'), array('\\\\', '\\/', '\\n', '\\t', '\\r', '\\b', '\\f', '\"'));
+			return '"' . str_replace($jsonReplaces[0], $jsonReplaces[1], $a) . '"';
 		}
 		else
+			return $a;
+	}
+	$isList = true;
+	for ($i = 0; reset($a); $i++){
+		if (key($a) !== $i)
 		{
-			foreach ($a as $k => $v){
-				$result[] = json_encode($k).':'.json_encode($v);
-			}
-			return '{' . join(',', $result) . '}';
+			$isList = false;
+			break;
 		}
+	}
+	$result = array();
+	if ($isList){
+		foreach ($a as $v) $result[] = jsonEncode($v);
+		return '[' . join(',', $result) . ']';
+	}
+	else
+	{
+		foreach ($a as $k => $v){
+			$result[] = jsonEncode($k).':'.jsonEncode($v);
+		}
+		return '{' . join(',', $result) . '}';
 	}
 }
 
@@ -499,10 +498,7 @@ function draw_help($page){
 	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
 	<script type="text/javascript" src="spriteSet.js"></script>
 	<script type="text/javascript" src="goldRun.js"></script>
-	<script src="http://www.google-analytics.com/urchin.js" type="text/javascript"></script>
 	<script type="text/javascript">
-	_uacct = "UA-3072147-1";
-	try{urchinTracker();}catch(e){};
 	var lastMenuSelect = 0, menuOptions = [];
 	var section_content = {};
 	var startingLevel = <?=intval($_GET['level'])?>;
