@@ -81,6 +81,7 @@ var gameClass = function(){
 	this.balls = [];
 	this.bgAng = 0;
 	this.bonuses = [];
+	this.buttonList = new areaActionClass();
 };
 
 gameClass.prototype.drawBackground = function(){
@@ -172,7 +173,7 @@ gameClass.prototype.render = function(){
 		for(n = 0; n < this.blocks.length; n++){
 			this.blocks[n].draw();
 		}
-		drawStats();
+		drawBottomBar();
 	}
 	switch(this.state){
 		case 'aiming':
@@ -202,6 +203,7 @@ gameClass.prototype.render = function(){
 			n--;
 		}
 	}
+
 
 	context.moveTo(0, 0);
 
@@ -324,6 +326,11 @@ gameClass.prototype.drawMenuStars = function(){
 	}
 };
 
+/////////////////////////////////////////////////////////////////////////////////////////////
+// additional game functions
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+
 function drawMenu(menuOptions){
 	var spacing = game.gridScale >> 2;
 	var topMargin = game.gridScale * .45;
@@ -404,7 +411,7 @@ function initializeMenu(menuOptions){
 
 gameClass.prototype.start = function(){
 
-	// turn the main menu events
+	// turn the main menu events off
 	this.canvas.onmousedown = null;
 	this.canvas.onmousemove = null;
 
@@ -416,6 +423,11 @@ gameClass.prototype.start = function(){
 	this.blocks = [];
 	this.balls = [];
 	this.addBall();
+
+	// add tracking of mouse clicks on ui components
+	this.canvas.onclick = function(e){
+		game.buttonList.checkAreas(e.offsetX, e.offsetY);
+	}
 
 	// let the game begin
 	// we'll do this instead of calling startround, as this lets the blocks
@@ -574,7 +586,6 @@ var handleMouseTargeting = (function(){
 		player.aim(e.offsetX, e.offsetY);
 	}
 })();
-
 function renderArrow(){
 	var arrowPoints = [
 		-.8, -2,  -.8, -5,  -2, -4.75,  0, -7.5,  2, -4.75, .8, -5, .8, -2
@@ -618,30 +629,69 @@ function renderArrow(){
 
 }
 
-function drawStats(){
+function drawBottomBar(){
 	context.save();
 		var fontSize = Math.floor(game.gridScale * .39);
 		var marginSize = fontSize / 2;
 		var bottomY = game.gridScale * game.gridSize.y - marginSize;
 		var rightX = game.gridScale * game.gridSize.x - marginSize / 2;
 
+		context.font = fontSize + "px jelleeroman";
+
+		// draw the panel back
 		context.fillStyle = 'rgba(160, 160, 160, .6)';
 		context.fillRect(0, game.gridScale * (game.gridSize.y - .75), game.canvas.width, game.gridScale * .75);
 		context.fillStyle = 'rgba(190, 190, 190, .6)';
 		context.fillRect(0, game.gridScale * (game.gridSize.y - .75), game.canvas.width, game.gridScale * .125);
-		context.font = fontSize + "px jelleeroman";
+
+/*
+		// draw the volume icon
+		context.save();
+			context.translate(marginSize + game.gridScale, bottomY);
+			context.scale(.5, .6);
+			drawShape('exit', context, { scale : .5, colour : 'rgba(196, 255, 128, 1)'});
+		context.restore();
+*/
+		// draw the exit
+		context.textAlign = 'right';
+		context.fillStyle = 'rgba(129, 64, 48, 1)';
+		context.fillText('EXIT', rightX + game.textShadowOffset * -2, bottomY + game.textShadowOffset);
+		context.fillStyle = 'rgba(255, 196, 128, 1)';
+		context.fillText('EXIT', rightX, bottomY);
+
+		var measurement = context.measureText('EXIT');
+		var exitButtonArea = {
+			x : rightX - measurement.width - game.textShadowOffset * 2,
+			y : bottomY - measurement.actualBoundingBoxAscent,
+			w : measurement.width + game.textShadowOffset * 2,
+			h : measurement.actualBoundingBoxAscent + measurement.actualBoundingBoxDescent + game.textShadowOffset
+		};
+
+		game.buttonList.removeArea('exit');
+		game.buttonList.addArea('exit', exitButtonArea, endGame);
+
+/*
+		// draw the level
 		context.textAlign = 'left';
-		context.fillStyle = 'rgba(128, 64, 48, 1)';
+		context.fillStyle = 'rgba(129, 64, 48, 1)';
 		context.fillText('LEVEL: ' + (player.level + 1), marginSize + game.textShadowOffset * 2, bottomY + game.textShadowOffset);
 		context.fillStyle = 'rgba(255, 196, 128, 1)';
 		context.fillText('LEVEL: ' + (player.level + 1), marginSize, bottomY);
+*/
 
-		context.textAlign = 'right';
-		context.fillStyle = 'rgb(48, 64, 32, 1)';
-		context.fillText('SCORE: ' + player.score, rightX + game.textShadowOffset * -2, bottomY + game.textShadowOffset);
+		// draw the score
+		context.textAlign = 'left';
+		context.fillStyle = 'rgb(49, 64, 32, 1)';
+		context.fillText('SCORE: ' + player.score, marginSize + game.textShadowOffset * 2, bottomY + game.textShadowOffset);
 		context.fillStyle = 'rgba(196, 255, 128, 1)';
-		context.fillText('SCORE: ' + player.score, rightX, bottomY);
+		context.fillText('SCORE: ' + player.score, marginSize, bottomY);
 	context.restore();
+}
+
+function endGame(){
+	game.state = 'menu';
+	game.currentMenu = 'main';
+	initializeMenu(game.menuOptions.main);
 }
 
 
