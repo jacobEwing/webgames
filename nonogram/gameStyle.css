@@ -1,0 +1,18 @@
+
+@font-face {
+    font-family: 'Vanilla Extract';
+    src: url('assets/fonts/VanillaExtractRegular.woff2') format('woff2'),
+        url('assets/fontsVanillaExtractRegular.woff') format('woff');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+body {
+	font-family : "Vanilla Extract";
+	background: url("assets/images/Wallpaper.png");
+	background-size: cover;
+}
+
+canvas {
+}
