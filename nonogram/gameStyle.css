@@ -1,11 +1,10 @@
 
 @font-face {
-    font-family: 'Vanilla Extract';
-    src: url('assets/fonts/VanillaExtractRegular.woff2') format('woff2'),
-        url('assets/fontsVanillaExtractRegular.woff') format('woff');
-    font-weight: 500;
-    font-style: normal;
-    font-display: swap;
+	font-family: 'Vanilla Extract';
+	src: url('assets/fonts/VanillaExtractRegular.woff2') format('woff2'),
+	     url('assets/fontsVanillaExtractRegular.woff') format('woff');
+	font-weight: 500;
+	font-style: normal;
 }
 
 body {
@@ -13,6 +12,19 @@ body {
 	background: url("assets/images/Wallpaper.png");
 	background-size: cover;
 }
+
+h1 {
+	margin-bottom: 0;
+	padding-bottom: 0.1lh;
+	text-align: center;
+	background-image: linear-gradient(rgb(239, 221, 115), brown);
+	background-clip: text;
+	-webkit-background-clip: text;
+	background-size:100%;
+	color: transparent;
+	font-size: 1cm;
+}
+
 
 canvas {
 }

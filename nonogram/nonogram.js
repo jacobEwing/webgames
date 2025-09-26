@@ -12,7 +12,7 @@ class Nonogram {
 		this.difficultySettings = {
 			easy: { minSegments: 1, maxSegments: 3, fillProbability: 0.7 },
 			medium: { minSegments: 2, maxSegments: 5, fillProbability: 0.6 },
-			hard: { minSegments: 3, maxSegments: 7, fillProbability: 0.5 }
+			hard: { minSegments: 3, maxSegments: 7, fillProbability: 0.45 }
 		};
 
 		this.colours = {
@@ -48,10 +48,13 @@ class Nonogram {
 
 	startGame(){
 		// generate our map and 
-		this.generate(12, 12, 'hard');
-		var x, y;
+		this.generate(this.maxGridSize, this.maxGridSize, 'hard');
+		this.drawCells();
+	}
 
+	drawCells(){
 		// draw the cells
+		var x, y;
 
 		for(y = 0; y < this.map.length; y++){
 			for(x = 0; x < this.map[y].length; x++){
