@@ -4,6 +4,13 @@ class Nonogram {
 			throw new Error('Nonogram: No target element defined.');
 		}
 
+		this.initialize(parameters);
+
+
+		this.startGame();
+	}
+
+	initialize(parameters){
 		this.font = null;
 		if(parameters.font != undefined){
 			this.font = parameters.font;
@@ -15,11 +22,28 @@ class Nonogram {
 			hard: { minSegments: 3, maxSegments: 7, fillProbability: 0.6 }
 		};
 
+		// initialize default colours and check to see if custom ones were passed in
 		this.colours = {
 			empty : { red : 157, green : 168, blue : 138, alpha : .5 },
 			active : { red: 239, green :221, blue : 115, alpha : .5 },
-			text : { red : 68, green :  67, blue : 58 }
+			plainText : { red : 68, green :  67, blue : 58, alpha : 1 },
+			paleText : { red : 68, green :  67, blue : 58, alpha : .4 },
+			errorText : { red : 192, green :  96, blue : 64, alpha : 1 }
 		};
+
+		if(parameters.colours != undefined){
+			for(let n in this.colours){
+				if(n in parameters.colours){
+					this.colours[n] = parameters.colours[n];
+				}
+			}
+		}
+
+		this.rowcolStates = {
+			unsolved : 0,
+			solved : 1,
+			error : 2
+		}
 
 		this.cellStates = {
 			unknown : 0,
@@ -42,10 +66,7 @@ class Nonogram {
 
 		this.context = this.canvas.getContext('2d');
 
-
-		this.startGame();
 	}
-
 	startGame(){
 		// generate our map and states of each cell.
 		//this.generate(this.maxGridSize, this.maxGridSize, 'hard');
@@ -63,7 +84,6 @@ class Nonogram {
 		var me = this;
 
 		this.canvas.onmousedown = function(e){
-			console.log(e.button);
 			let x = e.offsetX;
 			let y = e.offsetY;
 			let cellX = Math.floor(x / me.cellSize) - me.sideSpacing;
@@ -80,13 +100,19 @@ class Nonogram {
 	}
 
 	handleCellClick(x, y, button){
-//		console.log('(' + x + ', ' + y + ') : ' + button);
-
 		if(button == 'left'){
 			// handle left clicks
 			switch(this.state[x][y]){
 				case this.cellStates.unknown:
-					this.state[x][y] = this.map[x][y] == 1 ? this.cellStates.filled : this.cellStates.error;
+					/*
+					Currently, this just marks the cell as filled. Erroneous fillings are flagged
+					my changing colour of the numbers.
+					In the future, I want an option to play in a "3 errors and your out" style,
+					which will use the x instead. That can be done with the currently remarked
+					line below.
+					*/
+					//this.state[x][y] = this.map[x][y] == 1 ? this.cellStates.filled : this.cellStates.error;
+					this.state[x][y] = this.cellStates.filled;
 					break;
 				case this.cellStates.filled:
 					this.state[x][y] = this.cellStates.unknown;
@@ -138,9 +164,8 @@ class Nonogram {
 	drawCells(){
 		// draw the cells
 		var x, y;
-
-		for(y = 0; y < this.map.length; y++){
-			for(x = 0; x < this.map[y].length; x++){
+		for(x = 0; x < this.map.length; x++){
+			for(y = 0; y < this.map[x].length; y++){
 				switch(this.state[x][y]){
 					case this.cellStates.unknown:
 						this.drawBox(x, y, this.colours.empty);
@@ -163,14 +188,16 @@ class Nonogram {
 			}
 		}
 
-		// draw the clues at the top
 		// the margin is this.sideSpacing * this.cellSize
 		this.context.save();
 		this.context.font = this.cellSize / 5 + "px " + this.font;
-		this.context.fillStyle = this.#colourToText(this.colours.text);
-		this.context.textAlign = "center";
+		//this.context.fillStyle = this.#colourToText(this.colours.text);
 
+		// draw the clues at the top
+		this.context.textAlign = "center";
 		for(x = 0; x < this.map.length; x++){
+			this.context.fillStyle = this.getTextColour(this.checkColumn(x));
+
 			for(y = 0; y < this.columnClues[x].length; y++){
 				this.context.fillText(
 					this.columnClues[x][this.columnClues[x].length - 1 - y],
@@ -183,6 +210,7 @@ class Nonogram {
 		// now we'll do the side clues
 		this.context.textBaseline = 'middle';
 		for(y = 0; y < this.map[0].length; y++){
+			this.context.fillStyle = this.getTextColour(this.checkRow(y));
 			for(x = 0; x < this.rowClues[y].length; x++){
 				this.context.fillText(
 					this.rowClues[y][this.rowClues[y].length - 1 - x],
@@ -194,6 +222,53 @@ class Nonogram {
 
 		this.context.restore();
 
+	}
+
+	// return the appropriate text color for a given row/column state
+	getTextColour(state){
+		var rval;
+		switch(state){
+			case this.rowcolStates.unsolved:
+				rval = this.#colourToText(this.colours.plainText);
+				break;
+			case this.rowcolStates.solved:
+				rval = this.#colourToText(this.colours.paleText);
+				break;
+			case this.rowcolStates.error:
+				rval = this.#colourToText(this.colours.errorText);
+				break;
+			default:
+				throw ("uncaught case");
+		}
+		return rval;
+	}
+
+	// returns a state of error, solved, or unsolved depending on the column status
+	checkColumn(x){
+		var rval = this.rowcolStates.solved;
+		for(let y = 0; y < this.map[x].length; y++){
+			if(!this.map[x][y] && this.state[x][y] == this.cellStates.filled){
+				rval = this.rowcolStates.error;
+				break;
+			}else if(this.map[x][y] && this.state[x][y] != this.map[x][y]){
+				rval = this.rowcolStates.unsolved;
+			}
+		}
+		return rval;
+	}
+
+	// returns a state of error, solved, or unsolved depending on the row status
+	checkRow(y){
+		var rval = this.rowcolStates.solved;
+		for(let x = 0; x < this.map.length; x++){
+			if(!this.map[x][y] && this.state[x][y] == this.cellStates.filled){
+				rval = this.rowcolStates.error;
+				break;
+			}else if(this.map[x][y] && this.state[x][y] != this.map[x][y]){
+				rval = this.rowcolStates.unsolved;
+			}
+		}
+		return rval;
 	}
 
 	buildCanvas(target){

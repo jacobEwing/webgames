@@ -2,35 +2,14 @@
 <html>
 <head>
 	<script type="text/javascript" src="nonogram.js"></script>
-	<script type="text/javascript" src="mapBuild.js"></script>
 	<link rel="stylesheet" href="gameStyle.css"></link>
 	<script type="text/javascript">
 		var game;
 		window.onload = function() {
-			// Example usage:
-			const width = 5;
-			const height = 5;
-			const puzzle = generateNonogram(width, height);
-			const clues = generateClues(puzzle, width, height);
-
-			console.log("Generated Grid:");
-			for (let y = 0; y < height; y++) {
-				let row = "";
-				for (let x = 0; x < width; x++) {
-					row += puzzle[x][y] ? "x" : ".";
-				}
-				console.log(row);
-			}
-
-			console.log("\nRow clues:", clues.rowClues);
-			console.log("Column clues:", clues.colClues);
-			debugger;
-/*
 			game = new Nonogram({
 				target : document.getElementById('gameWrapper'),
 				font : 'Vanilla Extract'
 			});
-*/
 		};
 
 	</script>
