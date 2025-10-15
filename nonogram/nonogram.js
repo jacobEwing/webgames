@@ -5,21 +5,39 @@ class Nonogram {
 		}
 
 		this.initialize(parameters);
-
-
-		this.startGame();
 	}
 
 	initialize(parameters){
+		//some enums
+		this.rowcolStates = {
+			unsolved : 0,
+			solved : 1,
+			error : 2
+		};
+
+		this.cellStates = {
+			unknown : 0,
+			filled : 1,
+			flagged : 2,
+			error: 3
+		};
+
+		this.gameStates = {
+			menu : 0,
+			active : 1,
+			won : 2
+		}
+
+		// handle settings
 		this.font = null;
 		if(parameters.font != undefined){
 			this.font = parameters.font;
 		}
 
 		this.difficultySettings = {
-			easy: { minSegments: 1, maxSegments: 3, fillProbability: 0.8 },
-			medium: { minSegments: 2, maxSegments: 5, fillProbability: 0.7 },
-			hard: { minSegments: 3, maxSegments: 7, fillProbability: 0.6 }
+			easy: { fillProbability: 0.6 },
+			medium: { fillProbability: 0.5 },
+			hard: { fillProbability: 0.4 }
 		};
 
 		// initialize default colours and check to see if custom ones were passed in
@@ -39,45 +57,104 @@ class Nonogram {
 			}
 		}
 
-		this.rowcolStates = {
-			unsolved : 0,
-			solved : 1,
-			error : 2
+		if(parameters.font != undefined){
+			this.font = parameters.font;
+		}else{
+			this.font = 'Arial';
 		}
 
-		this.cellStates = {
-			unknown : 0,
-			filled : 1,
-			flagged : 2,
-			error: 3
-		}
+		// declare and assign some values
 
+		this.state = this.gameStates.menu;
 		this.maxGridSize = 12;
 		this.map = null; // the actual solution mapped
 		this.rowClues = null;
 		this.columnClues = null;
 		this.state = null; // an array of what marks the player has made
-		this.cellSize = 0;
 		this.sideSpacing = 2; // number of cell sizes used for numbers.  Should be made dynamic with settings, along with board position
-		this.font = 'Vanilla Extract';
 
+		// calculate the canvas size we want and the corresponding cell size
+		var canvasSize = this.getCanvasSize();
+		this.cellSize = Math.floor(canvasSize / (this.maxGridSize + this.sideSpacing));
+
+		// create the canvas, get context, and prevent right-click menus
 		this.canvas = this.buildCanvas(parameters.target);
+		this.context = this.canvas.getContext('2d');
 		this.canvas.oncontextmenu = function(){return false};
 
-		this.context = this.canvas.getContext('2d');
-
 	}
-	startGame(){
-		// generate our map and states of each cell.
+
+	getCanvasSize(){
+		// calculate the size of canvas we want to fit inside the window
+		let size = window.innerHeight;
+		if(window.innerWidth < size){
+			size = window.innerWidth;
+		}
+		size = Math.round(size * .9);
+		return size;
+		
+	}
+
+	start(){  // start the game!
+
 		//this.generate(this.maxGridSize, this.maxGridSize, 'hard');
-		this.generate(this.maxGridSize, this.maxGridSize, 'hard');
+
+		let w = Math.round(Math.random() * this.maxGridSize / 2);
+		w += this.maxGridSize >> 1;
+
+		let h = Math.round(Math.random() * this.maxGridSize / 2);
+		h += this.maxGridSize >> 1;
+
+		//this.generate(w, h, 'hard');
+		this.generate(w, h, 'hard');
 		this.state =  Array.from({ length: this.map.length }, () => Array(this.map[0].length).fill(this.cellStates.unknown));
+
+		//@@@@@@@@@@@@@@ TEMPORARY @@@@@@@@@@@@@@@@@
+		// a quick test to try and solve it
+//		this.solveTest();
+		//@@@@@@@@@@@@@@ /TEMPORARY @@@@@@@@@@@@@@@@@
 
 		// initialize our cell states
 		this.drawCells();
 
 		// add events
 		this.initializeEvents();
+	}
+
+	solveTest(){
+		//////// UNREMARK TO CONTINUE DEVELOPING THIS FUNCTION
+		return;
+		var x, y, n, m;
+
+		// check columns
+		let height = this.map[0].length;
+		for(x = 0; x < this.map.length; x++){
+			let sum = this.columnClues[x].length - 1;
+			for(n = 0; n < this.columnClues[x].length; n++){
+				sum += this.columnClues[x][n];
+			}
+			console.log('x: ' + x + ', sum: ' + sum);
+
+			// if the numbers add up to more than half the length of the column, then check
+			// to see if any overlap with themselves
+			if(sum == this.map[0].length){
+				// the clues fill the row
+			}else if(sum > this.map[0].length >> 1){
+				// the clues describe an area longer than half the row length, check them out
+
+				/**
+					THIS IS INCOMPLETE.  The idea is to check whether any segments
+					on a given column overlap with each other
+				**/
+				let offset = 0;
+				let testColumn = Array(height).fill(-1);
+				for(n = 0; n < this.columnClues[x].length; n++){
+					for(m = 0; m < this.columnClues[x][n]; m++){
+						testColumn[offset] = 1 << n
+					}
+				}
+			}
+		}
 	}
 
 	initializeEvents(){
@@ -106,7 +183,7 @@ class Nonogram {
 				case this.cellStates.unknown:
 					/*
 					Currently, this just marks the cell as filled. Erroneous fillings are flagged
-					my changing colour of the numbers.
+					by changing colour of the numbers.
 					In the future, I want an option to play in a "3 errors and your out" style,
 					which will use the x instead. That can be done with the currently remarked
 					line below.
@@ -153,11 +230,34 @@ class Nonogram {
 			}
 		}
 		this.refresh();
+		if(this.checkForWin()){
+			console.log('WIN!');
+		}
 	}
 
 	refresh(){
 		this.context.clearRect(0, 0, this.canvas.width - 1, this.canvas.height - 1);
 		this.drawCells();
+	}
+
+	checkForWin(){
+		let win = true;
+
+		for(let x = 0; x < this.map.length && win; x++){
+			for(let y = 0; y < this.map[x].length && win; y++){
+
+				if(this.map[x][y] == 1 && this.state[x][y] != this.cellStates.filled){
+					win = false;
+				}
+
+				if(this.map[x][y] != 1 && this.state[x][y] == this.cellStates.filled){
+					win = false;
+				}
+
+			}
+		}
+
+		return win;
 	}
 	
 
@@ -272,19 +372,8 @@ class Nonogram {
 	}
 
 	buildCanvas(target){
-		// calculate the size of canvas we want to fit inside the window
-		let size = window.innerHeight;
-		if(window.innerWidth < size){
-			size = window.innerWidth;
-		}
-		size = Math.round(size * .9);
-		
-		// now get the cell size that we'll be using.
-		this.cellSize = Math.floor(size / (this.maxGridSize + this.sideSpacing));
-
-		// now we can build the canvas itself
 		let canvas = document.createElement('canvas');
-		size = this.cellSize * (this.maxGridSize + this.sideSpacing);
+		let size = this.cellSize * (this.maxGridSize + this.sideSpacing);
 		canvas.width = size;
 		canvas.height = size;
 		canvas.style.backgroundColor = 'rgb(0, 0, 0, 0)';//'rgb(' + this.colours.empty.red + ', ' + this.colours.empty.green + ', ' + this.colours.empty.blue + ')';
@@ -482,14 +571,84 @@ class Nonogram {
 	}
 
 	generateMap(width, height, fillProbability) {
-		const grid = [];
-		
+//		var grid = [];
+		var grid = Array.from({ length: width }, () => Array(height).fill(0));
+		var x, y;
+
+		var numCells = 0;
+		let iterations = 0;
+		let minCells = Math.floor(width * height * .4);
+
+		// fill in at least minCells number of cells
+		while(numCells < minCells && iterations < 10){
+			iterations++;
+			for(x = 0; x < width; x++){
+				let n = 0;
+				do{
+					y = Math.floor(Math.random() * height);
+					n++;
+				}while(n < 10 && grid[x][y] == 1);
+				if(n < 10){
+					grid[x][y] = 1;
+					numCells++;
+				}
+			}
+
+			// fill one cell in each row
+			for(y = 0; y < height; y++){
+				let n = 0;
+				do{
+					x = Math.floor(Math.random() * width);
+					n++;
+				}while(n < 10 && grid[x][y] == 1);
+				if(n < 10){
+					grid[x][y] = 1;
+					numCells++;
+				}
+			}
+		}
+
+		// now scan through, and find any standalone cells
+		for(x = 0; x < width; x++){
+			for(y = 0; y < width; y++){
+				if(!grid[x][y]) continue;
+
+				let neighbourSum = 0;
+				neighbourSum += x < 1 ? 0 :  grid[x - 1][y];
+				neighbourSum += x >= width - 1 ? 0 :  grid[x + 1][y];
+				neighbourSum += y < 1 ? 0 :  grid[x][y - 1];
+				neighbourSum += y >= height - 1 ? 0 : grid[x][y + 1];
+
+				if(neighbourSum == 0){
+					// this filled cell has no neighbours.  Fix that.
+					// start by picking a random adjacent cell
+					let dx = 0;
+					let dy = 0;
+					do{
+						if(Math.random() < .5){
+							dx = Math.random() < .5 ? -1 : 1;
+							dy = 0;
+						}else{
+							dx = 0;
+							dy = Math.random() < .5 ? -1 : 1;
+						}
+					}while(x + dx < 0 || x + dx >= grid.length || y + dy < 0 || y + dy >= grid[x].length);
+
+					grid[x + dx][y + dy] = 1;
+				}
+				
+			}
+		}
+
+		// old random fill
+		/*
 		for (let x = 0; x < width; x++) {
 			grid[x] = [];
 			for (let y = 0; y < height; y++) {
 				grid[x][y] = Math.random() < fillProbability ? 1 : 0;
 			}
 		}
+		*/
 		
 		return grid;
 	}
@@ -547,6 +706,13 @@ class Nonogram {
 		}
 		
 		return clues;
+	}
+	
+	pointFallsInGrid(x, y){
+		return 	x >= 0
+			&& y >= 0
+			&& x < this.map.length
+			&& y < this.map[0].length;
 	}
 
 	#colourToText(colour){
