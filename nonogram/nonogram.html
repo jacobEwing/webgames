@@ -6,32 +6,25 @@
 	<link rel="stylesheet" href="nonogram.css"></link>
 	<script type="text/javascript">
 		var game;
-		//window.onload = function(){startGame()};
+		window.onload = function(){startGame()};
 		function startGame(){
-			console.log('foo');
 			game = new Nonogram({
 				target : document.getElementById('gameWrapper'),
 				font : 'Vanilla Extract'
 			});
 
-			document.getElementById('gameWrapper').style.display = 'unset';
-			document.getElementById('menu').style.display = 'none';
 			game.start();
 		};
 	</script>
 </head>
 <body>
 </body>
-	<div class="pageContainer">
 		<h1>Nonogram</h1>
-		<div id="contentWrapper">
-			<div id="gameWrapper"></div>
 			<div id="menu">
-				<div><span onclick="startGame()" class="menuButton"><a>Play</a></span></div>
-				<div><span onclick="window.history.back()" class="menuButton"><a>Exit</a></span></div>
+				<span onclick="startGame()" class="menuButton"><a>New</a></span>
+				<span onclick="window.history.back()" class="menuButton"><a>Exit</a></span>
 			</div>
-		</div>
-	</div>
+			<div id="gameWrapper"></div>
 
 	<!--
 		credits to give:

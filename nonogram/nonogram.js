@@ -1,3 +1,29 @@
+/****************************************
+This is incomplete code.
+
+It's a fully functional game, but some of the code needs cleanup/replacement.
+I'm just setting it aside for now as my attention is needed elsewhere.
+
+Some things that still need attention:
+
+1) Puzzle generation. It currently sucks, largely being random.  I started
+writing a function to try solving it (solveTest), to ensure it's solvable, but
+it's not complete or functional in any way.  It is heavily remarked below.
+
+2) For the same reason, difficultySettings isn't used.  I originally planned on
+allowing different levels of difficulty, but that's not currently in use.
+
+3) I originally planned on making it use a three-strikes-you're-out style of
+play, which was how it was done in the site that I previously played the game
+in. That was replaced with highlighting the hint numbers in red if an empty
+cell is marked as full.
+First, that should be more elegant. It should indeed check whether or not the
+row CAN fit the markers in place, not whether or not it does. This will give
+more of a challenge and not just tell the user when they fill the wrong cell.
+Also, I would still like to optionally have the three-strikes-you're-out style.
+
+****************************************/
+
 class Nonogram {
 	constructor(parameters){
 		if(parameters.target == undefined){
@@ -21,12 +47,6 @@ class Nonogram {
 			flagged : 2,
 			error: 3
 		};
-
-		this.gameStates = {
-			menu : 0,
-			active : 1,
-			won : 2
-		}
 
 		// handle settings
 		this.font = null;
@@ -65,7 +85,6 @@ class Nonogram {
 
 		// declare and assign some values
 
-		this.state = this.gameStates.menu;
 		this.maxGridSize = 12;
 		this.map = null; // the actual solution mapped
 		this.rowClues = null;
@@ -78,6 +97,7 @@ class Nonogram {
 		this.cellSize = Math.floor(canvasSize / (this.maxGridSize + this.sideSpacing));
 
 		// create the canvas, get context, and prevent right-click menus
+		parameters.target.innerHTML = '';
 		this.canvas = this.buildCanvas(parameters.target);
 		this.context = this.canvas.getContext('2d');
 		this.canvas.oncontextmenu = function(){return false};
@@ -90,7 +110,7 @@ class Nonogram {
 		if(window.innerWidth < size){
 			size = window.innerWidth;
 		}
-		size = Math.round(size * .9);
+		size = Math.round(size * .8);
 		return size;
 		
 	}
@@ -122,7 +142,9 @@ class Nonogram {
 	}
 
 	solveTest(){
-		//////// UNREMARK TO CONTINUE DEVELOPING THIS FUNCTION
+		//@@@@@@@@@@@
+		// This incomplete code is not in use, the call to it being remarked.
+		//@@@@@@@@@@
 		return;
 		var x, y, n, m;
 
