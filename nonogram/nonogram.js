@@ -606,7 +606,6 @@ class Nonogram {
 	}
 
 	generateMap(width, height, fillProbability) {
-//		var grid = [];
 		var grid = Array.from({ length: width }, () => Array(height).fill(0));
 		var x, y;
 
@@ -643,48 +642,6 @@ class Nonogram {
 			}
 		}
 
-		// now scan through, and find any standalone cells
-		for(x = 0; x < width; x++){
-			for(y = 0; y < width; y++){
-				if(!grid[x][y]) continue;
-
-				let neighbourSum = 0;
-				neighbourSum += x < 1 ? 0 :  grid[x - 1][y];
-				neighbourSum += x >= width - 1 ? 0 :  grid[x + 1][y];
-				neighbourSum += y < 1 ? 0 :  grid[x][y - 1];
-				neighbourSum += y >= height - 1 ? 0 : grid[x][y + 1];
-
-				if(neighbourSum == 0){
-					// this filled cell has no neighbours.  Fix that.
-					// start by picking a random adjacent cell
-					let dx = 0;
-					let dy = 0;
-					do{
-						if(Math.random() < .5){
-							dx = Math.random() < .5 ? -1 : 1;
-							dy = 0;
-						}else{
-							dx = 0;
-							dy = Math.random() < .5 ? -1 : 1;
-						}
-					}while(x + dx < 0 || x + dx >= grid.length || y + dy < 0 || y + dy >= grid[x].length);
-
-					grid[x + dx][y + dy] = 1;
-				}
-				
-			}
-		}
-
-		// old random fill
-		/*
-		for (let x = 0; x < width; x++) {
-			grid[x] = [];
-			for (let y = 0; y < height; y++) {
-				grid[x][y] = Math.random() < fillProbability ? 1 : 0;
-			}
-		}
-		*/
-		
 		return grid;
 	}
 
