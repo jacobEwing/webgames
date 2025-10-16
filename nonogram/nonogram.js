@@ -259,8 +259,16 @@ class Nonogram {
 		}
 		this.refresh();
 		if(this.checkForWin()){
-			console.log('WIN!');
+			this.handleWin();
 		}
+	}
+
+	handleWin(){
+		// remove mouse events on the board
+		this.canvas.onmousedown = null;
+
+		// add some congratulatory animation
+		this.canvas.classList.add('shaking');
 	}
 
 	refresh(){
