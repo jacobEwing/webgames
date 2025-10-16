@@ -17,7 +17,7 @@ allowing different levels of difficulty, but that's not currently in use.
 play, which was how it was done in the site that I previously played the game
 in. That was replaced with highlighting the hint numbers in red if an empty
 cell is marked as full.
-First, that should be more elegant. It should indeed check whether or not the
+First, that should be more elegant. It should instead check whether or not the
 row CAN fit the markers in place, not whether or not it does. This will give
 more of a challenge and not just tell the user when they fill the wrong cell.
 Also, I would still like to optionally have the three-strikes-you're-out style.
@@ -91,16 +91,20 @@ class Nonogram {
 		this.columnClues = null;
 		this.state = null; // an array of what marks the player has made
 		this.sideSpacing = 2; // number of cell sizes used for numbers.  Should be made dynamic with settings, along with board position
+		this.xOffset = 0; // the offset to centre the board - set on generation
 
 		// calculate the canvas size we want and the corresponding cell size
 		var canvasSize = this.getCanvasSize();
 		this.cellSize = Math.floor(canvasSize / (this.maxGridSize + this.sideSpacing));
 
-		// create the canvas, get context, and prevent right-click menus
+		// prevent right-click menus
+		document.oncontextmenu = () => false;
+
+		// clear the target div, create the canvas, and get context
 		parameters.target.innerHTML = '';
 		this.canvas = this.buildCanvas(parameters.target);
 		this.context = this.canvas.getContext('2d');
-		this.canvas.oncontextmenu = function(){return false};
+
 
 	}
 
@@ -117,15 +121,15 @@ class Nonogram {
 
 	start(){  // start the game!
 
-		//this.generate(this.maxGridSize, this.maxGridSize, 'hard');
-
 		let w = Math.round(Math.random() * this.maxGridSize / 2);
 		w += this.maxGridSize >> 1;
 
 		let h = Math.round(Math.random() * this.maxGridSize / 2);
 		h += this.maxGridSize >> 1;
 
-		//this.generate(w, h, 'hard');
+		this.xOffset = ((this.maxGridSize - w) * this.cellSize) >> 1;
+
+
 		this.generate(w, h, 'hard');
 		this.state =  Array.from({ length: this.map.length }, () => Array(this.map[0].length).fill(this.cellStates.unknown));
 
@@ -181,9 +185,11 @@ class Nonogram {
 
 	initializeEvents(){
 		var me = this;
-
+		/**
+		@@@ this should be a member function so that I don't need to use "me"
+		**/
 		this.canvas.onmousedown = function(e){
-			let x = e.offsetX;
+			let x = e.offsetX - me.xOffset;
 			let y = e.offsetY;
 			let cellX = Math.floor(x / me.cellSize) - me.sideSpacing;
 			let cellY = Math.floor(y / me.cellSize) - me.sideSpacing;
@@ -323,7 +329,7 @@ class Nonogram {
 			for(y = 0; y < this.columnClues[x].length; y++){
 				this.context.fillText(
 					this.columnClues[x][this.columnClues[x].length - 1 - y],
-					(x + this.sideSpacing + .5) * this.cellSize,  
+					(x + this.sideSpacing + .5) * this.cellSize + this.xOffset,  
 					(this.sideSpacing) * this.cellSize - (y + .4) * this.cellSize / 3
 				);
 			}
@@ -336,7 +342,7 @@ class Nonogram {
 			for(x = 0; x < this.rowClues[y].length; x++){
 				this.context.fillText(
 					this.rowClues[y][this.rowClues[y].length - 1 - x],
-					(this.sideSpacing - .25) * this.cellSize - x * this.cellSize * .28,
+					(this.sideSpacing - .25) * this.cellSize - x * this.cellSize * .28 + this.xOffset,
 					(this.sideSpacing + .5 + y) * this.cellSize
 				);
 			}
@@ -399,6 +405,9 @@ class Nonogram {
 		canvas.width = size;
 		canvas.height = size;
 		canvas.style.backgroundColor = 'rgb(0, 0, 0, 0)';//'rgb(' + this.colours.empty.red + ', ' + this.colours.empty.green + ', ' + this.colours.empty.blue + ')';
+		
+		// horizontally offset the canvas so that the numbers don't factor into centering the board
+		canvas.style.marginLeft = -this.sideSpacing * this.cellSize + 'px';
 
 		target.appendChild(canvas);
 		return canvas;
@@ -430,6 +439,7 @@ class Nonogram {
 
 		x = (x + this.sideSpacing) * this.cellSize;
 		y = (y + this.sideSpacing) * this.cellSize;
+		x += this.xOffset;
 		var x2 = x + Math.floor(this.cellSize * .95);
 		var y2 = y + Math.floor(this.cellSize * .95);
 
@@ -506,6 +516,8 @@ class Nonogram {
 		x *= this.cellSize;
 		y *= this.cellSize;
 
+		x += this.xOffset;
+
 		this.context.save();
 
 		this.context.translate(x, y);
@@ -546,6 +558,7 @@ class Nonogram {
 		x *= this.cellSize;
 		y *= this.cellSize;
 
+		x += this.xOffset;
 		let scale = this.cellSize / 100;
 
 		this.context.save();
