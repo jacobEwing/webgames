@@ -1,0 +1,108 @@
+:root {
+	--menu-red : 239;
+	--menu-green : 221;
+	--menu-blue : 210;
+}
+
+@font-face {
+	font-family: 'Vanilla Extract';
+	src: url('assets/fonts/VanillaExtractRegular.woff2') format('woff2'),
+	     url('assets/fontsVanillaExtractRegular.woff') format('woff');
+	font-weight: 500;
+	font-style: normal;
+}
+
+body {
+	font-family : "Vanilla Extract";
+	background: url("assets/images/Wallpaper.png");
+	background-size: cover;
+	letter-spacing: .2ex; /* added because the font is a bit too tight */
+	user-select: none;
+	text-align: center;
+}
+
+.shaking {
+	animation-name: shakeDiv;
+	animation-duration: .5s;
+	animation-iteration-count: 1;
+	animation-timing-function: linear;
+}
+
+@keyframes shakeDiv {
+	0%	{ transform: rotate(-10deg); }
+	10%	{ transform: rotate(8deg); }
+	20%	{ transform: rotate(-6deg); }
+	30%	{ transform: rotate(4deg); }
+	40%	{ transform: rotate(-3deg); }
+	50%	{ transform: rotate(3deg); }
+	60%	{ transform: rotate(-2deg); }
+	70%	{ transform: rotate(2deg); }
+	80%	{ transform: rotate(-1deg); }
+	90%	{ transform: rotate(1deg); }
+	100%	{ transform: rotate(0deg); }
+}
+
+.gameWrapper{
+	overflow:hidden;
+}
+
+.pageContainer {
+	display: grid; 
+	grid-template-columns: 6fr; 
+	grid-template-rows: 1fr 12fr; 
+	gap: 0px 0px; 
+	grid-template-areas: 
+		"header"
+		"body";
+}
+
+h1 {
+	grid-area: header;
+	margin-bottom: 0;
+	padding-bottom: 0.1lh;
+	background-image: linear-gradient(rgb(239, 221, 115), brown);
+	background-clip: text;
+	-webkit-background-clip: text;
+	background-size:100%;
+	color: transparent;
+	font-size: 1cm;
+}
+
+#contentWrapper {
+	display: flex;
+	justify-content:center;
+	grid-area: body;
+}
+
+#menu {
+	font-size:5mm; 
+}
+
+span.menuButton{
+	margin: 0.5lh 0;
+	display: inline-flex;
+	background:linear-gradient(160deg, rgb(var(--menu-red), var(--menu-green), var(--menu-blue)) 5%, rgba(157, 168, 160, .8) 100%);
+	position: relative;
+	border-radius: 0.1lh;
+	padding: 0.05em;
+	min-width: 5em;
+	line-height: 1.5em;
+}
+
+span.menuButton:hover{
+	cursor: pointer;
+}
+span.menuButton > a{
+	--highlight-ratio : 1.1;
+	background-image: linear-gradient(-45deg, rgba(
+		calc(var(--menu-red) * var(--highlight-ratio)),
+		calc(var(--menu-green) * var(--highlight-ratio)), 
+		calc(var(--menu-blue) * var(--highlight-ratio)), 
+		.8), rgba(157, 168, 160, .5));
+	display: inline-block;
+	width: 100%;
+	height: 100%;
+	border-radius: 0.3lh 0.1lh 0.3lh 0.1lh;
+	color : rgb(80, 60, 40);
+
+}

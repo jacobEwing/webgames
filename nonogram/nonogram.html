@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link rel="icon" type="image/x-icon" href="assets/images/nonogram.ico">
+	<script type="text/javascript" src="nonogram.js"></script>
+	<link rel="stylesheet" href="nonogram.css"></link>
+	<script type="text/javascript">
+		var game;
+		window.onload = function(){startGame()};
+		function startGame(){
+			game = new Nonogram({
+				target : document.getElementById('gameWrapper'),
+				font : 'Vanilla Extract'
+			});
+
+			game.start();
+		};
+	</script>
+</head>
+<body>
+</body>
+		<h1>Nonogram</h1>
+			<div id="menu">
+				<span onclick="startGame()" class="menuButton"><a>New</a></span>
+				<span onclick="window.history.back()" class="menuButton"><a>Exit</a></span>
+			</div>
+			<div id="gameWrapper"></div>
+
+	<!--
+		credits to give:
+		 - wallpaper: publicdomainvectors.org
+		 - font:
+		 	"vanilla extract", Shara Weber, 	https://sharasfonts.com
+	-->
+</html>
