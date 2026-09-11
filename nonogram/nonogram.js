@@ -24,8 +24,8 @@ class Nonogram {
 
 		this.difficultySettings = {
 			easy:   { fillProbability: 0.60, hardnessRange: [0.0, 0.3] },
-			medium: { fillProbability: 0.55, hardnessRange: [0.3, 0.42] },
-			hard:   { fillProbability: 0.50, hardnessRange: [0.42, 99.0] }
+			medium: { fillProbability: 0.55, hardnessRange: [0.3, 0.9] },
+			hard:   { fillProbability: 0.50, hardnessRange: [0.9, 99.0] }
 		};
 
 		this.threeStrikes = !!parameters.threeStrikes;
@@ -267,7 +267,7 @@ class Nonogram {
 					case this.cellStates.error:
 					case this.cellStates.struck:
 						this.drawBox(x, y, this.colours.empty, true);
-						this.drawRedX(x, y);
+						this.drawSkull(x, y);
 						break;
 					default:
 						throw new Error('Invalid map state "' + this.state[x][y] + '"');
@@ -548,43 +548,106 @@ class Nonogram {
 	}
 
 		
-	drawRedX(x, y){
+	drawSkull(x, y){
 		x += this.sideSpacing;
 		y += this.sideSpacing;
-		x += .15;
-		y += .15;
 		x *= this.cellSize;
 		y *= this.cellSize;
 
 		x += this.xOffset;
-		let scale = this.cellSize / 100;
+
+		// 240 is an arbitrary denominator to scale down the vectors in use
+		let scale = this.cellSize / 240;
+
+		// for clarity, we'll le this calculation in place.
+		// this is centre the image in the cell.
+		// 240 as described above is the denominator in the scale of the icon
+		// 125 is the real vector size of the icon
+		// divided by two because we're centering it.
+		x += scale * (240 - 125) / 2;
+		y += scale * (240 - 125) / 2;
 
 		this.context.save();
 
 		this.context.translate(x, y);
 		this.context.scale(scale, scale);
-		this.context.fillStyle = 'rgb(238, 109, 68)';
+
+
+		this.context.fillStyle = 'rgba(0, 0, 0, .5)';
 		this.context.lineCap = 'butt';
 		this.context.lineJoin = 'miter';
 
+		// this ugly chunk of numbers was extracted from a PDF file, exported to HTML with Inkscape.
 		this.context.beginPath();
-		this.context.moveTo(6, 14);
-		this.context.bezierCurveTo(25, 29, 40, 41, 51, 61);
-		this.context.bezierCurveTo(57, 70, 69, 58, 60, 52);
-		this.context.bezierCurveTo(42, 39, 30, 27, 15, 4);
-		this.context.bezierCurveTo(8, -3, -2, 8, 6, 14);
+		this.context.globalAlpha = 0.8;
+		this.context.moveTo(62.548000, 20.889000);
+		this.context.bezierCurveTo(44.751000, 20.889000, 30.321000, 35.320000, 30.321000, 53.116000);
+		this.context.bezierCurveTo(30.321000, 62.014300, 33.918600, 70.075000, 39.754000, 75.910000);
+		this.context.bezierCurveTo(42.671800, 78.827700, 44.554600, 97.197000, 48.411400, 98.830000);
+		this.context.bezierCurveTo(52.268200, 100.463000, 72.853400, 100.462100, 76.710400, 98.830000);
+		this.context.bezierCurveTo(80.567400, 97.197900, 82.425000, 78.828000, 85.342800, 75.910000);
+		this.context.bezierCurveTo(91.178300, 70.074500, 94.800800, 62.014000, 94.800900, 53.116000);
+		this.context.bezierCurveTo(94.800900, 35.319000, 80.344900, 20.889000, 62.548900, 20.889000);
+		this.context.closePath();
+		this.context.moveTo(9.978000, 38.004000);
+		this.context.bezierCurveTo(6.150000, 38.096240, 2.559800, 40.422300, 1.070400, 44.209300);
+		this.context.bezierCurveTo(-0.915500, 49.258600, 1.575800, 54.984300, 6.625100, 56.970300);
+		this.context.bezierCurveTo(9.077700, 57.934870, 11.694600, 57.797070, 13.956300, 56.870210);
+		this.context.lineTo(27.618300, 62.224810);
+		this.context.bezierCurveTo(26.855670, 59.291310, 26.317200, 56.282010, 26.317200, 53.117010);
+		this.context.bezierCurveTo(26.317200, 50.956410, 26.577430, 48.869810, 26.942730, 46.811610);
+		this.context.lineTo(19.111030, 43.734010);
+		this.context.bezierCurveTo(18.086730, 41.514410, 16.284330, 39.644410, 13.831530, 38.679710);
+		this.context.bezierCurveTo(12.569230, 38.183240, 11.254230, 37.973390, 9.978230, 38.004130);
+		this.context.closePath();
+		this.context.moveTo(115.118000, 38.004000);
+		this.context.bezierCurveTo(113.840100, 37.970810, 112.527000, 38.183100, 111.264700, 38.679580);
+		this.context.bezierCurveTo(108.812500, 39.644020, 107.009700, 41.490080, 105.985200, 43.708880);
+		this.context.lineTo(98.153500, 46.786480);
+		this.context.bezierCurveTo(98.522170, 48.852580, 98.804050, 50.947280, 98.804050, 53.116880);
+		this.context.bezierCurveTo(98.804050, 56.286480, 98.248930, 59.313780, 97.477950, 62.249680);
+		this.context.lineTo(111.164950, 56.870080);
+		this.context.bezierCurveTo(113.426650, 57.796780, 116.018750, 57.909680, 118.471150, 56.945150);
+		this.context.bezierCurveTo(123.520450, 54.959250, 126.011750, 49.283650, 124.025850, 44.234150);
+		this.context.bezierCurveTo(122.536450, 40.447150, 118.951850, 38.103450, 115.118250, 38.003850);
+		this.context.closePath();
+		this.context.moveTo(49.387000, 45.335200);
+		this.context.bezierCurveTo(54.440800, 45.335180, 58.544800, 49.439200, 58.544800, 54.493000);
+		this.context.bezierCurveTo(58.544800, 59.546800, 54.440800, 63.650800, 49.387000, 63.650800);
+		this.context.bezierCurveTo(44.333200, 63.650800, 40.229200, 59.546800, 40.229200, 54.493000);
+		this.context.bezierCurveTo(40.229200, 49.439200, 44.333200, 45.335200, 49.387000, 45.335200);
+		this.context.closePath();
+		this.context.moveTo(75.709000, 45.335200);
+		this.context.bezierCurveTo(80.762800, 45.335180, 84.866800, 49.439200, 84.866800, 54.493000);
+		this.context.bezierCurveTo(84.866800, 59.546800, 80.762800, 63.650800, 75.709000, 63.650800);
+		this.context.bezierCurveTo(70.655200, 63.650800, 66.551200, 59.546800, 66.551200, 54.493000);
+		this.context.bezierCurveTo(66.551200, 49.439200, 70.655200, 45.335200, 75.709000, 45.335200);
+		this.context.closePath();
+		this.context.moveTo(32.147000, 72.758200);
+		this.context.lineTo(13.957000, 79.914300);
+		this.context.bezierCurveTo(11.695200, 78.987450, 9.078300, 78.874600, 6.625800, 79.839240);
+		this.context.bezierCurveTo(1.576500, 81.825140, -0.914800, 87.525740, 1.071100, 92.575240);
+		this.context.bezierCurveTo(3.057000, 97.624740, 8.782700, 100.090840, 13.832100, 98.104940);
+		this.context.bezierCurveTo(16.284900, 97.140240, 18.087300, 95.295240, 19.111600, 93.075640);
+		this.context.lineTo(38.903600, 85.294040);
+		this.context.bezierCurveTo(38.587930, 84.049040, 38.254970, 82.648640, 37.952790, 81.640940);
+		this.context.bezierCurveTo(37.356690, 79.653040, 36.298390, 78.134940, 36.901890, 78.738440);
+		this.context.bezierCurveTo(35.097990, 76.934540, 33.537590, 74.911140, 32.147890, 72.758340);
+		this.context.closePath();
+		this.context.moveTo(92.949000, 72.758200);
+		this.context.bezierCurveTo(91.552600, 74.913600, 89.975200, 76.933000, 88.169900, 78.738300);
+		this.context.bezierCurveTo(88.775480, 78.132730, 87.712810, 79.653310, 87.119000, 81.640800);
+		this.context.bezierCurveTo(86.819910, 82.641800, 86.482400, 84.032800, 86.168190, 85.268900);
+		this.context.lineTo(105.985190, 93.075500);
+		this.context.bezierCurveTo(107.009690, 95.294300, 108.812490, 97.140300, 111.264690, 98.104800);
+		this.context.bezierCurveTo(116.313990, 100.090700, 122.039690, 97.624400, 124.025690, 92.575100);
+		this.context.bezierCurveTo(126.011690, 87.525800, 123.520250, 81.825100, 118.470990, 79.839100);
+		this.context.bezierCurveTo(116.018590, 78.874560, 113.426490, 78.987460, 111.164790, 79.914160);
+		this.context.lineTo(92.948790, 72.758060);
 		this.context.closePath();
 		this.context.fill();
-		
-		this.context.beginPath();
-		this.context.moveTo(53, 7);
-		this.context.bezierCurveTo(47, 18, 18, 45, 5, 52);
-		this.context.bezierCurveTo(-4, 57, 8, 70, 14, 60);
-		this.context.bezierCurveTo(26, 42, 39, 31, 62, 16);
-		this.context.bezierCurveTo(71, 9, 58, -1, 53, 7);
-		this.context.closePath();
 
-		this.context.fill();
+
 		this.context.restore();
 	}
 
