@@ -6,22 +6,36 @@
 	<link rel="stylesheet" href="nonogram.css"></link>
 	<script type="text/javascript">
 		var game;
-		window.onload = function(){startGame()};
-		function startGame(){
-			game = new Nonogram({
-				target : document.getElementById('gameWrapper'),
-				font : 'Vanilla Extract'
-			});
+		var threeStrikesEnabled = false;
 
+		window.onload = function(){ startGame(); };
+
+		function startGame(difficulty){
+			game = new Nonogram({
+				target		: document.getElementById('gameWrapper'),
+				font		: 'Vanilla Extract',
+				difficulty	: difficulty,
+				threeStrikes	: threeStrikesEnabled
+			});
 			game.start();
-		};
+		}
+
+		function toggleStrikes(){
+			threeStrikesEnabled = !threeStrikesEnabled;
+			document.getElementById('strikeToggleLabel').textContent =
+				'3-Strike: ' + (threeStrikesEnabled ? 'On' : 'Off');
+			document.getElementById('strikeToggle').classList.toggle('active', threeStrikesEnabled);
+		}
 	</script>
 </head>
 <body>
 </body>
 		<h1>Nonogram</h1>
 			<div id="menu">
-				<span onclick="startGame()" class="menuButton"><a>New</a></span>
+				<span onclick="startGame('easy')"   class="menuButton"><a>Easy</a></span>
+				<span onclick="startGame('medium')" class="menuButton"><a>Medium</a></span>
+				<span onclick="startGame('hard')"   class="menuButton"><a>Hard</a></span>
+				<span id="strikeToggle" onclick="toggleStrikes()" class="menuButton"><a id="strikeToggleLabel">3-Strike: Off</a></span>
 				<span onclick="window.history.back()" class="menuButton"><a>Exit</a></span>
 			</div>
 			<div id="gameWrapper"></div>

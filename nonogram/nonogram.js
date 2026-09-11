@@ -6,9 +6,7 @@ I'm just setting it aside for now as my attention is needed elsewhere.
 
 Some things that still need attention:
 
-1) Puzzle generation. It currently sucks, largely being random.  I started
-writing a function to try solving it (solveTest), to ensure it's solvable, but
-it's not complete or functional in any way.  It is heavily remarked below.
+1) Puzzle generation. It currently sucks, largely being random.
 
 2) For the same reason, difficultySettings isn't used.  I originally planned on
 allowing different levels of difficulty, but that's not currently in use.
@@ -45,20 +43,23 @@ class Nonogram {
 			unknown : 0,
 			filled : 1,
 			flagged : 2,
-			error: 3
+			struck : 4
 		};
-
-		// handle settings
-		this.font = null;
-		if(parameters.font != undefined){
-			this.font = parameters.font;
-		}
 
 		this.difficultySettings = {
 			easy: { fillProbability: 0.6 },
 			medium: { fillProbability: 0.5 },
 			hard: { fillProbability: 0.4 }
 		};
+
+		this.threeStrikes = !!parameters.threeStrikes;
+		this.showErrors   = !this.threeStrikes;   // red clue highlighting is off in three-strikes mode
+		this.onStateChange = parameters.onStateChange || null;
+
+		// per-game state, reset in start()
+		this.ended = false;
+		this.won   = false;
+		this.strikesRemaining = this.threeStrikes ? 3 : null;
 
 		// initialize default colours and check to see if custom ones were passed in
 		this.colours = {
@@ -76,6 +77,8 @@ class Nonogram {
 				}
 			}
 		}
+
+		this.difficulty = parameters.difficulty in this.difficultySettings ? parameters.difficulty : 'medium';
 
 		if(parameters.font != undefined){
 			this.font = parameters.font;
@@ -120,6 +123,10 @@ class Nonogram {
 	}
 
 	start(){  // start the game!
+		this.ended = false;
+		this.won   = false;
+		this.strikesRemaining = this.threeStrikes ? 3 : null;
+		this.notifyStateChange();
 
 		let w = Math.round(Math.random() * this.maxGridSize / 2);
 		w += this.maxGridSize >> 1;
@@ -130,13 +137,8 @@ class Nonogram {
 		this.xOffset = ((this.maxGridSize - w) * this.cellSize) >> 1;
 
 
-		this.generate(w, h, 'hard');
+		this.generate(w, h, this.difficulty);
 		this.state =  Array.from({ length: this.map.length }, () => Array(this.map[0].length).fill(this.cellStates.unknown));
-
-		//@@@@@@@@@@@@@@ TEMPORARY @@@@@@@@@@@@@@@@@
-		// a quick test to try and solve it
-//		this.solveTest();
-		//@@@@@@@@@@@@@@ /TEMPORARY @@@@@@@@@@@@@@@@@
 
 		// initialize our cell states
 		this.drawCells();
@@ -145,79 +147,38 @@ class Nonogram {
 		this.initializeEvents();
 	}
 
-	solveTest(){
-		//@@@@@@@@@@@
-		// This incomplete code is not in use, the call to it being remarked.
-		//@@@@@@@@@@
-		return;
-		var x, y, n, m;
-
-		// check columns
-		let height = this.map[0].length;
-		for(x = 0; x < this.map.length; x++){
-			let sum = this.columnClues[x].length - 1;
-			for(n = 0; n < this.columnClues[x].length; n++){
-				sum += this.columnClues[x][n];
-			}
-			console.log('x: ' + x + ', sum: ' + sum);
-
-			// if the numbers add up to more than half the length of the column, then check
-			// to see if any overlap with themselves
-			if(sum == this.map[0].length){
-				// the clues fill the row
-			}else if(sum > this.map[0].length >> 1){
-				// the clues describe an area longer than half the row length, check them out
-
-				/**
-					THIS IS INCOMPLETE.  The idea is to check whether any segments
-					on a given column overlap with each other
-				**/
-				let offset = 0;
-				let testColumn = Array(height).fill(-1);
-				for(n = 0; n < this.columnClues[x].length; n++){
-					for(m = 0; m < this.columnClues[x][n]; m++){
-						testColumn[offset] = 1 << n
-					}
-				}
-			}
-		}
+	initializeEvents(){
+		this.canvas.onmousedown = (e) => this.onCanvasMouseDown(e);
 	}
 
-	initializeEvents(){
-		var me = this;
-		/**
-		@@@ this should be a member function so that I don't need to use "me"
-		**/
-		this.canvas.onmousedown = function(e){
-			let x = e.offsetX - me.xOffset;
-			let y = e.offsetY;
-			let cellX = Math.floor(x / me.cellSize) - me.sideSpacing;
-			let cellY = Math.floor(y / me.cellSize) - me.sideSpacing;
-			if(
-			  cellX >= 0 && cellX < me.map.length &&
-			  cellY >= 0 && cellY < me.map[0].length
-			){
-				me.handleCellClick(cellX, cellY, e.button ? 'right' : 'left');
-				
-			}
+	onCanvasMouseDown(e){
+		const x = e.offsetX - this.xOffset;
+		const y = e.offsetY;
+		const cellX = Math.floor(x / this.cellSize) - this.sideSpacing;
+		const cellY = Math.floor(y / this.cellSize) - this.sideSpacing;
 
+		if(
+			cellX >= 0 && cellX < this.map.length &&
+			cellY >= 0 && cellY < this.map[0].length
+		){
+			this.handleCellClick(cellX, cellY, e.button ? 'right' : 'left');
 		}
 	}
 
 	handleCellClick(x, y, button){
+		if(this.ended) return;
+
 		if(button == 'left'){
 			// handle left clicks
 			switch(this.state[x][y]){
 				case this.cellStates.unknown:
-					/*
-					Currently, this just marks the cell as filled. Erroneous fillings are flagged
-					by changing colour of the numbers.
-					In the future, I want an option to play in a "3 errors and your out" style,
-					which will use the x instead. That can be done with the currently remarked
-					line below.
-					*/
-					//this.state[x][y] = this.map[x][y] == 1 ? this.cellStates.filled : this.cellStates.error;
-					this.state[x][y] = this.cellStates.filled;
+					if(this.threeStrikes && this.map[x][y] !== 1){
+						// Wrong fill. Mark it as struck, take a strike.
+						this.state[x][y] = this.cellStates.struck;
+						this.registerStrike();
+					}else{
+						this.state[x][y] = this.cellStates.filled;
+					}
 					break;
 				case this.cellStates.filled:
 					this.state[x][y] = this.cellStates.unknown;
@@ -225,23 +186,19 @@ class Nonogram {
 				case this.cellStates.flagged:
 					//this.state[x][y] = this.cellStates.filled;
 					break;
+				case this.cellStates.struck:
+					// permanent, do nothing
+					break;
 				case this.cellStates.error:
-					
 					break;
 				default:
 					throw new Error('Invalid map state "' + this.state[x][y] + '"');
-					break;
 			}
 		}else{
 			// handle right clicks
-
 			switch(this.state[x][y]){
 				case this.cellStates.unknown:
-					if(this.state[x][y] == this.cellStates.flagged){
-						this.state[x][y] = this.cellStates.unknown;
-					}else{
-						this.state[x][y] = this.cellStates.flagged;
-					}
+					this.state[x][y] = this.cellStates.flagged;
 					break;
 				case this.cellStates.filled:
 					//this.state[x][y] = this.cellStates.unknown;
@@ -249,26 +206,44 @@ class Nonogram {
 				case this.cellStates.flagged:
 					this.state[x][y] = this.cellStates.unknown;
 					break;
+				case this.cellStates.struck:
+					// permanent, do nothing
+					break;
 				case this.cellStates.error:
-					
 					break;
 				default:
 					throw new Error('Invalid map state "' + this.state[x][y] + '"');
-					break;
 			}
 		}
+
 		this.refresh();
-		if(this.checkForWin()){
-			this.handleWin();
+		if(this.strikesRemaining !== null && this.strikesRemaining <= 0){
+			this.endGame(false);
+		}else if(this.checkForWin()){
+			this.endGame(true);
 		}
 	}
 
-	handleWin(){
-		// remove mouse events on the board
+	endGame(won){
+		this.ended = true;
+		this.won   = won;
 		this.canvas.onmousedown = null;
-
-		// add some congratulatory animation
 		this.canvas.classList.add('shaking');
+		this.notifyStateChange();
+	}
+
+	registerStrike(){
+		this.strikesRemaining--;
+		this.notifyStateChange();
+	}
+
+	notifyStateChange(){
+		if (!this.onStateChange) return;
+		this.onStateChange({
+			strikesRemaining : this.strikesRemaining,
+			ended			: this.ended,
+			won			  : this.won
+		});
 	}
 
 	refresh(){
@@ -314,6 +289,7 @@ class Nonogram {
 						this.drawX(x, y);
 						break;
 					case this.cellStates.error:
+					case this.cellStates.struck:
 						this.drawBox(x, y, this.colours.empty, true);
 						this.drawRedX(x, y);
 						break;
@@ -379,32 +355,70 @@ class Nonogram {
 		return rval;
 	}
 
-	// returns a state of error, solved, or unsolved depending on the column status
-	checkColumn(x){
-		var rval = this.rowcolStates.solved;
-		for(let y = 0; y < this.map[x].length; y++){
-			if(!this.map[x][y] && this.state[x][y] == this.cellStates.filled){
-				rval = this.rowcolStates.error;
-				break;
-			}else if(this.map[x][y] && this.state[x][y] != this.map[x][y]){
-				rval = this.rowcolStates.unsolved;
-			}
-		}
-		return rval;
+	// Convert a row or column of this.state into the solver's line-state array.
+	// filled  → 1 (forced filled)
+	// flagged → 2 (forced empty)
+	// unknown → 0 (free)
+	//
+	// If you'd rather flags be purely advisory (never trigger errors),
+	// map flagged to 0 here instead of 2.
+	lineStateFromStates(cells){
+		return cells.map(c => {
+			if (c === this.cellStates.filled)  return 1;
+			if (c === this.cellStates.flagged) return 2;
+			return 0;
+		});
 	}
 
-	// returns a state of error, solved, or unsolved depending on the row status
-	checkRow(y){
-		var rval = this.rowcolStates.solved;
-		for(let x = 0; x < this.map.length; x++){
-			if(!this.map[x][y] && this.state[x][y] == this.cellStates.filled){
-				rval = this.rowcolStates.error;
-				break;
-			}else if(this.map[x][y] && this.state[x][y] != this.map[x][y]){
-				rval = this.rowcolStates.unsolved;
+	// Return error / solved / unsolved for column x.
+	//   error - the clue no longer fits alongside the player's marks
+	//   solved - the player's marks exactly match the solution for this column
+	//   unsolved - everything else
+	checkColumn(x){
+		const cells = new Array(this.map[x].length);
+		for (let y = 0; y < this.map[x].length; y++) cells[y] = this.state[x][y];
+
+		// Feasibility: can the clue still fit given filled + flagged cells?
+		if(this.showErrors){
+			const line = this.lineStateFromStates(cells);
+			if (this.solveLine(this.map[x].length, this.columnClues[x], line) === null){
+				return this.rowcolStates.error;
 			}
 		}
-		return rval;
+
+		// Completion: does the player's fill match the solution?
+		for (let y = 0; y < this.map[x].length; y++){
+			if (this.map[x][y] && this.state[x][y] !== this.cellStates.filled){
+				return this.rowcolStates.unsolved;
+			}
+			if (!this.map[x][y] && this.state[x][y] === this.cellStates.filled){
+				return this.rowcolStates.unsolved;
+			}
+		}
+		return this.rowcolStates.solved;
+	}
+
+	// Mirror of checkColumn, for row y.
+	checkRow(y){
+		const cells = new Array(this.map.length);
+		for (let x = 0; x < this.map.length; x++) cells[x] = this.state[x][y];
+
+		if(this.showErrors){
+			const line = this.lineStateFromStates(cells);
+			if (this.solveLine(this.map.length, this.rowClues[y], line) === null){
+				return this.rowcolStates.error;
+			}
+		}
+
+		for (let x = 0; x < this.map.length; x++){
+			if (this.map[x][y] && this.state[x][y] !== this.cellStates.filled){
+				return this.rowcolStates.unsolved;
+			}
+			if (!this.map[x][y] && this.state[x][y] === this.cellStates.filled){
+				return this.rowcolStates.unsolved;
+			}
+		}
+		return this.rowcolStates.solved;
 	}
 
 	buildCanvas(target){
@@ -557,7 +571,7 @@ class Nonogram {
 		this.context.restore();
 	}
 
-    	
+		
 	drawRedX(x, y){
 		x += this.sideSpacing;
 		y += this.sideSpacing;
@@ -598,122 +612,127 @@ class Nonogram {
 		this.context.restore();
 	}
 
-	generate(width, height, difficulty){
-		// Validate inputs
-		if(width <= 0 || height <= 0 || !Number.isInteger(width) || !Number.isInteger(height)){
+	generate(width, height, difficulty) {
+		if (width <= 0 || height <= 0 || !Number.isInteger(width) || !Number.isInteger(height)) {
 			throw new Error('Width and height must be positive integers');
 		}
-		
+
 		const settings = this.difficultySettings[difficulty] || this.difficultySettings.medium;
-		
-		// Generate random map and the corresponding clues
-		this.map = this.generateMap(width, height, settings.fillProbability);
-		this.rowClues = this.generateRowClues();
-		this.columnClues = this.generateColumnClues();
-		
+		const maxAttempts = 200;
+
+		let best = null; // closest-to-solvable fallback
+
+		for (let attempt = 0; attempt < maxAttempts; attempt++) {
+			const map = this.generateMap(width, height, settings.fillProbability);
+			const rowClues = this.generateRowClues(map);
+			const colClues = this.generateColumnClues(map);
+			const result = this.solveClues(rowClues, colClues, width, height);
+
+			if (result.solved) {
+				this.map = map;
+				this.rowClues = rowClues;
+				this.columnClues = colClues;
+				return;
+			}
+
+			// Track the candidate the solver got furthest on.
+			let deduced = 0;
+			for (let x = 0; x < width; x++) {
+				for (let y = 0; y < height; y++) {
+					if (result.state[x][y] !== 0) deduced++;
+				}
+			}
+			if (best === null || deduced > best.deduced) {
+				best = { map, rowClues, colClues, deduced };
+			}
+		}
+
+		// Fallback — warn so we know to tune.
+		console.warn(
+			`Nonogram: no line-solvable puzzle found for ${width}×${height} at ` +
+			`difficulty "${difficulty}" in ${maxAttempts} attempts. ` +
+			`Using best candidate (${best.deduced}/${width * height} cells deducible).`
+		);
+		this.map = best.map;
+		this.rowClues = best.rowClues;
+		this.columnClues = best.colClues;
 	}
 
 	generateMap(width, height, fillProbability) {
-		var grid = Array.from({ length: width }, () => Array(height).fill(0));
-		var x, y;
+		const grid = Array.from({ length: width }, () => Array(height).fill(0));
 
-		var numCells = 0;
-		let iterations = 0;
-		let minCells = Math.floor(width * height * .4);
-
-		// fill in at least minCells number of cells
-		while(numCells < minCells && iterations < 10){
-			iterations++;
-			for(x = 0; x < width; x++){
-				let n = 0;
-				do{
-					y = Math.floor(Math.random() * height);
-					n++;
-				}while(n < 10 && grid[x][y] == 1);
-				if(n < 10){
-					grid[x][y] = 1;
-					numCells++;
-				}
+		// Seed one filled cell per column, then per row, so no clue reads as a lone "0".
+		// (Preserves the intent of the old generator's "one per row/column" pass.)
+		for (let x = 0; x < width; x++) {
+			grid[x][Math.floor(Math.random() * height)] = 1;
+		}
+		for (let y = 0; y < height; y++) {
+			if (!grid.some(column => column[y] === 1)) {
+				grid[Math.floor(Math.random() * width)][y] = 1;
 			}
+		}
 
-			// fill one cell in each row
-			for(y = 0; y < height; y++){
-				let n = 0;
-				do{
-					x = Math.floor(Math.random() * width);
-					n++;
-				}while(n < 10 && grid[x][y] == 1);
-				if(n < 10){
-					grid[x][y] = 1;
-					numCells++;
-				}
+		// Scatter additional fills until we hit the difficulty's target density.
+		const targetCells = Math.round(width * height * fillProbability);
+		let numCells = 0;
+		for (let x = 0; x < width; x++) {
+			for (let y = 0; y < height; y++) {
+				if (grid[x][y]) numCells++;
+			}
+		}
+
+		// Bounded so a bad fillProbability can't spin forever.
+		let guard = width * height * 4;
+		while (numCells < targetCells && guard-- > 0) {
+			const x = Math.floor(Math.random() * width);
+			const y = Math.floor(Math.random() * height);
+			if (!grid[x][y]) {
+				grid[x][y] = 1;
+				numCells++;
 			}
 		}
 
 		return grid;
 	}
 
-	generateColumnClues() {
-		var clues = [];
-		
-		for (let x = 0; x < this.map.length; x++) {
-			const mapColumn = this.map[x];
+	generateColumnClues(map) {
+		const clues = [];
+		for (let x = 0; x < map.length; x++) {
 			const column = [];
-			let currentCount = 0;
-			
-			for (let y = 0; y < mapColumn.length; y++) {
-				if (mapColumn[y]) {
-					currentCount++;
-				} else if (currentCount > 0) {
-					column.push(currentCount);
-					currentCount = 0;
+			let count = 0;
+			for (let y = 0; y < map[x].length; y++) {
+				if (map[x][y]) {
+					count++;
+				} else if (count > 0) {
+					column.push(count);
+					count = 0;
 				}
 			}
-			
-			// Don't forget the last segment
-			if (currentCount > 0) {
-				column.push(currentCount);
-			}
-			
+			if (count > 0) column.push(count);
 			clues.push(column);
 		}
-		
 		return clues;
 	}
 
-	generateRowClues() {
-		var clues = [];
-		
-		for (let y = 0; y < this.map[0].length; y++) {
-			var row = [];
-			let currentCount = 0;
-			
-			for (let x = 0; x < this.map.length; x++) {
-				if (this.map[x][y]) {
-					currentCount++;
-				} else if (currentCount > 0) {
-					row.push(currentCount);
-					currentCount = 0;
+	generateRowClues(map) {
+		const clues = [];
+		for (let y = 0; y < map[0].length; y++) {
+			const row = [];
+			let count = 0;
+			for (let x = 0; x < map.length; x++) {
+				if (map[x][y]) {
+					count++;
+				} else if (count > 0) {
+					row.push(count);
+					count = 0;
 				}
 			}
-			
-			// Don't forget the last segment
-			if (currentCount > 0) {
-				row.push(currentCount);
-			}
-			
+			if (count > 0) row.push(count);
 			clues.push(row);
 		}
-		
 		return clues;
 	}
-	
-	pointFallsInGrid(x, y){
-		return 	x >= 0
-			&& y >= 0
-			&& x < this.map.length
-			&& y < this.map[0].length;
-	}
+
 
 	#colourToText(colour){
 		// a convenience function for converting RGB definitions into strings for canvas styles;
@@ -725,5 +744,127 @@ class Nonogram {
 			')';
 	}
 
+	/**
+	 * Solve a single line of a nonogram by exhaustive enumeration of all
+	 * block placements that are consistent with the current cell states.
+	 *
+	 * @param {number}   length  Number of cells in the line.
+	 * @param {number[]} blocks  Runs of filled cells, in order. May be [].
+	 * @param {number[]} state   Current knowledge per cell:
+	 *							 0 = unknown, 1 = filled, 2 = empty
+	 * @returns {{canFill: boolean[], canEmpty: boolean[]} | null}
+	 *   canFill[i]  = true if some valid arrangement fills cell i
+	 *   canEmpty[i] = true if some valid arrangement leaves cell i empty
+	 *   null		= no valid arrangement exists (contradiction)
+	 */
+	solveLine(length, blocks, state) {
+		const canFill  = new Array(length).fill(false);
+		const canEmpty = new Array(length).fill(false);
+		const committed = new Array(length).fill(0);
+		let anyPlacement = false;
+
+		const place = (blockIdx, startPos) => {
+			if (blockIdx === blocks.length) {
+				// Trailing cells after the last block must be empty.
+				for (let i = startPos; i < length; i++) {
+					if (state[i] === 1) return;
+				}
+				anyPlacement = true;
+				for (let i = 0; i < length; i++) {
+					if (committed[i] === 1) canFill[i] = true;
+					else					canEmpty[i] = true;
+				}
+				return;
+			}
+
+			const b = blocks[blockIdx];
+
+			// Room needed for this block + all following blocks + mandatory gaps.
+			let tail = 0;
+			for (let j = blockIdx + 1; j < blocks.length; j++) tail += blocks[j];
+			tail += (blocks.length - blockIdx - 1);
+			const maxStart = length - tail - b;
+
+			for (let start = startPos; start <= maxStart; start++) {
+				let ok = true;
+
+				// Cells between the previous block and this one must be empty.
+				for (let i = startPos; i < start; i++) {
+					if (state[i] === 1) { ok = false; break; }
+				}
+				if (!ok) break; // any later start is blocked by the same cell
+
+				// Cells under this block must not already be forced empty.
+				for (let i = start; i < start + b; i++) {
+					if (state[i] === 2) { ok = false; break; }
+				}
+				if (!ok) continue;
+
+				// The separator cell after the block must not be forced filled.
+				if (start + b < length && state[start + b] === 1) continue;
+
+				for (let i = start; i < start + b; i++) committed[i] = 1;
+				place(blockIdx + 1, start + b + 1);
+				for (let i = start; i < start + b; i++) committed[i] = 0;
+			}
+		};
+
+		place(0, 0);
+		return anyPlacement ? { canFill, canEmpty } : null;
+	}
+
+	/**
+	 * Run line-logic to exhaustion on the given clues.
+	 *
+	 * @returns {{ solved: boolean, state: number[][] }}
+	 *   solved = true iff every cell was deduced without guessing
+	 *   state[x][y] ∈ {0 unknown, 1 filled, 2 empty}
+	 */
+	solveClues(rowClues, colClues, width, height) {
+		const state = Array.from({ length: width }, () => new Array(height).fill(0));
+
+		let progress = true;
+		while (progress) {
+			progress = false;
+
+			// Columns
+			for (let x = 0; x < width; x++) {
+				const line = new Array(height);
+				for (let y = 0; y < height; y++) line[y] = state[x][y];
+
+				const res = this.solveLine(height, colClues[x], line);
+				if (!res) return { solved: false, state };
+
+				for (let y = 0; y < height; y++) {
+					if (state[x][y] !== 0) continue;
+					if (res.canFill[y] && !res.canEmpty[y])	  { state[x][y] = 1; progress = true; }
+					else if (res.canEmpty[y] && !res.canFill[y]) { state[x][y] = 2; progress = true; }
+				}
+			}
+
+			// Rows
+			for (let y = 0; y < height; y++) {
+				const line = new Array(width);
+				for (let x = 0; x < width; x++) line[x] = state[x][y];
+
+				const res = this.solveLine(width, rowClues[y], line);
+				if (!res) return { solved: false, state };
+
+				for (let x = 0; x < width; x++) {
+					if (state[x][y] !== 0) continue;
+					if (res.canFill[x] && !res.canEmpty[x])	  { state[x][y] = 1; progress = true; }
+					else if (res.canEmpty[x] && !res.canFill[x]) { state[x][y] = 2; progress = true; }
+				}
+			}
+		}
+
+		let solved = true;
+		for (let x = 0; x < width && solved; x++) {
+			for (let y = 0; y < height && solved; y++) {
+				if (state[x][y] === 0) solved = false;
+			}
+		}
+		return { solved, state };
+	}
 }
 

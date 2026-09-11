@@ -106,3 +106,7 @@ span.menuButton > a{
 	color : rgb(80, 60, 40);
 
 }
+
+span.menuButton.active > a {
+	color: rgb(192, 96, 64);
+}
