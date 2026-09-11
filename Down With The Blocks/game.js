@@ -1,6 +1,6 @@
 var game, context, player;
 
-var soundEffects, music, muted = false, musicVolume = .6, effectsVolume = .9;
+var soundEffects, music, muted = false, musicVolume = .2, effectsVolume = .3;
 /////////////////////////////////////////////////////////////////////////////////////////////
 // the game class
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -29,7 +29,11 @@ var gameClass = function(){
 			},
 			{
 				'label' : 'Settings',
-				'action' : function(){alert('Not implemented');},
+				'action' : function(){
+					game.canvas.onmousedown = null;
+					game.canvas.onmousemove = null;
+					game.currentMenu = 'settings';
+				},
 				'hovering' : 0
 			},
 			{
@@ -191,7 +195,12 @@ gameClass.prototype.render = function(){
 			drawShape('title', context);
 			context.restore();
 
-			drawMenu(this.menuOptions[this.currentMenu]);
+			
+			if(this.currentMenu == 'settings'){
+				drawSettings();
+			}else{
+				drawMenu(this.menuOptions[this.currentMenu]);
+			}
 			break;
 	}
 	for(n = 0; n < this.bonuses.length; n++){
@@ -330,6 +339,30 @@ gameClass.prototype.drawMenuStars = function(){
 // additional game functions
 /////////////////////////////////////////////////////////////////////////////////////////////
 
+var drawSettings = (function(){
+	var fillColour = {red : 240, green : 225, blue : 192};
+	var borderColour = {red : 64, green : 48, blue : 32};
+	return function(){
+		var boxx = game.gridScale >> 2;
+		var boxy = game.gridScale * 2.8;
+		var boxWidth = game.gridScale * (game.gridSize.x - .5);
+		var boxHeight = game.gridScale * (game.gridSize.y - 3);
+		drawSimpleBox(
+			boxx, boxy, boxWidth, boxHeight,
+			fillColour, borderColour
+		);
+
+		context.save();
+			context.textAlign = 'left';
+			var fontSize = game.gridScale * .8;
+			context.font = fontSize + "px PoorStory";
+			context.fillStyle = 'rgba(0, 0, 0, 1)';
+
+			context.fillText('Music:', boxx + boxWidth / 20, boxy + fontSize);
+
+		context.restore();
+	}
+})();
 
 function drawMenu(menuOptions){
 	var spacing = game.gridScale >> 2;
@@ -695,6 +728,36 @@ function endGame(){
 }
 
 
+function drawSimpleBox(x, y, width, height, colour, borderColour){
+	var edgeBias = height < width ? height >> 3 : width >> 3;
+	var colour = 'rgb('+ colour.red + ',' + colour.green + ',' + colour.blue + ')';
+	var borderColour = 'rgb('+ borderColour.red + ',' + borderColour.green + ',' + borderColour.blue + ')';
+	var x2 = x + width, y2 = y + height;
+	
+	context.save();
+
+		context.beginPath();
+		context.fillStyle = colour;
+		context.strokeStyle = borderColour;
+		context.lineWidth = game.gridScale >> 4;
+		context.moveTo(x, y + edgeBias);
+		context.quadraticCurveTo(x, y, x + edgeBias, y);
+		context.lineTo(x2 - edgeBias, y);
+
+		context.quadraticCurveTo(x2, y, x2, y + edgeBias);
+		context.lineTo(x2, y2 - edgeBias);
+
+		context.quadraticCurveTo(x2, y2, x2 - edgeBias, y2);
+		context.lineTo(x + edgeBias, y2);
+
+		context.quadraticCurveTo(x, y2, x, y2 - edgeBias);
+		context.closePath();
+		context.fill();
+		context.stroke();
+	context.restore();
+
+}
+
 // render a nicely shaded rectangle with rounded corners
 function drawNiceBox(x, y, width, height, colour){
 	var edgeBias = height < width ? height >> 3 : width >> 3;
@@ -772,7 +835,7 @@ function doBGSine(ang, radius, midpoint, colour){
 	var x, y;
 	var stepSize = game.gridScale * .1;
 	var myAng = ang;
-	var myAngi = game.gridScale * .0005;
+	var myAngi = .005 * game.canvas.width / game.gridScale;
 	context.save();
 		context.fillStyle = colour;
 		context.beginPath();
@@ -902,14 +965,24 @@ function texasStar(cx, cy, radius, angle, opacity){
 
 
 // @@@@@@@@@@@@@@@@@@@@@@@ copied from swix 
-function playSound(soundName, force){
-	if(force == undefined) force = 0;
-	if(!muted || force){
-		var sound = soundEffects[soundName].cloneNode();
-		sound.volume = effectsVolume;
-		sound.play();
+var playSound = (function(){
+	var soundTally = 0;
+	return function (soundName, force){
+		if(force == undefined) force = 0;
+		if(!muted || force){
+			if(soundTally < 10){
+				soundTally ++;
+				console.log(soundTally);
+				var sound = soundEffects[soundName].cloneNode();
+				sound.volume = effectsVolume;
+				sound.addEventListener("ended", function(){
+					soundTally --;
+				});
+				sound.play();
+			}
+		}
 	}
-}
+})();
 
 function soundOn(){
 

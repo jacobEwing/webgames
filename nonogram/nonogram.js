@@ -1,27 +1,3 @@
-/****************************************
-This is incomplete code.
-
-It's a fully functional game, but some of the code needs cleanup/replacement.
-I'm just setting it aside for now as my attention is needed elsewhere.
-
-Some things that still need attention:
-
-1) Puzzle generation. It currently sucks, largely being random.
-
-2) For the same reason, difficultySettings isn't used.  I originally planned on
-allowing different levels of difficulty, but that's not currently in use.
-
-3) I originally planned on making it use a three-strikes-you're-out style of
-play, which was how it was done in the site that I previously played the game
-in. That was replaced with highlighting the hint numbers in red if an empty
-cell is marked as full.
-First, that should be more elegant. It should instead check whether or not the
-row CAN fit the markers in place, not whether or not it does. This will give
-more of a challenge and not just tell the user when they fill the wrong cell.
-Also, I would still like to optionally have the three-strikes-you're-out style.
-
-****************************************/
-
 class Nonogram {
 	constructor(parameters){
 		if(parameters.target == undefined){
@@ -47,9 +23,9 @@ class Nonogram {
 		};
 
 		this.difficultySettings = {
-			easy: { fillProbability: 0.6 },
-			medium: { fillProbability: 0.5 },
-			hard: { fillProbability: 0.4 }
+			easy:   { fillProbability: 0.60, hardnessRange: [0.0, 0.3] },
+			medium: { fillProbability: 0.55, hardnessRange: [0.3, 0.42] },
+			hard:   { fillProbability: 0.50, hardnessRange: [0.42, 99.0] }
 		};
 
 		this.threeStrikes = !!parameters.threeStrikes;
@@ -618,9 +594,10 @@ class Nonogram {
 		}
 
 		const settings = this.difficultySettings[difficulty] || this.difficultySettings.medium;
+		const [lo, hi] = settings.hardnessRange;
 		const maxAttempts = 200;
 
-		let best = null; // closest-to-solvable fallback
+		let best = null;
 
 		for (let attempt = 0; attempt < maxAttempts; attempt++) {
 			const map = this.generateMap(width, height, settings.fillProbability);
@@ -629,37 +606,57 @@ class Nonogram {
 			const result = this.solveClues(rowClues, colClues, width, height);
 
 			if (result.solved) {
-				this.map = map;
-				this.rowClues = rowClues;
-				this.columnClues = colClues;
-				return;
-			}
-
-			// Track the candidate the solver got furthest on.
-			let deduced = 0;
-			for (let x = 0; x < width; x++) {
-				for (let y = 0; y < height; y++) {
-					if (result.state[x][y] !== 0) deduced++;
+				const h = result.stats.hardness;
+				if (h >= lo && h < hi) {
+					this.map = map;
+					this.rowClues = rowClues;
+					this.columnClues = colClues;
+					return;
 				}
-			}
-			if (best === null || deduced > best.deduced) {
-				best = { map, rowClues, colClues, deduced };
+				// Solvable but out of band — track by distance to band.
+				const distance = h < lo ? lo - h : h - hi;
+				if (best === null || best.kind !== 'solved' || distance < best.distance) {
+					best = { kind: 'solved', map, rowClues, colClues, distance, h };
+				}
+			} else {
+				// Not line-solvable — track by how far the solver got.
+				let deduced = 0;
+				for (let x = 0; x < width; x++) {
+					for (let y = 0; y < height; y++) {
+						if (result.state[x][y] !== 0) deduced++;
+					}
+				}
+				if (best === null || (best.kind === 'unsolved' && deduced > best.deduced)) {
+					best = { kind: 'unsolved', map, rowClues, colClues, deduced };
+				}
 			}
 		}
 
-		// Fallback — warn so we know to tune.
-		console.warn(
-			`Nonogram: no line-solvable puzzle found for ${width}×${height} at ` +
-			`difficulty "${difficulty}" in ${maxAttempts} attempts. ` +
-			`Using best candidate (${best.deduced}/${width * height} cells deducible).`
-		);
+		if (best === null) {
+			// generateMap always returns a grid, so this should be unreachable.
+			throw new Error('Nonogram: generation produced no candidate puzzle');
+		}
+
+		if (best.kind === 'solved') {
+			console.warn(
+				`Nonogram: no puzzle in hardness band [${lo}, ${hi}) for ${width}×${height} ` +
+				`at difficulty "${difficulty}" in ${maxAttempts} attempts. ` +
+				`Using closest candidate (hardness ${best.h.toFixed(2)}).`
+			);
+		} else {
+			console.warn(
+				`Nonogram: no line-solvable puzzle found for ${width}×${height} at ` +
+				`difficulty "${difficulty}" in ${maxAttempts} attempts. ` +
+				`Using best candidate (${best.deduced}/${width * height} cells deducible).`
+			);
+		}
+
 		this.map = best.map;
 		this.rowClues = best.rowClues;
 		this.columnClues = best.colClues;
 	}
-
-	generateMap(width, height, fillProbability) {
-		const grid = Array.from({ length: width }, () => Array(height).fill(0));
+		generateMap(width, height, fillProbability) {
+			const grid = Array.from({ length: width }, () => Array(height).fill(0));
 
 		// Seed one filled cell per column, then per row, so no clue reads as a lone "0".
 		// (Preserves the intent of the old generator's "one per row/column" pass.)
@@ -822,40 +819,50 @@ class Nonogram {
 	 */
 	solveClues(rowClues, colClues, width, height) {
 		const state = Array.from({ length: width }, () => new Array(height).fill(0));
+		const level = Array.from({ length: width }, () => new Array(height).fill(-1));
 
+		let pass = 0;
 		let progress = true;
 		while (progress) {
 			progress = false;
 
-			// Columns
+			// Columns: colClues[x] describes column x, which is state[x][*]
 			for (let x = 0; x < width; x++) {
 				const line = new Array(height);
 				for (let y = 0; y < height; y++) line[y] = state[x][y];
 
 				const res = this.solveLine(height, colClues[x], line);
-				if (!res) return { solved: false, state };
+				if (!res) return { solved: false, state, level, stats: null };
 
 				for (let y = 0; y < height; y++) {
 					if (state[x][y] !== 0) continue;
-					if (res.canFill[y] && !res.canEmpty[y])	  { state[x][y] = 1; progress = true; }
-					else if (res.canEmpty[y] && !res.canFill[y]) { state[x][y] = 2; progress = true; }
+					if (res.canFill[y] && !res.canEmpty[y]) {
+						state[x][y] = 1; level[x][y] = pass; progress = true;
+					} else if (res.canEmpty[y] && !res.canFill[y]) {
+						state[x][y] = 2; level[x][y] = pass; progress = true;
+					}
 				}
 			}
 
-			// Rows
+			// Rows: rowClues[y] describes row y, which is state[*][y]
 			for (let y = 0; y < height; y++) {
 				const line = new Array(width);
 				for (let x = 0; x < width; x++) line[x] = state[x][y];
 
 				const res = this.solveLine(width, rowClues[y], line);
-				if (!res) return { solved: false, state };
+				if (!res) return { solved: false, state, level, stats: null };
 
 				for (let x = 0; x < width; x++) {
 					if (state[x][y] !== 0) continue;
-					if (res.canFill[x] && !res.canEmpty[x])	  { state[x][y] = 1; progress = true; }
-					else if (res.canEmpty[x] && !res.canFill[x]) { state[x][y] = 2; progress = true; }
+					if (res.canFill[x] && !res.canEmpty[x]) {
+						state[x][y] = 1; level[x][y] = pass; progress = true;
+					} else if (res.canEmpty[x] && !res.canFill[x]) {
+						state[x][y] = 2; level[x][y] = pass; progress = true;
+					}
 				}
 			}
+
+			pass++;
 		}
 
 		let solved = true;
@@ -864,7 +871,34 @@ class Nonogram {
 				if (state[x][y] === 0) solved = false;
 			}
 		}
-		return { solved, state };
+
+		const stats = this.scoreDeduction(level, width, height);
+		return { solved, state, level, stats };
+	}
+
+	scoreDeduction(level, width, height) {
+		let maxLevel = 0;
+		let firstPass = 0;
+		const total = width * height;
+
+		for (let x = 0; x < width; x++) {
+			for (let y = 0; y < height; y++) {
+				const l = level[x][y];
+				if (l < 0) continue;
+				if (l > maxLevel) maxLevel = l;
+				if (l === 0) firstPass++;
+			}
+		}
+
+		const firstPassFrac = firstPass / total;
+		const raw = maxLevel + 2 * (1 - firstPassFrac);
+		const norm = Math.max(width, height);
+
+		return {
+			maxLevel,
+			firstPassFrac,
+			hardness: raw / norm
+		};
 	}
 }
 
