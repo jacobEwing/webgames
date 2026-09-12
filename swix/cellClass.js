@@ -1,8 +1,10 @@
+'use strict';
+
 var constants = function() {
-	this.rotationAng = Math.PI / 36; // five degrees
+	let rotationAng = Math.PI / 36; // five degrees
 	return {
-		'rotcos': Math.cos(this.rotationAng),
-		'rotsin': Math.sin(this.rotationAng)
+		'rotcos': Math.cos(rotationAng),
+		'rotsin': Math.sin(rotationAng)
 	};
 }();
 
@@ -98,7 +100,7 @@ cellClass.prototype.act = function() {
 };
 
 cellClass.prototype.getNeighbours = function() {
-	var n;
+	var n, dx;
 	var rval = [];
 
 	for (n = 0; n < cells.length; n++) {
@@ -174,7 +176,7 @@ cellClass.prototype.setPosition = function(x, y, noDraw) {
 	this.position.x = x;
 	this.position.y = y;
 
-	pos = this.realPosition(x, y);
+	let pos = this.realPosition(x, y);
 
 	if (!noDraw) {
 		this.sprite.setPosition(pos.x, pos.y);
@@ -192,8 +194,6 @@ cellClass.prototype.rotNeighbours = function() {
 	playSound('crank');
 
 	for (n = 0; n < this.children.length; n++) {
-		//this.children[n].sprite.element.remove().appendTo(document.getElementById('spriteTest'));
-		document.getElementById('spriteTest').appendChild(this.children[n].sprite.element);
 
 		var childRealPos = this.children[n].realPosition();
 		this.children[n].transformation = {
@@ -264,7 +264,7 @@ cellClass.prototype.rotNeighbours = function() {
 				this.children[n].sprite.doSequenceStep();
 			}
 		},
-		'callback': function() {
+		'callback': () => {
 			var n;
 
 			for (n = 0; n < this.children.length; n++) {

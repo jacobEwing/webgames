@@ -86,12 +86,14 @@
 							Sound:&nbsp;<span id="soundCheckmark" class="rot3">On</span><br/>
 
 						</div>
-						Music Volume:&nbsp;<input id="musicVolumeSlider" class="volumeSlider" type="range" min="0" max="1" value=".5" class="slider" step = ".01" onInput="setMusicVolume(this.value)"/><br/>
-						Effects Volume:&nbsp;<input id="effectsVolumeSlider" class="volumeSlider" type="range" min="0" max="1" value="1" class="slider" step = ".01" onInput="setEffectsVolume(this.value)"/><br/>
+						Music Volume:&nbsp;<input id="musicVolumeSlider" class="volumeSlider" type="range" min="0" max="1" value=".25" class="slider" step = ".01" onInput="setMusicVolume(this.value)"/><br/>
+						Effects Volume:&nbsp;<input id="effectsVolumeSlider" class="volumeSlider" type="range" min="0" max="1" value=".75" class="slider" step = ".01" onInput="setEffectsVolume(this.value)"/><br/>
 						<div id="levelSelectWrapper">
-							Current Level:
-							<select id="startingLevel">
-							</select>
+							<div class="settingLabel">Starting Level</div>
+							<div id="currentLevelButton" class="currentLevelButton" onclick="openLevelPicker();">
+								<canvas id="currentLevelThumb" width="180" height="180"></canvas>
+								<div id="currentLevelTitle" class="currentLevelTitle"></div>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -128,6 +130,17 @@
 					<div class="closeButton colouredButton">Close</div>
 				</div>
 			</div>
+		</div>
+	</div>
+
+	<div id="levelPickerOverlay" class="levelPickerOverlay"
+		 onclick="if (event.target === this) closeLevelPicker();">
+		<div class="levelPickerPanel">
+			<div class="levelPickerHeader">
+				<span class="levelPickerHeading">Select Starting Level</span>
+				<span class="colouredButton levelPickerClose" onclick="closeLevelPicker();">Close</span>
+			</div>
+			<div id="levelGrid" class="levelGrid"></div>
 		</div>
 	</div>
 </body>

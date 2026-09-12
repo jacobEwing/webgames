@@ -120,3 +120,15 @@ function loadImage(src, callback) {
 	img.src = src;
 	return img;
 }
+
+function debounce(fn, delay) {
+	var timer = null;
+	return function() {
+		var args = arguments;
+		var context = this;
+		clearTimeout(timer);
+		timer = setTimeout(function() {
+			fn.apply(context, args);
+		}, delay);
+	};
+}

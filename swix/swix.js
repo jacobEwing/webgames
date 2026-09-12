@@ -13,6 +13,8 @@ var disableHints = false;
 var levelMap, stepsTaken;
 var soundEffects, music, muted = false, musicVolume = 0.25, effectsVolume = .75, volumeScale = .5;
 
+var THUMB_DISPLAY_SIZE = 90;
+
 levelQueue = [];
 
 function checkForWin() {
@@ -23,7 +25,7 @@ function checkForWin() {
 	if (n >= cells.length) {
 		// all cells are active!
 		gameState = 'won';
-		setTimeout('finishLevel()', 600);
+		setTimeout(finishLevel, 600);
 	}
 }
 
@@ -254,14 +256,14 @@ function soundOn() {
 			console.log('Autoplay blocked, will retry on first interaction:', error);
 
 			var retry = function() {
-				document.removeEventListener('pointerDown', retry, true);
+				document.removeEventListener('pointerdown', retry, true);
 				document.removeEventListener('click', retry, true);
 				document.removeEventListener('keydown', retry, true);
 				document.removeEventListener('touchstart', retry, true);
 				soundOn();
 			};
 
-			document.addEventListener('pointerDown', retry, true);
+			document.addEventListener('pointerdown', retry, true);
 			document.addEventListener('click', retry, true);
 			document.addEventListener('keydown', retry, true);
 			document.addEventListener('touchstart', retry, true);
@@ -327,6 +329,8 @@ function showSettings() {
 
 		document.getElementById('musicVolumeSlider').value = musicVolume;
 		document.getElementById('effectsVolumeSlider').value = effectsVolume;
+
+		refreshLevelPicker();
 
 		animate(settingsMenu, { opacity: 1 }, 400, 'swing');
 	});
@@ -492,19 +496,8 @@ var startGame = function() {
 				break;
 
 			case 'buildSettingsWidgets':
-				var selectElement = document.getElementById('startingLevel');
-
-				for (n = 0; n < gameLevels.length; n++) {
-					widget = document.createElement('option');
-					widget.value = n;
-					widget.text = (n + 1) + ' - ' + gameLevels[n].title;
-					selectElement.appendChild(widget);
-				}
-
-				selectElement.onchange = function() {
-					currentLevel = 1 * this.value;
-				};
-
+				buildLevelGrid();
+				refreshLevelPicker()
 				setTimeout(function() { startGame('doMenu'); }, 0);
 				break;
 
@@ -559,7 +552,7 @@ function setMusicVolume(volume) {
 	musicVolume = volume * volumeScale;
 
 	for (var n in music) {
-		music[n].volume = musicVolume * volumeScale;
+		music[n].volume = musicVolume;
 	}
 }
 
@@ -567,6 +560,207 @@ function setEffectsVolume(volume) {
 	effectsVolume = volume * volumeScale;
 
 	for (var n in soundEffects) {
-		soundEffects[n].volume = effectsVolume * volumeScale;
+		soundEffects[n].volume = effectsVolume;
 	}
 }
+
+function buildLevelGrid() {
+	var grid = document.getElementById('levelGrid');
+	empty(grid);
+
+	for (var n = 0; n < gameLevels.length; n++) {
+		var level = gameLevels[n];
+
+		var tile = document.createElement('div');
+		tile.className = 'levelTile';
+		tile.dataset.levelIndex = n;
+		tile.title = level.title;
+
+		var canvas = document.createElement('canvas');
+		sizeCanvasForDisplay(canvas);
+		drawLevelThumbnail(canvas, level);
+
+		var label = document.createElement('div');
+		label.className = 'levelTitle';
+		label.textContent = level.title;
+
+		tile.appendChild(canvas);
+		tile.appendChild(label);
+
+		tile.addEventListener('click', function() {
+			var idx = parseInt(this.dataset.levelIndex, 10);
+			currentLevel = idx;
+
+			var prev = grid.querySelector('.levelTile.selected');
+			if (prev) prev.classList.remove('selected');
+			this.classList.add('selected');
+
+			updateCurrentLevelButton();
+			closeLevelPicker();
+		});
+
+		if (n === currentLevel) tile.classList.add('selected');
+
+		grid.appendChild(tile);
+	}
+}
+
+function drawLevelThumbnail(canvas, level) {
+	var ctx = canvas.getContext('2d');
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	var levelCells = [];
+
+	// Collect cells and find the isometric bounding box
+	var minX = Infinity, maxX = -Infinity;
+	var minY = Infinity, maxY = -Infinity;
+
+	for (var celltype in level.cells) {
+		var plateSet = level.cells[celltype];
+
+		for (var i = 0; i < plateSet.length; i += 3) {
+			var gx = plateSet[i];
+			var gy = plateSet[i + 1];
+			var active = plateSet[i + 2];
+
+			// Isometric screen position (matches realPosition in cellClass.js)
+			var sx = 48 * gx;
+			var sy = 27.5 * gx + 55 * gy;
+
+			levelCells.push({
+				sx: sx,
+				sy: sy,
+				active: active,
+				type: celltype
+			});
+
+			if (sx < minX) minX = sx;
+			if (sx > maxX) maxX = sx;
+			if (sy < minY) minY = sy;
+			if (sy > maxY) maxY = sy;
+		}
+	}
+
+	// Account for the cell's own width/height (55 x 48)
+	maxX += 55;
+	maxY += 48;
+
+	var levelW = maxX - minX;
+	var levelH = maxY - minY;
+	if (levelW <= 0 || levelH <= 0) return;
+
+	// Fit into the canvas with a little padding
+	var padding = 12;
+	var scale = Math.min(
+		(canvas.width  - padding * 2) / levelW,
+		(canvas.height - padding * 2) / levelH
+	);
+
+	var offsetX = (canvas.width  - levelW * scale) / 2 - minX * scale;
+	var offsetY = (canvas.height - levelH * scale) / 2 - minY * scale;
+
+	var cellW = 55 * scale;
+	var cellH = 48 * scale;
+
+	for (var i = 0; i < levelCells.length; i++) {
+		var c = levelCells[i];
+		var cx = c.sx * scale + offsetX + cellW / 2;
+		var cy = c.sy * scale + offsetY + cellH / 2;
+
+		var color;
+		if (!c.active) {
+			color = '#2a2a2a';
+		} else if (c.type === 'spin') {
+			color = '#f1c40f';
+		} else {
+			color = '#3d8fdd';
+		}
+
+		ctx.fillStyle = color;
+		drawHexagon(ctx, cx, cy, cellW, cellH);
+	}
+}
+
+function drawHexagon(ctx, cx, cy, w, h) {
+	ctx.beginPath();
+	ctx.moveTo(cx - w / 2, cy);
+	ctx.lineTo(cx - w / 4, cy + h / 2);
+	ctx.lineTo(cx + w / 4, cy + h / 2);
+	ctx.lineTo(cx + w / 2, cy);
+	ctx.lineTo(cx + w / 4, cy - h / 2);
+	ctx.lineTo(cx - w / 4, cy - h / 2);
+	ctx.closePath();
+	ctx.fill();
+}
+
+function updateCurrentLevelButton() {
+	var canvas = document.getElementById('currentLevelThumb');
+	var title = document.getElementById('currentLevelTitle');
+	if (!canvas || !title) return;
+
+	sizeCanvasForDisplay(canvas);	
+	drawLevelThumbnail(canvas, gameLevels[currentLevel]);
+	title.textContent = gameLevels[currentLevel].title;
+}
+
+function refreshLevelPicker() {
+	updateCurrentLevelButton();
+
+	var grid = document.getElementById('levelGrid');
+	if (!grid) return;
+
+	var tiles = grid.querySelectorAll('.levelTile');
+	for (var i = 0; i < tiles.length; i++) {
+		if (parseInt(tiles[i].dataset.levelIndex, 10) === currentLevel) {
+			tiles[i].classList.add('selected');
+		} else {
+			tiles[i].classList.remove('selected');
+		}
+	}
+}
+
+function openLevelPicker() {
+	playSound('mouseClick');
+	document.getElementById('levelPickerOverlay').classList.add('open');
+}
+
+function closeLevelPicker() {
+	document.getElementById('levelPickerOverlay').classList.remove('open');
+}
+
+function sizeCanvasForDisplay(canvas) {
+	var dpr = window.devicePixelRatio || 1;
+	var bufferSize = Math.round(THUMB_DISPLAY_SIZE * dpr);
+	if (canvas.width !== bufferSize || canvas.height !== bufferSize) {
+		canvas.width = bufferSize;
+		canvas.height = bufferSize;
+	}
+}
+
+function redrawAllThumbnails() {
+	updateCurrentLevelButton();
+
+	var grid = document.getElementById('levelGrid');
+	if (!grid) return;
+
+	var tiles = grid.querySelectorAll('.levelTile');
+	for (var i = 0; i < tiles.length; i++) {
+		var idx = parseInt(tiles[i].dataset.levelIndex, 10);
+		var canvas = tiles[i].querySelector('canvas');
+		if (!canvas || isNaN(idx)) continue;
+		sizeCanvasForDisplay(canvas);
+		drawLevelThumbnail(canvas, gameLevels[idx]);
+	}
+}
+
+document.addEventListener('keydown', function(e) {
+	if (e.key === 'Escape') closeLevelPicker();
+});
+
+var lastThumbDevicePixelRatio = window.devicePixelRatio || 1;
+
+window.addEventListener('resize', debounce(function() {
+	var dpr = window.devicePixelRatio || 1;
+	if (dpr === lastThumbDevicePixelRatio) return;
+	lastThumbDevicePixelRatio = dpr;
+	redrawAllThumbnails();
+}, 150));

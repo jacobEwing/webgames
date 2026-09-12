@@ -1,3 +1,5 @@
+'use strict';
+
 function trim(stringToTrim) {
 	// make sure it is indeed a string:
 	stringToTrim = ' ' + stringToTrim;
@@ -428,7 +430,7 @@ spriteSet.prototype.loadJSON = function(data, callback) {
 	}
 
 	if (callback != undefined) {
-		callback(result);
+		callback(data);
 	}
 };
 
@@ -684,11 +686,11 @@ spriteSet.prototype.setImage = function(file) {
 	var imgElement = document.createElement('img');
 	imgElement.onload = () => {
 		this.loadingImage = false;
+		this.imageWidth = imgElement.width;
+		this.imageHeight = imgElement.height;
 	};
 	imgElement.src = file;
 
 	cacheDiv.appendChild(imgElement);
 
-	this.imageWidth = imgElement.width;
-	this.imageHeight = imgElement.height;
 };
