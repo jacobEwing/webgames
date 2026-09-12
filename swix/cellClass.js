@@ -28,7 +28,6 @@ var cellClass = function() {
 };
 
 cellClass.prototype.initialize = function(params) {
-	//var me = this;
 	for (var idx in params) {
 		switch (idx) {
 			case 'sprite':
@@ -186,7 +185,6 @@ cellClass.prototype.rotNeighbours = function() {
 	// first, grab the neighbours we'll be rotating
 	var n;
 	var dx, dy;
-	var me = this;
 	var childSequence;
 	var myRealPos = this.realPosition();
 
@@ -249,30 +247,29 @@ cellClass.prototype.rotNeighbours = function() {
 	}
 
 	this.sprite.startSequence('rotgold', {
-		'stepCallback': function(currentFrame) {
-			//alert(currentFrame);
-			var myRealPos = me.realPosition();
+		'stepCallback': (currentFrame) => {
+			var myRealPos = this.realPosition();
 			var n, newx, newy;
 
-			for (n = 0; n < me.children.length; n++) {
-				newx = me.children[n].transformation.relPos.x * constants.rotcos - me.children[n].transformation.relPos.y * constants.rotsin;
-				newy = me.children[n].transformation.relPos.x * constants.rotsin + me.children[n].transformation.relPos.y * constants.rotcos;
-				me.children[n].transformation.relPos = { x: newx, y: newy };
+			for (n = 0; n < this.children.length; n++) {
+				newx = this.children[n].transformation.relPos.x * constants.rotcos - this.children[n].transformation.relPos.y * constants.rotsin;
+				newy = this.children[n].transformation.relPos.x * constants.rotsin + this.children[n].transformation.relPos.y * constants.rotcos;
+				this.children[n].transformation.relPos = { x: newx, y: newy };
 
-				me.children[n].sprite.position(
+				this.children[n].sprite.position(
 					newx + myRealPos.x + 32,
 					newy + myRealPos.y + 32
 				);
 
-				me.children[n].sprite.doSequenceStep();
+				this.children[n].sprite.doSequenceStep();
 			}
 		},
 		'callback': function() {
 			var n;
 
-			for (n = 0; n < me.children.length; n++) {
+			for (n = 0; n < this.children.length; n++) {
 				globals.animating--;
-				me.children[n].transformation = undefined;
+				this.children[n].transformation = undefined;
 			}
 
 			stepsTaken++;

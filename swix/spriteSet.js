@@ -304,8 +304,7 @@ spriteClass.prototype.doSequenceStep = function(params) {
 	}
 
 	if (doNextFrame) {
-		var me = this;
-		setTimeout(function() { me.doSequenceStep(params); }, animDelay);
+		setTimeout(() => { this.doSequenceStep(params); }, animDelay);
 	}
 
 	return params;
@@ -329,20 +328,19 @@ var spriteSet = function() {
 };
 
 spriteSet.prototype.load = function(fileName, callback) {
-	var me = this;
 	var xhr = new XMLHttpRequest();
 
 	xhr.open('GET', fileName, true);
 
-	xhr.onreadystatechange = function() {
+	xhr.onreadystatechange = () => {
 		if (xhr.readyState === 4) {
 			if (xhr.status === 200 || xhr.status === 0) {
 				var result = xhr.responseText;
 				try {
 					var data = JSON.parse(result);
-					me.loadJSON(data, callback);
+					this.loadJSON(data, callback);
 				} catch (e) {
-					me.loadSimpletext(result, callback);
+					this.loadSimpletext(result, callback);
 				}
 			} else {
 				console.error('Failed to load sprite set: ' + fileName + ' (' + xhr.status + ')');
@@ -668,8 +666,6 @@ spriteSet.prototype.load_frames = function(data) {
 
 // set the image and cache it
 spriteSet.prototype.setImage = function(file) {
-	var me = this;
-
 	this.loadingImage = true;
 	this.image = file;
 
@@ -686,8 +682,8 @@ spriteSet.prototype.setImage = function(file) {
 	document.body.appendChild(cacheDiv);
 
 	var imgElement = document.createElement('img');
-	imgElement.onload = function() {
-		me.loadingImage = false;
+	imgElement.onload = () => {
+		this.loadingImage = false;
 	};
 	imgElement.src = file;
 
