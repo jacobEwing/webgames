@@ -512,11 +512,15 @@ function moveClouds(){
 	}
 }
 
-
 function addToScore(food){
 	scoring[food]++;
-	$('#score_' + food).html(scoring[food]);
-	if(scoring[food] == 1) $('#scoreDiv_' + food).css('display', 'inline');
+	var scoreEl = document.getElementById('score_' + food);
+	if (scoreEl) scoreEl.textContent = scoring[food];
+
+	if(scoring[food] == 1) {
+		var scoreDiv = document.getElementById('scoreDiv_' + food);
+		if (scoreDiv) scoreDiv.style.display = 'inline';
+	}
 }
 
 function rel_ang(x1, y1, x2, y2){
@@ -558,7 +562,7 @@ function rel_ang(x1, y1, x2, y2){
 	return alpha;
 }
 
-$(document).ready(function(){
+window.onload = function(){
 	gameCanvas = document.getElementById('gameCanvas');
 	dContext = gameCanvas.getContext('2d');
 	numClouds = 20;
@@ -588,7 +592,7 @@ $(document).ready(function(){
 		
 		initialize();
 	});
-});
+};
 
 function initialize(){
 	var mound = new Image();
@@ -664,11 +668,13 @@ function startGame(){
 	setInterval(animate, 50);
 
 	gameCanvas.onmousemove = function(evt){
+		var rect = gameCanvas.getBoundingClientRect();
 
 		mousePos = {
-			x : evt.pageX - $('#gameCanvas').offset().left,
-			y : evt.pageY - $('#gameCanvas').offset().top
+			x : evt.clientX - rect.left,
+			y : evt.clientY - rect.top
 		};
+
 		var dx = mousePos.x - frog.position.x - 20;
 		var dy = mousePos.y - frog.position.y - 6;
 
@@ -690,15 +696,21 @@ function startGame(){
 		addFly(Math.random() * 500 + 150, Math.random() * 200 + 50);
 	}
 
-	$(gameCanvas).mousedown(function(){
+	gameCanvas.addEventListener('mousedown', function(){
 		if(frog.action == null){
 			frog.setFrame(2);
 			frog.launchTongue();
 		}
 	});
-	$('#bodyOverlay').fadeOut(500, function(){
-		$('#bodyOverlay').css('display', 'none');
-	});
+
+	var bodyOverlay = document.getElementById('bodyOverlay');
+	if (bodyOverlay) {
+		bodyOverlay.style.transition = 'opacity 500ms';
+		bodyOverlay.style.opacity = '0';
+		setTimeout(function(){
+			bodyOverlay.style.display = 'none';
+		}, 500);
+	}
 }
 
 function quit(){
