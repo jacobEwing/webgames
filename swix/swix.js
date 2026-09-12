@@ -11,7 +11,7 @@ var hint;
 var cellSprite, menuSpriteSet, menuSprite;
 var disableHints = false;
 var levelMap, stepsTaken;
-var soundEffects, music, muted = false, musicVolume = 0.5, effectsVolume = 1;
+var soundEffects, music, muted = false, musicVolume = 0.25, effectsVolume = .75, volumeScale = .5;
 
 levelQueue = [];
 
@@ -236,7 +236,7 @@ function playSound(soundName, force) {
 
 	if (!muted || force) {
 		var sound = soundEffects[soundName].cloneNode();
-		sound.volume = effectsVolume;
+		sound.volume = effectsVolume * volumeScale;
 		sound.play();
 	}
 }
@@ -249,9 +249,22 @@ function soundOn() {
 			muted = false;
 			document.getElementById('soundCheckmark').innerHTML = 'On&nbsp;';
 		}).catch(function(error) {
-			muted = true;
-			document.getElementById('soundCheckmark').innerHTML = 'Off';
-			console.log(error);
+			// Autoplay was blocked. Don't mark the game as muted; instead,
+			// arm a one-shot listener that retries on the first user gesture.
+			console.log('Autoplay blocked, will retry on first interaction:', error);
+
+			var retry = function() {
+				document.removeEventListener('pointerDown', retry, true);
+				document.removeEventListener('click', retry, true);
+				document.removeEventListener('keydown', retry, true);
+				document.removeEventListener('touchstart', retry, true);
+				soundOn();
+			};
+
+			document.addEventListener('pointerDown', retry, true);
+			document.addEventListener('click', retry, true);
+			document.addEventListener('keydown', retry, true);
+			document.addEventListener('touchstart', retry, true);
 		});
 	} else {
 		muted = false;
@@ -380,7 +393,7 @@ var startGame = function() {
 				];
 
 				for (n in music) {
-					music[n].volume = musicVolume;
+					music[n].volume = musicVolume * volumeScale;
 					music[n].addEventListener("ended", function() {
 						music.push(music.shift());
 						music[0].play();
@@ -394,7 +407,7 @@ var startGame = function() {
 				};
 
 				for (n in soundEffects) {
-					soundEffects[n].volume = effectsVolume;
+					soundEffects[n].volume = effectsVolume * volumeScale;
 				}
 
 				currentLevel = 0;
@@ -543,17 +556,17 @@ function toMenu() {
 }
 
 function setMusicVolume(volume) {
-	musicVolume = volume;
+	musicVolume = volume * volumeScale;
 
 	for (var n in music) {
-		music[n].volume = musicVolume;
+		music[n].volume = musicVolume * volumeScale;
 	}
 }
 
 function setEffectsVolume(volume) {
-	effectsVolume = volume;
+	effectsVolume = volume * volumeScale;
 
 	for (var n in soundEffects) {
-		soundEffects[n].volume = effectsVolume;
+		soundEffects[n].volume = effectsVolume * volumeScale;
 	}
 }
