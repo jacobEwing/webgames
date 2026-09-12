@@ -1,24 +1,25 @@
-var constants = function(){
+var constants = function() {
 	this.rotationAng = Math.PI / 36; // five degrees
 	return {
-		'rotcos' : Math.cos(this.rotationAng),
-		'rotsin' : Math.sin(this.rotationAng)
+		'rotcos': Math.cos(this.rotationAng),
+		'rotsin': Math.sin(this.rotationAng)
 	};
 }();
 
 var globals = {
-	'animating' : 0
+	'animating': 0
 };
 
-var cellClass = function(){
+var cellClass = function() {
 	this.sprite = this.active = this.celltype = null;
-	this.position = {x : 0, y : 0};
+	this.position = { x: 0, y: 0 };
 	this.children = [];
-	if(arguments.length == 1) this.initialize(arguments[0]);
 
-	this.toString = function(){
-		var rval = 
-			'{x:' + this.position.x 
+	if (arguments.length == 1) this.initialize(arguments[0]);
+
+	this.toString = function() {
+		var rval =
+			'{x:' + this.position.x
 			+ ',y:' + this.position.y
 			+ ',a:' + this.active
 			+ ',t:"' + this.celltype + '"}';
@@ -26,23 +27,24 @@ var cellClass = function(){
 	};
 };
 
-cellClass.prototype.initialize = function(params){
+cellClass.prototype.initialize = function(params) {
 	//var me = this;
-	for(var idx in params){
-		switch(idx){
+	for (var idx in params) {
+		switch (idx) {
 			case 'sprite':
 				this.sprite = new spriteClass(params[idx]);
 				break;
-			case 'active': case 'celltype':
+			case 'active':
+			case 'celltype':
 				this[idx] = params[idx];
 				break;
 			case 'position':
-				try{
+				try {
 					this.position = {
-						'x' : params[idx].x,
-						'y' : params[idx].y
+						'x': params[idx].x,
+						'y': params[idx].y
 					};
-				}catch(e){
+				} catch (e) {
 					throw "cellClass::initialize: position parameter expects an object with x, y values";
 				}
 				break;
@@ -50,221 +52,239 @@ cellClass.prototype.initialize = function(params){
 				throw "cellClass::initialize: Invalid parameter \"" + idx + "\"";
 		}
 	}
-	if(this.sprite == null || this.active == null || this.celltype == null){
+
+	if (this.sprite == null || this.active == null || this.celltype == null) {
 		throw "cellClass::initialize: parameters must include 'sprite', 'active', and 'celltype'";
 	}
 
 	this.sprite.position(this.position.x, this.position.y);
 
-	if(this.active){
-		if(this.celltype == 'flip'){
+	if (this.active) {
+		if (this.celltype == 'flip') {
 			this.sprite.setFrame('blue');
-		}else if(this.celltype == 'spin'){
+		} else if (this.celltype == 'spin') {
 			this.sprite.setFrame('gold');
 		}
-	}else{
+	} else {
 		this.sprite.setFrame('black');
 	}
-	this.sprite.image.data('cell', this);
-	this.sprite.image.click(
-		function(){
-			var cell = $(this).data('cell');
-			cell.act();
-			return false;
-		}
-	);
-	this.sprite.image.mousedown(function(){return false;});
+
+	this.sprite.image.cell = this;
+	this.sprite.image.addEventListener('click', function(e) {
+		var cell = this.cell;
+		cell.act();
+		e.preventDefault();
+		return false;
+	});
+	this.sprite.image.addEventListener('mousedown', function(e) {
+		e.preventDefault();
+		return false;
+	});
 };
 
-cellClass.prototype.draw = function(target){
+cellClass.prototype.draw = function(target) {
 	var realpos = realPosition(this.position.x, this.position.y);
 	this.sprite.position(realpos.x, realpos.y);
 	this.sprite.draw(target);
 };
 
-cellClass.prototype.act = function(){
-	if(!this.active || globals.animating) return;
-	if(this.celltype == 'spin'){
+cellClass.prototype.act = function() {
+	if (!this.active || globals.animating) return;
+
+	if (this.celltype == 'spin') {
 		this.rotNeighbours();
-	}else if(this.celltype == 'flip'){
+	} else if (this.celltype == 'flip') {
 		this.flipNeighbours();
 	}
 };
 
-cellClass.prototype.getNeighbours = function(){
+cellClass.prototype.getNeighbours = function() {
 	var n;
 	var rval = [];
-	for(n = 0; n < cells.length; n++){
-		if(cells[n].position.y == this.position.y){
-			if(Math.abs(cells[n].position.x - this.position.x) == 1){
+
+	for (n = 0; n < cells.length; n++) {
+		if (cells[n].position.y == this.position.y) {
+			if (Math.abs(cells[n].position.x - this.position.x) == 1) {
 				rval[rval.length] = cells[n];
 			}
-		}else if(cells[n].position.y == this.position.y - 1){
+		} else if (cells[n].position.y == this.position.y - 1) {
 			dx = cells[n].position.x - this.position.x;
-			if(dx == 1 || dx == 0){
+			if (dx == 1 || dx == 0) {
 				rval[rval.length] = cells[n];
 			}
-		}else if(cells[n].position.y == this.position.y + 1){
+		} else if (cells[n].position.y == this.position.y + 1) {
 			dx = cells[n].position.x - this.position.x;
-			if(dx == -1 || dx == 0){
+			if (dx == -1 || dx == 0) {
 				rval[rval.length] = cells[n];
 			}
 		}
 	}
+
 	return rval;
 };
 
 // flips the six cells that surround the current selected one
-cellClass.prototype.flipNeighbours = function(){
+cellClass.prototype.flipNeighbours = function() {
 	var n;
 	var neighbourList = this.getNeighbours();
+
 	playSound('swish');
-	for(n = 0; n < neighbourList.length; n++){
+
+	for (n = 0; n < neighbourList.length; n++) {
 		neighbourList[n].flip();
 	}
-	stepsTaken ++;
-	$('#stepstaken').html(stepsTaken);
+
+	stepsTaken++;
+	document.getElementById('stepstaken').innerHTML = stepsTaken;
 };
 
-cellClass.prototype.flip = function(){
+cellClass.prototype.flip = function() {
 	globals.animating++;
+
 	var flipParams = {
-		'callback' : function(){
+		'callback': function() {
 			globals.animating--;
-			if(globals.animating == 0){
+			if (globals.animating == 0) {
 				checkForWin();
 			}
 		}
 	};
 
-	if(this.celltype == 'flip'){
-		if(this.active){
+	if (this.celltype == 'flip') {
+		if (this.active) {
 			this.sprite.startSequence('blue2black', flipParams);
 			this.active = 0;
-		}else{
+		} else {
 			this.sprite.startSequence('black2blue', flipParams);
 			this.active = 1;
 		}
-	}else if(this.celltype == 'spin'){
-		if(this.active){
+	} else if (this.celltype == 'spin') {
+		if (this.active) {
 			this.sprite.startSequence('gold2black', flipParams);
 			this.active = 0;
-		}else{
+		} else {
 			this.sprite.startSequence('black2gold', flipParams);
 			this.active = 1;
 		}
 	}
 };
 
-cellClass.prototype.setPosition = function(x, y, noDraw){
-	if(noDraw == undefined) noDraw = false;
+cellClass.prototype.setPosition = function(x, y, noDraw) {
+	if (noDraw == undefined) noDraw = false;
+
 	this.position.x = x;
 	this.position.y = y;
+
 	pos = this.realPosition(x, y);
-	if(!noDraw){
+
+	if (!noDraw) {
 		this.sprite.setPosition(pos.x, pos.y);
 	}
 };
 
-cellClass.prototype.rotNeighbours = function(){
+cellClass.prototype.rotNeighbours = function() {
 	// first, grab the neighbours we'll be rotating
 	var n;
 	var dx, dy;
 	var me = this;
 	var childSequence;
 	var myRealPos = this.realPosition();
+
 	this.children = this.getNeighbours();
 	playSound('crank');
-	for(n = 0; n < this.children.length; n++){
-		//this.children[n].sprite.element.remove().appendTo($('#spriteTest'));
-		this.children[n].sprite.element.appendTo($('#spriteTest'));
+
+	for (n = 0; n < this.children.length; n++) {
+		//this.children[n].sprite.element.remove().appendTo(document.getElementById('spriteTest'));
+		document.getElementById('spriteTest').appendChild(this.children[n].sprite.element);
+
 		var childRealPos = this.children[n].realPosition();
 		this.children[n].transformation = {
-			sine : Math.sin(5),
-			cosine : Math.cos(5),
-			relPos : {
-				x : childRealPos.x - myRealPos.x,
-				y : childRealPos.y - myRealPos.y
+			sine: Math.sin(5),
+			cosine: Math.cos(5),
+			relPos: {
+				x: childRealPos.x - myRealPos.x,
+				y: childRealPos.y - myRealPos.y
 			}
 		};
-//		$('body').append(this.children[n].transformation.relPos.x + ', ' + this.children[n].transformation.relPos.y);
-		if(this.children[n].active){
-			if(this.children[n].celltype == 'flip'){
+
+		if (this.children[n].active) {
+			if (this.children[n].celltype == 'flip') {
 				childSequence = 'rotblue';
-			}else if(this.children[n].celltype == 'spin'){
+			} else if (this.children[n].celltype == 'spin') {
 				childSequence = 'rotgold';
-			}else{
+			} else {
 				// shouldn't happen, but for the sake of completeness
 				throw "cellClass::rotNeighbours: Invalid cell type";
 			}
-		}else{
+		} else {
 			childSequence = 'rotblack';
 		}
+
 		globals.animating++;
 
-		this.children[n].sprite.startSequence(childSequence, {'method' : 'manual'});
+		this.children[n].sprite.startSequence(childSequence, { 'method': 'manual' });
 
 		dx = this.children[n].position.x - this.position.x;
 		dy = this.children[n].position.y - this.position.y;
 
-		if(dy == 0){
-			if(dx == 1){
+		if (dy == 0) {
+			if (dx == 1) {
 				this.children[n].setPosition(this.position.x, this.position.y + 1, true);
-			}else if(dx == -1){
+			} else if (dx == -1) {
 				this.children[n].setPosition(this.position.x, this.position.y - 1, true);
 			}
-		}else if(dy == -1){
-			if(dx == 1){
+		} else if (dy == -1) {
+			if (dx == 1) {
 				this.children[n].setPosition(this.position.x + 1, this.position.y, true);
-			}else if(dx == 0){
+			} else if (dx == 0) {
 				this.children[n].setPosition(this.position.x + 1, this.position.y - 1, true);
 			}
-		}else if(dy == 1){
-			if(dx == -1){
+		} else if (dy == 1) {
+			if (dx == -1) {
 				this.children[n].setPosition(this.position.x - 1, this.position.y, true);
-			}else if(dx == 0){
+			} else if (dx == 0) {
 				this.children[n].setPosition(this.position.x - 1, this.position.y + 1, true);
 			}
 		}
 	}
 
 	this.sprite.startSequence('rotgold', {
-		'stepCallback' : function(currentFrame){
+		'stepCallback': function(currentFrame) {
 			//alert(currentFrame);
-			var myRealPos = me.realPosition();	
+			var myRealPos = me.realPosition();
 			var n, newx, newy;
-			for(n = 0; n < me.children.length; n++){
+
+			for (n = 0; n < me.children.length; n++) {
 				newx = me.children[n].transformation.relPos.x * constants.rotcos - me.children[n].transformation.relPos.y * constants.rotsin;
 				newy = me.children[n].transformation.relPos.x * constants.rotsin + me.children[n].transformation.relPos.y * constants.rotcos;
-				me.children[n].transformation.relPos = { x : newx, y : newy };
+				me.children[n].transformation.relPos = { x: newx, y: newy };
 
 				me.children[n].sprite.position(
 					newx + myRealPos.x + 32,
-					newy + myRealPos.y + 32 
+					newy + myRealPos.y + 32
 				);
 
 				me.children[n].sprite.doSequenceStep();
 			}
-			
 		},
-		'callback' : function(){
+		'callback': function() {
 			var n;
-			for(n = 0; n < me.children.length; n++){
+
+			for (n = 0; n < me.children.length; n++) {
 				globals.animating--;
 				me.children[n].transformation = undefined;
-
 			}
-			stepsTaken ++;
-			$('#stepstaken').html(stepsTaken);
+
+			stepsTaken++;
+			document.getElementById('stepstaken').innerHTML = stepsTaken;
 		}
 	});
-
 };
 
-cellClass.prototype.realPosition = function(){
+cellClass.prototype.realPosition = function() {
 	return realPosition(this.position.x, this.position.y);
 };
 
-function realPosition(x, y){
-	return {'x':48 * x - drawOffset.x, 'y': 27.5 * x + 55 * y + drawOffset.y};
+function realPosition(x, y) {
+	return { 'x': 48 * x - drawOffset.x, 'y': 27.5 * x + 55 * y + drawOffset.y };
 }
