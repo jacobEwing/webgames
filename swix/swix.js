@@ -675,21 +675,56 @@ function drawLevelThumbnail(canvas, level) {
 			color = '#3d8fdd';
 		}
 
-		ctx.fillStyle = color;
-		drawHexagon(ctx, cx, cy, cellW, cellH);
+		drawHexagon(ctx, cx, cy, cellW, cellH, color);
+
 	}
 }
 
-function drawHexagon(ctx, cx, cy, w, h) {
+function lightenColor(color, amount) {
+	// color is '#rrggbb'; amount is 0..1
+	var r = parseInt(color.slice(1, 3), 16);
+	var g = parseInt(color.slice(3, 5), 16);
+	var b = parseInt(color.slice(5, 7), 16);
+	r = Math.min(255, Math.round(r + (255 - r) * amount));
+	g = Math.min(255, Math.round(g + (255 - g) * amount));
+	b = Math.min(255, Math.round(b + (255 - b) * amount));
+	return 'rgb(' + r + ', ' + g + ', ' + b + ')';
+}
+
+function hexPath(ctx, cx, cy, w, h) {
 	ctx.beginPath();
-	ctx.moveTo(cx - w / 2, cy);
-	ctx.lineTo(cx - w / 4, cy + h / 2);
-	ctx.lineTo(cx + w / 4, cy + h / 2);
-	ctx.lineTo(cx + w / 2, cy);
-	ctx.lineTo(cx + w / 4, cy - h / 2);
-	ctx.lineTo(cx - w / 4, cy - h / 2);
+	ctx.moveTo(cx - w / 2, cy);            // left vertex
+	ctx.lineTo(cx - w / 4, cy + h / 2);    // bottom-left
+	ctx.lineTo(cx + w / 4, cy + h / 2);    // bottom-right
+	ctx.lineTo(cx + w / 2, cy);            // right vertex
+	ctx.lineTo(cx + w / 4, cy - h / 2);    // top-right
+	ctx.lineTo(cx - w / 4, cy - h / 2);    // top-left
 	ctx.closePath();
+}
+
+function drawHexagon(ctx, cx, cy, w, h, color) {
+	// Base fill
+	hexPath(ctx, cx, cy, w, h);
+	ctx.fillStyle = color;
 	ctx.fill();
+
+	// Inner highlight: a smaller, brighter hexagon centered on the same point
+	hexPath(ctx, cx, cy, w * 0.8, h * 0.8);
+	ctx.fillStyle = lightenColor(color, 0.28);
+	ctx.fill();
+
+	// Top and left edge highlight: a continuous path along the
+	// lower-left, upper-left, and top edges
+	ctx.beginPath();
+	ctx.moveTo(cx - w / 4, cy + h / 2);    // bottom-left
+	ctx.lineTo(cx - w / 2, cy);            // left vertex
+	ctx.lineTo(cx - w / 4, cy - h / 2);    // top-left
+	ctx.lineTo(cx + w / 4, cy - h / 2);    // top-right
+	ctx.strokeStyle = lightenColor(color, 0.4);
+	ctx.lineWidth = Math.max(1, Math.min(3, w * 0.05));
+	ctx.lineCap = 'round';
+	ctx.lineJoin = 'round';
+	ctx.stroke();
 }
 
 function updateCurrentLevelButton() {
