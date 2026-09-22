@@ -55,11 +55,16 @@ playerClass.prototype.takeTurn = function(){
 	var mouseState = 0;
 
 	var handleMouseDown = function(e){
+		if(game.confirmExit) return;
 		mouseState = 1;
-
 	}
 
 	var handleMouseUp = function(e){
+		if(game.confirmExit){
+			mouseState = 0;
+			return;
+		}
+
 		if(mouseState == 1){
 			game.canvas.removeEventListener('mousemove', handleMouseTargeting);
 			game.canvas.removeEventListener('mouseup', handleMouseUp);

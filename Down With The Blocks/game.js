@@ -22,6 +22,7 @@ var gameClass = function(){
 	this.ballRadiusScale = 1 / 75;
 	this.bonusBlockChance = 0.1;
 	this.defaultBallSpeed = 16;
+	this.confirmExit = false;
 	this.menuOptions = {
 		'main' : [
 		{
@@ -222,6 +223,9 @@ gameClass.prototype.render = function(){
 		}
 	}
 
+	if(this.confirmExit){
+		drawExitConfirm();
+	}
 
 	context.moveTo(0, 0);
 
@@ -238,6 +242,11 @@ gameClass.prototype.animateBalls = function(){
 		}
 		animated = true;
 
+		if(this.confirmExit){
+			ball.draw();
+			continue;
+		}
+
 		ball.move();
 		if(ball.temporary && ball.velocity.dx == 0 && ball.velocity.dy == 0){
 			ball[n] = undefined;
@@ -246,14 +255,12 @@ gameClass.prototype.animateBalls = function(){
 		}else{
 			ball.draw();
 		}
-
 	}
 
-	if(!animated){
+	if(!animated && !this.confirmExit){
 		this.endRound();
 	}
 };
-
 
 gameClass.prototype.addBall = function(params){
 	if(params == undefined) params = {};
@@ -344,6 +351,66 @@ gameClass.prototype.drawMenuStars = function(){
 	}
 };
 
+function drawExitConfirm(){
+	// darken everything behind the dialog
+	context.save();
+	context.fillStyle = 'rgba(0, 0, 0, .45)';
+	context.fillRect(0, 0, game.canvas.width, game.canvas.height);
+	context.restore();
+
+	var boxWidth  = game.gridScale * 4.5;
+	var boxHeight = game.gridScale * 2.4;
+	var boxX = (game.canvas.width  - boxWidth ) / 2;
+	var boxY = (game.canvas.height - boxHeight) / 2;
+
+	drawSimpleBox(boxX, boxY, boxWidth, boxHeight,
+			{red : 240, green : 225, blue : 192},
+			{red : 64,  green : 48,  blue : 32});
+
+	// prompt text
+	context.save();
+	context.textAlign = 'center';
+	var fontSize = game.gridScale * .45;
+	context.font = fontSize + "px PoorStory";
+	context.fillStyle = 'rgba(64, 32, 16, 1)';
+	context.fillText('Return to menu?',
+			boxX + boxWidth / 2,
+			boxY + fontSize * 2.0);
+	context.restore();
+
+	// Yes / No
+	var btnWidth  = boxWidth * .35;
+	var btnHeight = game.gridScale * .7;
+	var gap       = boxWidth * .08;
+	var btnY      = boxY + boxHeight - btnHeight - game.gridScale * .35;
+	var btnStartX = boxX + (boxWidth - (btnWidth * 2 + gap)) / 2;
+
+	drawLabeledButton(btnStartX, btnY, btnWidth, btnHeight, 'Yes',
+			{red : 140, green : 200, blue : 120}, 'confirmExitYes', doExitConfirm);
+	drawLabeledButton(btnStartX + btnWidth + gap, btnY, btnWidth, btnHeight, 'No',
+			{red : 210, green : 140, blue : 120}, 'confirmExitNo',  cancelExitConfirm);
+}
+
+function showExitConfirm(){
+	game.confirmExit = true;
+	// stop the in-game EXIT area from also catching this click, and remove
+	// it so it can't be re-triggered while the dialog is up
+	game.buttonList.removeArea('exit');
+}
+
+function doExitConfirm(){
+	game.confirmExit = false;
+	game.buttonList.removeArea('confirmExitYes');
+	game.buttonList.removeArea('confirmExitNo');
+	endGame();
+}
+
+function cancelExitConfirm(){
+	game.confirmExit = false;
+	game.buttonList.removeArea('confirmExitYes');
+	game.buttonList.removeArea('confirmExitNo');
+	// the exit area is re-registered by drawBottomBar next frame
+}
 /////////////////////////////////////////////////////////////////////////////////////////////
 // info pages & settings
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -539,6 +606,25 @@ function drawToggleRow(label, isOn, r, y, rowHeight, areaName, callback){
 	game.buttonList.addArea(areaName, {
 		x : buttonX, y : buttonY, w : buttonWidth, h : buttonHeight
 	}, callback);
+}
+
+function drawLabeledButton(x, y, width, height, label, colour, areaName, callback){
+	drawNiceBox(x, y, width, height, colour);
+
+	context.save();
+	context.textAlign = 'center';
+	var fontSize = Math.min(height * .7, width * .35);
+	context.font = fontSize + "px PoorStory";
+	var tx = x + width / 2;
+	var ty = y + height / 2 + fontSize / 3;
+	context.fillStyle = 'rgba(255, 255, 255, .6)';
+	context.fillText(label, tx + game.textShadowOffset, ty + game.textShadowOffset);
+	context.fillStyle = 'rgba(0, 48, 0, .8)';
+	context.fillText(label, tx, ty);
+	context.restore();
+
+	game.buttonList.removeArea(areaName);
+	game.buttonList.addArea(areaName, {x:x, y:y, w:width, h:height}, callback);
 }
 
 function drawBackButton(r, callback){
@@ -839,6 +925,7 @@ var handleMouseTargeting = (function(){
 	var lastTime = 0;
 	return function(e){
 		// only update the arrow with the animation frequency at the most
+		if(game.confirmExit) return;
 		var dateTime = new Date();
 		var time = dateTime.getTime();
 		if(time < lastTime + game.animationFrequency){
@@ -908,14 +995,6 @@ function drawBottomBar(){
 		context.fillStyle = 'rgba(190, 190, 190, .6)';
 		context.fillRect(0, game.gridScale * (game.gridSize.y - .75), game.canvas.width, game.gridScale * .125);
 
-/*
-		// draw the volume icon
-		context.save();
-			context.translate(marginSize + game.gridScale, bottomY);
-			context.scale(.5, .6);
-			drawShape('exit', context, { scale : .5, colour : 'rgba(196, 255, 128, 1)'});
-		context.restore();
-*/
 		// draw the exit
 		context.textAlign = 'right';
 		context.fillStyle = 'rgba(129, 64, 48, 1)';
@@ -931,17 +1010,10 @@ function drawBottomBar(){
 			h : measurement.actualBoundingBoxAscent + measurement.actualBoundingBoxDescent + game.textShadowOffset
 		};
 
-		game.buttonList.removeArea('exit');
-		game.buttonList.addArea('exit', exitButtonArea, endGame);
-
-/*
-		// draw the level
-		context.textAlign = 'left';
-		context.fillStyle = 'rgba(129, 64, 48, 1)';
-		context.fillText('LEVEL: ' + (player.level + 1), marginSize + game.textShadowOffset * 2, bottomY + game.textShadowOffset);
-		context.fillStyle = 'rgba(255, 196, 128, 1)';
-		context.fillText('LEVEL: ' + (player.level + 1), marginSize, bottomY);
-*/
+		if(!game.confirmExit){
+			game.buttonList.removeArea('exit');
+			game.buttonList.addArea('exit', exitButtonArea, showExitConfirm);
+		}
 
 		// draw the score
 		context.textAlign = 'left';
