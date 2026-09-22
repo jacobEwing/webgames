@@ -124,10 +124,15 @@ class Nonogram {
 	}
 
 	initializeEvents(){
+		this.dragState = null;
+		this.windowMouseUpHandler = null;
+
 		this.canvas.onmousedown = (e) => this.onCanvasMouseDown(e);
+		this.canvas.onmousemove = (e) => this.onCanvasMouseMove(e);
 	}
 
-	onCanvasMouseDown(e){
+	// Translate a mouse event into grid coordinates, or null if out of bounds.
+	eventToCell(e){
 		const x = e.offsetX - this.xOffset;
 		const y = e.offsetY;
 		const cellX = Math.floor(x / this.cellSize) - this.sideSpacing;
@@ -137,62 +142,120 @@ class Nonogram {
 			cellX >= 0 && cellX < this.map.length &&
 			cellY >= 0 && cellY < this.map[0].length
 		){
-			this.handleCellClick(cellX, cellY, e.button ? 'right' : 'left');
+			return { x : cellX, y : cellY };
 		}
+		return null;
 	}
 
-	handleCellClick(x, y, button){
+	onCanvasMouseDown(e){
 		if(this.ended) return;
 
-		if(button == 'left'){
-			// handle left clicks
-			switch(this.state[x][y]){
-				case this.cellStates.unknown:
-					if(this.threeStrikes && this.map[x][y] !== 1){
-						// Wrong fill. Mark it as struck, take a strike.
-						this.state[x][y] = this.cellStates.struck;
-						this.registerStrike();
-					}else{
-						this.state[x][y] = this.cellStates.filled;
-					}
-					break;
-				case this.cellStates.filled:
-					this.state[x][y] = this.cellStates.unknown;
-					break;
-				case this.cellStates.flagged:
-					//this.state[x][y] = this.cellStates.filled;
-					break;
-				case this.cellStates.struck:
-					// permanent, do nothing
-					break;
-				case this.cellStates.error:
-					break;
-				default:
-					throw new Error('Invalid map state "' + this.state[x][y] + '"');
+		const cell = this.eventToCell(e);
+		if(!cell) return;
+
+		const button = e.button ? 'right' : 'left';
+		const op = this.beginDragOperation(cell.x, cell.y, button);
+		if(!op) return;   // this cell can't start a drag (flag/struck with wrong button)
+
+		op.lastCell = { x : cell.x, y : cell.y };
+		this.dragState = op;
+
+		// mouseup is on window so a drag that ends outside the canvas still terminates.
+		this.windowMouseUpHandler = (ev) => this.onWindowMouseUp(ev);
+		window.addEventListener('mouseup', this.windowMouseUpHandler);
+
+		this.applyDragToCell(cell.x, cell.y);
+		e.preventDefault();
+	}
+
+	onCanvasMouseMove(e){
+		if(!this.dragState) return;
+		if(this.ended){ this.dragState = null; return; }
+
+		const cell = this.eventToCell(e);
+		if(!cell) return;
+
+		// Skip if the pointer is still over the same cell — avoids redundant redraws.
+		if(this.dragState.lastCell.x === cell.x && this.dragState.lastCell.y === cell.y) return;
+
+		this.applyDragToCell(cell.x, cell.y);
+	}
+	endDrag(){
+		if(this.windowMouseUpHandler){
+			window.removeEventListener('mouseup', this.windowMouseUpHandler);
+			this.windowMouseUpHandler = null;
+		}
+		this.dragState = null;
+	}
+
+	onWindowMouseUp(e){
+		this.endDrag();
+		this.refresh();
+		this.checkEndConditions();
+	}
+
+	// Decide what a drag starting at (x, y) with the given button means.
+	// Returns an operation descriptor, or null if the cell can't start a drag.
+	// Apply the current drag operation to one cell.
+		beginDragOperation(x, y, button){
+		const cs = this.cellStates;
+		const cur = this.state[x][y];
+
+		if(button === 'left'){
+			if(cur === cs.unknown) return { mode : 'fill', set : true  };
+			if(cur === cs.filled)  return { mode : 'fill', set : false };
+			return null;
+		}
+		if(cur === cs.unknown) return { mode : 'flag', set : true  };
+		if(cur === cs.flagged) return { mode : 'flag', set : false };
+		return null;
+	}
+
+	applyDragToCell(x, y){
+		const ds = this.dragState;
+		const cs = this.cellStates;
+		const cur = this.state[x][y];
+		let next = null;
+		let strike = false;
+
+		if(ds.mode === 'fill'){
+			if(ds.set && cur === cs.unknown){
+				if(this.threeStrikes && this.map[x][y] !== 1){
+					next = cs.struck;
+					strike = true;
+				}else{
+					next = cs.filled;
+				}
+			}else if(!ds.set && cur === cs.filled){
+				next = cs.unknown;
 			}
 		}else{
-			// handle right clicks
-			switch(this.state[x][y]){
-				case this.cellStates.unknown:
-					this.state[x][y] = this.cellStates.flagged;
-					break;
-				case this.cellStates.filled:
-					//this.state[x][y] = this.cellStates.unknown;
-					break;
-				case this.cellStates.flagged:
-					this.state[x][y] = this.cellStates.unknown;
-					break;
-				case this.cellStates.struck:
-					// permanent, do nothing
-					break;
-				case this.cellStates.error:
-					break;
-				default:
-					throw new Error('Invalid map state "' + this.state[x][y] + '"');
+			if(ds.set && cur === cs.unknown){
+				next = cs.flagged;
+			}else if(!ds.set && cur === cs.flagged){
+				next = cs.unknown;
 			}
+		}
+
+		if(next === null) return;
+
+		this.state[x][y] = next;
+		ds.lastCell = { x, y };
+
+		if(strike){
+			this.registerStrike();
+			this.endDrag();
 		}
 
 		this.refresh();
+
+		if(strike){
+			this.checkEndConditions();
+		}
+	}
+
+	checkEndConditions(){
+		if(this.ended) return;
 		if(this.strikesRemaining !== null && this.strikesRemaining <= 0){
 			this.endGame(false);
 		}else if(this.checkForWin()){
@@ -203,6 +266,7 @@ class Nonogram {
 	endGame(won){
 		this.ended = true;
 		this.won   = won;
+		this.endDrag();
 		this.canvas.onmousedown = null;
 		this.canvas.classList.add('shaking');
 		this.notifyStateChange();
@@ -964,4 +1028,3 @@ class Nonogram {
 		};
 	}
 }
-
