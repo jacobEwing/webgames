@@ -1,6 +1,8 @@
 var game, context, player;
 
-var soundEffects, music, muted = false, musicVolume = .2, effectsVolume = .3;
+var soundEffects, music;
+var musicMuted = false, effectsMuted = false;
+var musicVolume = .2, effectsVolume = .3;
 /////////////////////////////////////////////////////////////////////////////////////////////
 // the game class
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -22,61 +24,67 @@ var gameClass = function(){
 	this.defaultBallSpeed = 16;
 	this.menuOptions = {
 		'main' : [
-			{
-				'label' : 'Play',
-				'action' : function(){ self.start(); },
-				'hovering' : 0
+		{
+			'label' : 'Play',
+			'action' : function(){ self.start(); },
+			'hovering' : 0
+		},
+		{
+			'label' : 'Settings',
+			'action' : function(){
+				game.canvas.onmousedown = null;
+				game.canvas.onmousemove = null;
+				game.currentMenu = 'settings';
 			},
-			{
-				'label' : 'Settings',
-				'action' : function(){
-					game.canvas.onmousedown = null;
-					game.canvas.onmousemove = null;
-					game.currentMenu = 'settings';
-				},
-				'hovering' : 0
+			'hovering' : 0
+		},
+		{
+			'label' : 'About',
+			'action' : function(){
+				game.canvas.onmousedown = null;
+				game.canvas.onmousemove = null;
+				game.currentMenu = 'about';
+				initializeMenu(game.menuOptions.about);
 			},
-			{
-				'label' : 'About',
-				'action' : function(){
-					game.canvas.onmousedown = null;
-					game.canvas.onmousemove = null;
-					game.currentMenu = 'about';
-					initializeMenu(game.menuOptions.about );
-				},
-				'hovering' : 0
-			},
-			{
-				'label' : 'Exit',
-				'action' : function(){ document.location.href = document.referrer;},
-				'hovering' : 0
-			}
+			'hovering' : 0
+		},
+		{
+			'label' : 'Exit',
+			'action' : function(){ document.location.href = document.referrer; },
+			'hovering' : 0
+		}
 		],
 		'about' : [
-			{
-				'label' : 'How to Play',
-				'action' : function(){alert('Not implemented');},
-				'hovering' : 0
-			},			
-			{
-				'label' : 'Credits',
-				'action' : function(){alert('Not implemented');},
-				'hovering' : 0
-			},			
-			{
-				'label' : 'Main Menu',
-				'action' : function(){
-					game.canvas.onmousedown = null;
-					game.canvas.onmousemove = null;
-					game.currentMenu = 'main';
-					initializeMenu(game.menuOptions.main );
-				},
-				'hovering' : 0
-			}
-
+		{
+			'label' : 'How to Play',
+			'action' : function(){
+				game.canvas.onmousedown = null;
+				game.canvas.onmousemove = null;
+				game.currentMenu = 'howToPlay';
+			},
+			'hovering' : 0
+		},
+		{
+			'label' : 'Credits',
+			'action' : function(){
+				game.canvas.onmousedown = null;
+				game.canvas.onmousemove = null;
+				game.currentMenu = 'credits';
+			},
+			'hovering' : 0
+		},
+		{
+			'label' : 'Main Menu',
+			'action' : function(){
+				game.canvas.onmousedown = null;
+				game.canvas.onmousemove = null;
+				game.currentMenu = 'main';
+				initializeMenu(game.menuOptions.main);
+			},
+			'hovering' : 0
+		}
 		]
 	};
-
 	// initialize variables
 	this.canvas = null;
 	this.state = 'initializing';
@@ -195,9 +203,10 @@ gameClass.prototype.render = function(){
 			drawShape('title', context);
 			context.restore();
 
-			
 			if(this.currentMenu == 'settings'){
 				drawSettings();
+			}else if(infoPages[this.currentMenu]){
+				drawInfoPage(infoPages[this.currentMenu], backToAbout);
 			}else{
 				drawMenu(this.menuOptions[this.currentMenu]);
 			}
@@ -336,33 +345,247 @@ gameClass.prototype.drawMenuStars = function(){
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////
-// additional game functions
+// info pages & settings
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-var drawSettings = (function(){
-	var fillColour = {red : 240, green : 225, blue : 192};
-	var borderColour = {red : 64, green : 48, blue : 32};
-	return function(){
-		var boxx = game.gridScale >> 2;
-		var boxy = game.gridScale * 2.8;
-		var boxWidth = game.gridScale * (game.gridSize.x - .5);
-		var boxHeight = game.gridScale * (game.gridSize.y - 3);
-		drawSimpleBox(
-			boxx, boxy, boxWidth, boxHeight,
-			fillColour, borderColour
-		);
-
-		context.save();
-			context.textAlign = 'left';
-			var fontSize = game.gridScale * .8;
-			context.font = fontSize + "px PoorStory";
-			context.fillStyle = 'rgba(0, 0, 0, 1)';
-
-			context.fillText('Music:', boxx + boxWidth / 20, boxy + fontSize);
-
-		context.restore();
+var infoPages = {
+	'howToPlay' : {
+		title : 'How to Play',
+		autoFit: true,
+		lines : [
+			'Destroy the blocks by firing your available arsenal at them!',
+			'',
+			'Use your mouse to aim and fire, wearing down the blocks with each ball. Bonus blocks hold power-ups; use them wisely!',
+		]
+	},
+	'credits' : {
+		title : 'Credits',
+		autoFit: 'true',
+		lines : [
+			'Design, development, and graphical arts by Jacob Ewing (http://weirdly.net)',
+			'Music kindly licensed by Wintergatan (https://wintergatan.net/)',
+			'Sound effects provided by zapsplat.com and freesound.org',
+			'Fonts provided by 1001freefonts.com:',
+			' -  Poor Story (https://www.1001freefonts.com/poor-story.font)',
+			' -  Jellee Roman (https://www.1001fonts.com/jellee-font.html)'
+		]
 	}
-})();
+};
+
+// Shared panel geometry, so settings and info pages line up.
+function menuPanelRect(){
+	return {
+		x	  : game.gridScale >> 2,
+		y	  : game.gridScale * 2.8,
+		width  : game.gridScale * (game.gridSize.x - .5),
+		height : game.gridScale * (game.gridSize.y - 3)
+	};
+}
+
+function drawInfoPage(page, backCallback){
+	var r = menuPanelRect();
+	drawSimpleBox(r.x, r.y, r.width, r.height,
+			{red : 240, green : 225, blue : 192},
+			{red : 64,  green : 48,  blue : 32});
+
+	var titleSize = game.gridScale * .8;
+
+	// text area inside the panel
+	var textX     = r.x + r.width * .08;
+	var textWidth = r.width * .84;
+	var textTop   = r.y + titleSize * 2.3;
+	var textFloor = r.y + r.height - game.gridScale * 1.4;  // leave room for Back
+	var textHeight = textFloor - textTop;
+
+	// choose a font size: explicit override, auto-fit, or default
+	var fontSize;
+	if(page.autoFit){
+		fontSize = fitFontSize(page.lines, textWidth, textHeight,
+				game.gridScale * .6,  game.gridScale * .22);
+	}else{
+		fontSize = game.gridScale * (page.fontSize !== undefined ? page.fontSize : .34);
+	}
+	var lineHeight = fontSize * 1.4;
+
+	// title
+	context.save();
+	context.textAlign = 'center';
+	context.font = titleSize + "px PoorStory";
+	context.fillStyle = 'rgba(64, 32, 16, 1)';
+	context.fillText(page.title, r.x + r.width / 2, r.y + titleSize * 1.3);
+	context.restore();
+
+	// wrapped body
+	context.save();
+	context.textAlign = 'left';
+	context.font = fontSize + "px PoorStory";
+	context.fillStyle = 'rgba(0, 0, 0, 1)';
+	var y = textTop;
+	for(var n = 0; n < page.lines.length; n++){
+		var wrapped = wrapText(page.lines[n], textWidth);
+		for(var m = 0; m < wrapped.length; m++){
+			context.fillText(wrapped[m], textX, y);
+			y += lineHeight;
+		}
+	}
+	context.restore();
+
+	drawBackButton(r, backCallback);
+}
+
+// Break a single string into an array of lines that fit within maxWidth,
+// using the currently-set context font.  An empty string yields ['']
+// so callers can use it as a paragraph break.
+function wrapText(text, maxWidth){
+	if(text === '') return [''];
+	var words = text.split(/\s+/);
+	var lines = [];
+	var current = '';
+	for(var n = 0; n < words.length; n++){
+		var test = current === '' ? words[n] : current + ' ' + words[n];
+		// the "current === ''" guard keeps an overlong single word from
+		// looping forever - it just gets placed on its own line.
+		if(current === '' || context.measureText(test).width <= maxWidth){
+			current = test;
+		}else{
+			lines.push(current);
+			current = words[n];
+		}
+	}
+	if(current !== '') lines.push(current);
+	return lines;
+}
+
+// Find the largest font size (down to minSize) at which every line in
+// `lines`, wrapped to `maxWidth`, fits within `maxHeight`.
+function fitFontSize(lines, maxWidth, maxHeight, startSize, minSize){
+	var size = startSize;
+	while(size > minSize){
+		context.font = size + "px PoorStory";
+		var lineHeight  = size * 1.4;
+		var totalHeight = 0;
+		for(var n = 0; n < lines.length; n++){
+			totalHeight += wrapText(lines[n], maxWidth).length * lineHeight;
+		}
+		if(totalHeight <= maxHeight) return size;
+		size -= 1;
+	}
+	return minSize;
+}
+
+function drawSettings(){
+	var r = menuPanelRect();
+
+	drawSimpleBox(r.x, r.y, r.width, r.height,
+		{red : 240, green : 225, blue : 192},
+		{red : 64,  green : 48,  blue : 32});
+
+	context.save();
+		context.textAlign = 'center';
+		var titleSize = game.gridScale * .8;
+		context.font = titleSize + "px PoorStory";
+		context.fillStyle = 'rgba(64, 32, 16, 1)';
+		context.fillText('Settings',
+			r.x + r.width / 2,
+			r.y + titleSize * 1.3);
+	context.restore();
+
+	var rowHeight  = game.gridScale * .9;
+	var rowSpacing = game.gridScale * .3;
+	var rowStartY  = r.y + game.gridScale * 2;
+
+	drawToggleRow('Music',		 !musicMuted,
+		r, rowStartY, rowHeight, 'toggle_Music',		 toggleMusic);
+	drawToggleRow('Sound Effects', !effectsMuted,
+		r, rowStartY + rowHeight + rowSpacing, rowHeight, 'toggle_Sound_Effects', toggleEffects);
+
+	drawBackButton(r, backToMain);
+}
+
+function drawToggleRow(label, isOn, r, y, rowHeight, areaName, callback){
+	context.save();
+		var fontSize = game.gridScale * .55;
+		context.font = fontSize + "px PoorStory";
+		context.textAlign = 'left';
+		context.fillStyle = 'rgba(0, 0, 0, 1)';
+		context.fillText(label + ':', r.x + r.width * .1, y + rowHeight * .7);
+	context.restore();
+
+	var buttonWidth  = r.width * .22;
+	var buttonHeight = game.gridScale * .6;
+	var buttonX	  = r.x + r.width - buttonWidth - r.width * .1;
+	var buttonY	  = y + (rowHeight - buttonHeight) / 2;
+
+	var colour = isOn
+		? {red : 140, green : 200, blue : 120}
+		: {red : 210, green : 140, blue : 120};
+	drawNiceBox(buttonX, buttonY, buttonWidth, buttonHeight, colour);
+
+	context.save();
+		context.textAlign = 'center';
+		var fontSize2 = game.gridScale * .45;
+		context.font = fontSize2 + "px PoorStory";
+		var text = isOn ? 'ON' : 'OFF';
+		var tx = buttonX + buttonWidth / 2;
+		var ty = buttonY + buttonHeight / 2 + fontSize2 / 3;
+
+		context.fillStyle = 'rgba(255, 255, 255, .6)';
+		context.fillText(text, tx + game.textShadowOffset, ty + game.textShadowOffset);
+		context.fillStyle = 'rgba(0, 48, 0, .8)';
+		context.fillText(text, tx, ty);
+	context.restore();
+
+	game.buttonList.removeArea(areaName);
+	game.buttonList.addArea(areaName, {
+		x : buttonX, y : buttonY, w : buttonWidth, h : buttonHeight
+	}, callback);
+}
+
+function drawBackButton(r, callback){
+	var buttonWidth  = r.width * .3;
+	var buttonHeight = game.gridScale * .7;
+	var buttonX	  = r.x + (r.width - buttonWidth) / 2;
+	var buttonY	  = r.y + r.height - buttonHeight - game.gridScale * .3;
+
+	drawNiceBox(buttonX, buttonY, buttonWidth, buttonHeight,
+		{red : 140, green : 200, blue : 120});
+
+	context.save();
+		context.textAlign = 'center';
+		var fontSize = game.gridScale * .55;
+		context.font = fontSize + "px PoorStory";
+		var tx = buttonX + buttonWidth / 2;
+		var ty = buttonY + buttonHeight / 2 + fontSize / 3;
+
+		context.fillStyle = 'rgba(255, 255, 255, .6)';
+		context.fillText('Back', tx + game.textShadowOffset, ty + game.textShadowOffset);
+		context.fillStyle = 'rgba(0, 48, 0, .8)';
+		context.fillText('Back', tx, ty);
+	context.restore();
+
+	game.buttonList.removeArea('menuBack');
+	game.buttonList.addArea('menuBack', {
+		x : buttonX, y : buttonY, w : buttonWidth, h : buttonHeight
+	}, callback);
+}
+
+function backToAbout(){
+	game.buttonList.removeArea('menuBack');
+	game.currentMenu = 'about';
+	initializeMenu(game.menuOptions.about);
+}
+
+function backToMain(){
+	game.buttonList.removeArea('menuBack');
+	game.buttonList.removeArea('toggle_Music');
+	game.buttonList.removeArea('toggle_Sound_Effects');
+	game.currentMenu = 'main';
+	initializeMenu(game.menuOptions.main);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+// additional game functions
+/////////////////////////////////////////////////////////////////////////////////////////////
 
 function drawMenu(menuOptions){
 	var spacing = game.gridScale >> 2;
@@ -447,6 +670,9 @@ gameClass.prototype.start = function(){
 	// turn the main menu events off
 	this.canvas.onmousedown = null;
 	this.canvas.onmousemove = null;
+
+	// clear any leftover UI buttons
+	this.buttonList = new areaActionClass();
 
 	// reset the player, balls, game.blocks, etc.
 	player = new playerClass(this);
@@ -562,6 +788,11 @@ function initialize(step){
 			window.onresize = handleResize;
 			game.state = 'menu';
 			game.currentMenu = 'main';
+
+			game.canvas.onclick = function(e){
+				game.buttonList.checkAreas(e.offsetX, e.offsetY);
+			};
+
 			setInterval(function(){game.render();}, game.animationFrequency);
 			initializeMenu(game.menuOptions.main);
 			break;
@@ -722,6 +953,7 @@ function drawBottomBar(){
 }
 
 function endGame(){
+	game.buttonList.removeArea('exit');
 	game.state = 'menu';
 	game.currentMenu = 'main';
 	initializeMenu(game.menuOptions.main);
@@ -963,20 +1195,17 @@ function texasStar(cx, cy, radius, angle, opacity){
 	*/
 }
 
-
-// @@@@@@@@@@@@@@@@@@@@@@@ copied from swix 
 var playSound = (function(){
 	var soundTally = 0;
 	return function (soundName, force){
 		if(force == undefined) force = 0;
-		if(!muted || force){
+		if(!effectsMuted || force){
 			if(soundTally < 10){
-				soundTally ++;
-				console.log(soundTally);
+				soundTally++;
 				var sound = soundEffects[soundName].cloneNode();
 				sound.volume = effectsVolume;
 				sound.addEventListener("ended", function(){
-					soundTally --;
+					soundTally--;
 				});
 				sound.play();
 			}
@@ -985,35 +1214,32 @@ var playSound = (function(){
 })();
 
 function soundOn(){
-
 	var playPromise = music[0].play();
 
 	if (playPromise !== undefined) {
 		playPromise.then(function() {
-			muted = false;
-//			$('#soundCheckmark').html('On&nbsp;');
+			musicMuted = false;
 		}).catch(function(error) {
-			muted = true;
-//			$('#soundCheckmark').html('Off');
+			musicMuted = true;
 			console.log(error);
 		});
 	}else{
-		muted = false;
-//		$('#soundCheckmark').html('On&nbsp;');
+		musicMuted = false;
 	}
-
 }
 
 function soundOff(){
 	music[0].pause();
-	muted = true;
-	//	$('#soundCheckmark').html('Off');
+	musicMuted = true;
 }
 
-function toggleSound(){
-	muted ? soundOn() : soundOff();
+function toggleMusic(){
+	musicMuted ? soundOn() : soundOff();
 }
 
+function toggleEffects(){
+	effectsMuted = !effectsMuted;
+}
 
 var myRandom = (function(){
 	var seed = 2;
