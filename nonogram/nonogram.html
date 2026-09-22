@@ -3,47 +3,165 @@
 <head>
 	<link rel="icon" type="image/x-icon" href="assets/images/nonogram.ico">
 	<script type="text/javascript" src="nonogram.js"></script>
-	<link rel="stylesheet" href="nonogram.css"></link>
+	<link rel="stylesheet" href="nonogram.css">
 	<script type="text/javascript">
-		var game;
+		var game = null;
+		var currentDifficulty = 'medium';
 		var threeStrikesEnabled = false;
 
-		window.onload = function(){ startGame(); };
+		window.onload = function(){
+			buildMenuIcons();
+			wireMenu();
 
-		function startGame(difficulty){
+			document.getElementById('threeStrikesCheck').addEventListener('change', function(e){
+				threeStrikesEnabled = e.target.checked;
+			});
+
+			document.getElementById('restartButton').addEventListener('click', replayGame);/*function(){
+				if(game && !game.ended){
+					if(confirm('Restart this puzzle? Progress will be lost.')){
+						replayGame();
+					}
+				}else if(game){
+					replayGame();
+				}
+			});*/
+
+			document.getElementById('exitButton').addEventListener('click', goToMenu);/*function(){
+				if(!game || game.ended || confirm('Leave this puzzle and return to the menu?')){
+					goToMenu();
+				}
+			});*/
+
+			showScreen('menu');
+		};
+
+		function buildMenuIcons(){
+			document.querySelectorAll('.menuTile').forEach(function(tile){
+				const canvas = tile.querySelector('.tileIcon');
+				const filled = parseInt(tile.dataset.filled, 10);
+				Nonogram.renderIcon(canvas, filled);
+			});
+		}
+
+		function wireMenu(){
+			document.querySelectorAll('.menuTile').forEach(function(tile){
+				tile.addEventListener('click', function(){
+					currentDifficulty = tile.dataset.difficulty;
+					startNewGame();
+				});
+			});
+		}
+
+		function showScreen(name){
+			document.getElementById('menuScreen').style.display = (name === 'menu') ? '' : 'none';
+			document.getElementById('gameScreen').style.display = (name === 'game') ? '' : 'none';
+			hideEndPrompt();
+		}
+
+		function startNewGame(){
+			showScreen('game');
 			game = new Nonogram({
-				target		: document.getElementById('gameWrapper'),
-				font		: 'Vanilla Extract',
-				difficulty	: difficulty,
-				threeStrikes	: threeStrikesEnabled
+				target        : document.getElementById('gameWrapper'),
+				font          : 'Vanilla Extract',
+				difficulty    : currentDifficulty,
+				threeStrikes  : threeStrikesEnabled,
+				onStateChange : onGameStateChange
 			});
 			game.start();
 		}
 
-		function toggleStrikes(){
-			threeStrikesEnabled = !threeStrikesEnabled;
-			document.getElementById('strikeToggleLabel').textContent =
-				'3-Strike: ' + (threeStrikesEnabled ? 'On' : 'Off');
-			document.getElementById('strikeToggle').classList.toggle('active', threeStrikesEnabled);
+		function replayGame(){
+			hideEndPrompt();
+			game.replay();
+		}
+
+		function goToMenu(){
+			showScreen('menu');
+		}
+
+		function onGameStateChange(state){
+			if(!state.ended) return;
+			showEndPrompt(state.won);
+		}
+
+		function showEndPrompt(won){
+			const prompt = document.getElementById('endPrompt');
+			const title = prompt.querySelector('.promptTitle');
+			const buttons = prompt.querySelector('.promptButtons');
+
+			buttons.innerHTML = '';
+			if(won){
+				title.textContent = 'Solved!';
+				buttons.appendChild(makeButton('New Game', startNewGame));
+				buttons.appendChild(makeButton('Menu', goToMenu));
+			}else{
+				title.textContent = 'Out of Strikes';
+				buttons.appendChild(makeButton('Try Again', replayGame));
+				buttons.appendChild(makeButton('New Game', startNewGame));
+				buttons.appendChild(makeButton('Menu', goToMenu));
+			}
+			prompt.style.display = '';
+		}
+
+		function hideEndPrompt(){
+			document.getElementById('endPrompt').style.display = 'none';
+		}
+
+		function makeButton(label, onClick){
+			const b = document.createElement('button');
+			b.className = 'promptButton';
+			b.textContent = label;
+			b.addEventListener('click', onClick);
+			return b;
 		}
 	</script>
 </head>
 <body>
-</body>
-		<h1>Nonogram</h1>
-			<div id="menu">
-				<span onclick="startGame('easy')"   class="menuButton"><a>Easy</a></span>
-				<span onclick="startGame('medium')" class="menuButton"><a>Medium</a></span>
-				<span onclick="startGame('hard')"   class="menuButton"><a>Hard</a></span>
-				<span id="strikeToggle" onclick="toggleStrikes()" class="menuButton"><a id="strikeToggleLabel">3-Strike: Off</a></span>
-				<span onclick="window.history.back()" class="menuButton"><a>Exit</a></span>
-			</div>
-			<div id="gameWrapper"></div>
+
+	<h1>Nonogram</h1>
+
+	<div id="menuScreen" class="screen">
+		<div id="difficultyRow">
+			<button class="menuTile" data-difficulty="easy"   data-filled="3">
+				<canvas class="tileIcon" width="256" height="256"></canvas>
+				<span class="tileLabel">Easy</span>
+			</button>
+			<button class="menuTile" data-difficulty="medium" data-filled="2">
+				<canvas class="tileIcon" width="256" height="256"></canvas>
+				<span class="tileLabel">Medium</span>
+			</button>
+			<button class="menuTile" data-difficulty="hard"   data-filled="1">
+				<canvas class="tileIcon" width="256" height="256"></canvas>
+				<span class="tileLabel">Hard</span>
+			</button>
+		</div>
+		<div id="toggleRow">
+			<label class="toggleSwitch">
+				<input type="checkbox" id="threeStrikesCheck">
+				<span class="toggleSlider"></span>
+			</label>
+			<span class="toggleLabel">Three-Strikes Mode</span>
+		</div>
+	</div>
+
+	<div id="gameScreen" class="screen" style="display:none">
+		<div id="gameWrapper"></div>
+		<div id="gameControls">
+			<button id="restartButton" class="gameControlButton">Restart</button>
+			<button id="exitButton"    class="gameControlButton">Exit</button>
+		</div>
+		<div id="endPrompt" class="endPrompt" style="display:none">
+			<div class="promptTitle"></div>
+			<div class="promptButtons"></div>
+		</div>
+	</div>
 
 	<!--
 		credits to give:
 		 - wallpaper: publicdomainvectors.org
 		 - font:
-		 	"vanilla extract", Shara Weber, 	https://sharasfonts.com
+			"vanilla extract", Shara Weber, https://sharasfonts.com
 	-->
+</body>
 </html>

@@ -23,9 +23,9 @@ class Nonogram {
 		};
 
 		this.difficultySettings = {
-			easy:   { fillProbability: 0.60, hardnessRange: [0.0, 0.3] },
-			medium: { fillProbability: 0.55, hardnessRange: [0.3, 0.9] },
-			hard:   { fillProbability: 0.50, hardnessRange: [0.9, 99.0] }
+			easy:   { fillProbability: 0.60, hardnessRange: [0.0, 0.3], sizeRange: [ 4,  7] },
+			medium: { fillProbability: 0.55, hardnessRange: [0.3, 0.9], sizeRange: [ 6,  10]  },
+			hard:   { fillProbability: 0.50, hardnessRange: [0.9, 99.0], sizeRange: [ 9,  12]  }
 		};
 
 		this.threeStrikes = !!parameters.threeStrikes;
@@ -39,10 +39,10 @@ class Nonogram {
 
 		// initialize default colours and check to see if custom ones were passed in
 		this.colours = {
-			empty : { red : 157, green : 168, blue : 138, alpha : .5 },
-			active : { red: 239, green :221, blue : 115, alpha : .5 },
+			empty : { red : 157, green : 168, blue : 138, alpha : 1 },
+			active : { red: 239, green :221, blue : 115, alpha : 1 },
 			plainText : { red : 68, green :  67, blue : 58, alpha : 1 },
-			paleText : { red : 68, green :  67, blue : 58, alpha : .4 },
+			paleText : { red : 137, green :  135, blue : 119, alpha : 1 },
 			errorText : { red : 192, green :  96, blue : 64, alpha : 1 }
 		};
 
@@ -98,29 +98,47 @@ class Nonogram {
 		
 	}
 
-	start(){  // start the game!
-		this.ended = false;
-		this.won   = false;
-		this.strikesRemaining = this.threeStrikes ? 3 : null;
-		this.notifyStateChange();
+	start(){
+		const settings = this.difficultySettings[this.difficulty];
+		const [minSize, maxSize] = settings.sizeRange;
 
-		let w = Math.round(Math.random() * this.maxGridSize / 2);
-		w += this.maxGridSize >> 1;
+		if(minSize > maxSize){
+			throw new Error(
+				`Nonogram: invalid sizeRange [${minSize}, ${maxSize}] for difficulty "${this.difficulty}"`
+			);
+		}
 
-		let h = Math.round(Math.random() * this.maxGridSize / 2);
-		h += this.maxGridSize >> 1;
+		const pickSize = () =>
+			minSize + Math.floor(Math.random() * (maxSize - minSize + 1));
+
+		const w = pickSize();
+		const h = pickSize();
 
 		this.xOffset = ((this.maxGridSize - w) * this.cellSize) >> 1;
 
-
 		this.generate(w, h, this.difficulty);
-		this.state =  Array.from({ length: this.map.length }, () => Array(this.map[0].length).fill(this.cellStates.unknown));
-
-		// initialize our cell states
+		this.resetForNewGame();
 		this.drawCells();
-
-		// add events
 		this.initializeEvents();
+		this.notifyStateChange();
+	}
+
+	// Keep the current puzzle; reset player progress and re-arm the board.
+	replay(){
+		this.resetForNewGame();
+		this.drawCells();
+		this.initializeEvents();
+		this.notifyStateChange();
+	}
+
+	resetForNewGame(){
+		this.ended = false;
+		this.won   = false;
+		this.strikesRemaining = this.threeStrikes ? 3 : null;
+		this.state = Array.from(
+			{ length : this.map.length },
+			() => Array(this.map[0].length).fill(this.cellStates.unknown)
+		);
 	}
 
 	initializeEvents(){
@@ -343,7 +361,7 @@ class Nonogram {
 		// the margin is this.sideSpacing * this.cellSize
 		this.context.save();
 		this.context.font = this.cellSize / 5 + "px " + this.font;
-		//this.context.fillStyle = this.#colourToText(this.colours.text);
+		//this.context.fillStyle = Nonogram.#colourToText(this.colours.text);
 
 		// draw the clues at the top
 		this.context.textAlign = "center";
@@ -381,13 +399,13 @@ class Nonogram {
 		var rval;
 		switch(state){
 			case this.rowcolStates.unsolved:
-				rval = this.#colourToText(this.colours.plainText);
+				rval = Nonogram.#colourToText(this.colours.plainText);
 				break;
 			case this.rowcolStates.solved:
-				rval = this.#colourToText(this.colours.paleText);
+				rval = Nonogram.#colourToText(this.colours.paleText);
 				break;
 			case this.rowcolStates.error:
-				rval = this.#colourToText(this.colours.errorText);
+				rval = Nonogram.#colourToText(this.colours.errorText);
 				break;
 			default:
 				throw ("uncaught case");
@@ -476,96 +494,72 @@ class Nonogram {
 
 	}
 
-	// render a nicely shaded rectangle with rounded corners
-	drawBox(x, y, colour, invert){
-		if(invert == undefined){
-			invert = false;
-		}
+	// Render one cell at pixel position (px, py). Pure drawing; no game state.
+	static drawCellBox(context, px, py, cellSize, colour, invert){
+		if(invert == undefined) invert = false;
 
-		var edgeBias = this.cellSize >> 4;
+		const edgeBias = cellSize >> 4;
+		const fill = Nonogram.#colourToText(colour);
 
-		var colour = this.#colourToText(colour);
-		var shade = 'rgba(0, 0, 0, .1)';
-		/*
-		var highlight = 'rgba(255, 255, 255, .2)';
-		var darkColour = this.#colourToText({red : colour.red >> 1, green : colour.green >> 1, blue : colour.blue >> 1, 'alpha' : 0.1});
-		*/
+		let shade, highlight;
 		if(invert){
-			shade = 'rgba(255, 255, 255, .2)';
-			var highlight = 'rgba(0, 0, 0, .2)';
-//			var highlight = this.#colourToText({red : colour.red >> 1, green : colour.green >> 1, blue : colour.blue >> 1, 'alpha' : 0.1});
+			shade     = 'rgba(255, 255, 255, .2)';
+			highlight = 'rgba(0, 0, 0, .2)';
 		}else{
-			var highlight = 'rgba(255, 255, 255, .2)';
-			shade = this.#colourToText({red : colour.red >> 1, green : colour.green >> 1, blue : colour.blue >> 1, 'alpha' : 0.1});
+			highlight = 'rgba(255, 255, 255, .2)';
+			shade     = 'rgba(0, 0, 0, .1)';
 		}
 
-		x = (x + this.sideSpacing) * this.cellSize;
-		y = (y + this.sideSpacing) * this.cellSize;
-		x += this.xOffset;
-		var x2 = x + Math.floor(this.cellSize * .95);
-		var y2 = y + Math.floor(this.cellSize * .95);
+		const x  = px;
+		const y  = py;
+		const x2 = x + Math.floor(cellSize * .95);
+		const y2 = y + Math.floor(cellSize * .95);
 
-		
-		this.context.save();
+		context.save();
 
-			this.context.beginPath();
-			this.context.fillStyle = colour;
-			this.context.moveTo(x, y + edgeBias);
-			this.context.quadraticCurveTo(x, y, x + edgeBias, y);
-			this.context.lineTo(x2 - edgeBias, y);
+		context.beginPath();
+		context.fillStyle = fill;
+		context.moveTo(x, y + edgeBias);
+		context.quadraticCurveTo(x, y, x + edgeBias, y);
+		context.lineTo(x2 - edgeBias, y);
+		context.quadraticCurveTo(x2, y, x2, y + edgeBias);
+		context.lineTo(x2, y2 - edgeBias);
+		context.quadraticCurveTo(x2, y2, x2 - edgeBias, y2);
+		context.lineTo(x + edgeBias, y2);
+		context.quadraticCurveTo(x, y2, x, y2 - edgeBias);
+		context.closePath();
+		context.fill();
 
-			this.context.quadraticCurveTo(x2, y, x2, y + edgeBias);
-			this.context.lineTo(x2, y2 - edgeBias);
+		context.beginPath();
+		context.fillStyle = highlight;
+		context.moveTo(x, y2 - edgeBias);
+		context.lineTo(x, y + edgeBias);
+		context.quadraticCurveTo(x, y, x + edgeBias, y);
+		context.lineTo(x2 - edgeBias, y);
+		context.quadraticCurveTo(x2, y, x2, y + edgeBias);
+		context.bezierCurveTo(x, y, x + edgeBias, y + edgeBias, x, y2 - edgeBias);
+		context.closePath();
+		context.fill();
 
-			this.context.quadraticCurveTo(x2, y2, x2 - edgeBias, y2);
-			this.context.lineTo(x + edgeBias, y2);
+		context.beginPath();
+		context.fillStyle = shade;
+		context.moveTo(x2, y + edgeBias);
+		context.lineTo(x2, y2 - edgeBias);
+		context.quadraticCurveTo(x2, y2, x2 - edgeBias, y2);
+		context.lineTo(x + edgeBias, y2);
+		context.quadraticCurveTo(x, y2, x, y2 - edgeBias);
+		context.bezierCurveTo(x2, y2, x2 - edgeBias, y2 - edgeBias, x2, y + edgeBias);
+		context.fill();
+		context.closePath();
 
-			this.context.quadraticCurveTo(x, y2, x, y2 - edgeBias);
-			this.context.closePath();
-			this.context.fill();
+		context.restore();
+	}
 
-			// add some shading, first at the top
-			this.context.beginPath();
-			this.context.fillStyle = highlight;
-			this.context.moveTo(x, y2 - edgeBias);
-			this.context.lineTo(x, y + edgeBias);
-			this.context.quadraticCurveTo(x, y, x + edgeBias, y);
-			this.context.lineTo(x2 - edgeBias, y);
-			this.context.quadraticCurveTo(x2, y, x2, y + edgeBias);
-			this.context.bezierCurveTo(
-				x, 
-				y, 
-				x + edgeBias, 
-				y + edgeBias, 
-				x, 
-				y2 - edgeBias
-			);
-
-			this.context.closePath();
-			this.context.fill();
-
-
-			// and now some dark colour shading at the bottom
-			this.context.beginPath();
-			this.context.fillStyle = shade;
-			this.context.moveTo(x2, y + edgeBias);
-			this.context.lineTo(x2, y2 - edgeBias);
-			this.context.quadraticCurveTo(x2, y2, x2 - edgeBias, y2);
-			this.context.lineTo(x + edgeBias, y2);
-			this.context.quadraticCurveTo(x, y2, x, y2 - edgeBias);
-			this.context.bezierCurveTo(
-				x2,
-				y2,
-				x2 - edgeBias,
-				y2 - edgeBias,
-				x2,
-				y + edgeBias
-			);
-
-			this.context.fill();
-			this.context.closePath();
-
-		this.context.restore();
+	// Instance-level wrapper: converts cell coords to pixel coords, then defers.
+	drawBox(x, y, colour, invert){
+		const px = (x + this.sideSpacing) * this.cellSize + this.xOffset;
+		const py = (y + this.sideSpacing) * this.cellSize;
+		Nonogram.drawCellBox(this.context, px, py, this.cellSize, colour, invert);
 	}
 
 	drawX(x, y, colour){
@@ -715,6 +709,42 @@ class Nonogram {
 		this.context.restore();
 	}
 
+	// Paint a 2x2 mini-board onto a canvas. `filledCount` is 1, 2, or 3.
+	static renderIcon(canvas, filledCount){
+		const size = canvas.width;
+		const cellSize = size / 2;
+		const ctx = canvas.getContext('2d');
+		ctx.clearRect(0, 0, size, size);
+
+		// Backing plate so the icon reads as a board rather than floating tiles.
+		ctx.fillStyle = 'rgba(80, 60, 40, 0.18)';
+		ctx.fillRect(0, 0, size, size);
+
+		const fillColour  = { red : 239, green : 221, blue : 115, alpha : 1.0 };
+		const emptyColour = { red : 157, green : 168, blue : 138, alpha : 0.9 };
+
+		// Which cells are filled. Chosen for visual variety across the three icons.
+		let filled;
+		if(filledCount === 3)      filled = [[0,0],[1,0],[0,1]];  // all but bottom-right
+		else if(filledCount === 2) filled = [[0,0],[1,1]];        // diagonal
+		else                       filled = [[0,0]];              // top-left only
+
+		const isFilled = (x, y) => filled.some(c => c[0] === x && c[1] === y);
+
+		for(let x = 0; x < 2; x++){
+			for(let y = 0; y < 2; y++){
+				Nonogram.drawCellBox(
+					ctx,
+					x * cellSize,
+					y * cellSize,
+					cellSize,
+					isFilled(x, y) ? fillColour : emptyColour,
+					false
+				);
+			}
+		}
+	}
+
 	generate(width, height, difficulty) {
 		if (width <= 0 || height <= 0 || !Number.isInteger(width) || !Number.isInteger(height)) {
 			throw new Error('Width and height must be positive integers');
@@ -858,7 +888,7 @@ class Nonogram {
 	}
 
 
-	#colourToText(colour){
+	static #colourToText(colour){
 		// a convenience function for converting RGB definitions into strings for canvas styles;
 		return 'rgb(' +
 			colour.red + ', ' + 
