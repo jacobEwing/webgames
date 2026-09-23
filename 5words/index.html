@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>5words</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <div class="app">
+
+    <header class="site-header">
+      <h1>5words</h1>
+      <div class="header-actions">
+        <button type="button" id="help" class="header-btn">How to play</button>
+        <button type="button" id="new-game" class="header-btn">New game</button>
+        <a href="http://weirdly.net" class="header-btn">weirdly.net</a>
+      </div>
+    </header>
+
+    <nav class="alphabet" id="alphabet" aria-label="Letter states"></nav>
+
+    <main class="play" id="play">
+
+      <!-- Completed guesses. This is the only scrolling region. -->
+      <div class="board" id="board" role="list" aria-live="polite"></div>
+
+      <!-- Pinned to the bottom of the play area. -->
+      <div class="bottom-dock">
+        <p class="message" id="message" role="status"></p>
+
+        <form id="guess-form" novalidate autocomplete="off">
+          <div class="row" id="input-row" role="listitem">
+            <span class="cell"></span>
+            <span class="cell"></span>
+            <span class="cell"></span>
+            <span class="cell"></span>
+            <span class="cell"></span>
+            <span class="score"></span>
+
+            <input
+              id="guess-input"
+              class="guess-input"
+              type="text"
+              maxlength="5"
+              spellcheck="false"
+              autocapitalize="off"
+              autocorrect="off"
+              enterkeyhint="go"
+              aria-label="Your guess">
+          </div>
+        </form>
+
+        <div class="reveal-wrap">
+          <button type="button" id="reveal" class="reveal-btn">Reveal</button>
+        </div>
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- Instructions modal -->
+  <div class="modal-backdrop" id="help-modal" hidden>
+    <div class="modal" role="dialog" aria-labelledby="help-title" aria-modal="true">
+      <div class="modal-head">
+        <h2 id="help-title">How to play</h2>
+        <button type="button" id="help-close" class="modal-close" aria-label="Close">×</button>
+      </div>
+      <div class="modal-body">
+        <p>Guess the hidden five-letter word. Type a word and press <kbd>Enter</kbd>.</p>
+
+        <p>Each guess is scored by how many of its letters appear in the hidden word, counting duplicates correctly. For example:</p>
+        <ul>
+          <li>If the word is <code>poops</code> and you guess <code>poppy</code>, the score is <strong>3</strong> — the two <code>p</code>s and one <code>o</code> match.</li>
+          <li>If the word is <code>poppy</code> and you guess <code>poops</code>, the score is still <strong>3</strong>.</li>
+        </ul>
+
+        <p>A score of 5 does not necessarily mean you've won — the letters may be in the wrong order. You win only by guessing the exact word.</p>
+
+        <p>Use the letter tiles at the top to keep track. Click a letter to cycle it through three states:</p>
+        <ul>
+          <li>Plain — no information yet.</li>
+          <li>Red — you've ruled this letter out.</li>
+          <li>Green — this letter is in the word.</li>
+        </ul>
+
+        <p><strong>Reveal</strong> gives up and shows the answer. <strong>New game</strong> starts a fresh round.</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="common.js"></script>
+  <script src="words.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
