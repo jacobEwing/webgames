@@ -17,21 +17,21 @@
 				threeStrikesEnabled = e.target.checked;
 			});
 
-			document.getElementById('restartButton').addEventListener('click', replayGame);/*function(){
-				if(game && !game.ended){
-					if(confirm('Restart this puzzle? Progress will be lost.')){
-						replayGame();
-					}
-				}else if(game){
-					replayGame();
-				}
-			});*/
+			document.getElementById('restartButton').addEventListener('click', replayGame);
+			document.getElementById('exitButton').addEventListener('click', goToMenu);
 
-			document.getElementById('exitButton').addEventListener('click', goToMenu);/*function(){
-				if(!game || game.ended || confirm('Leave this puzzle and return to the menu?')){
-					goToMenu();
-				}
-			});*/
+
+			document.getElementById('aboutButton').addEventListener('click', function(){
+				document.getElementById('aboutPrompt').style.display = '';
+			});
+
+			document.getElementById('aboutCloseButton').addEventListener('click', function(){
+				document.getElementById('aboutPrompt').style.display = 'none';
+			});
+
+			document.getElementById('exitSiteButton').addEventListener('click', function(){
+				window.location.href = window.location.origin + '/';
+			});
 
 			showScreen('menu');
 		};
@@ -56,6 +56,7 @@
 		function showScreen(name){
 			document.getElementById('menuScreen').style.display = (name === 'menu') ? '' : 'none';
 			document.getElementById('gameScreen').style.display = (name === 'game') ? '' : 'none';
+			document.getElementById('aboutPrompt').style.display = 'none';
 			hideEndPrompt();
 		}
 
@@ -93,13 +94,13 @@
 			buttons.innerHTML = '';
 			if(won){
 				title.textContent = 'Solved!';
-				buttons.appendChild(makeButton('New Game', startNewGame));
-				buttons.appendChild(makeButton('Menu', goToMenu));
+				buttons.appendChild(makeButton('New Game', startNewGame, 'primary'));
+				buttons.appendChild(makeButton('Menu', goToMenu, 'secondary'));
 			}else{
 				title.textContent = 'Out of Strikes';
-				buttons.appendChild(makeButton('Try Again', replayGame));
-				buttons.appendChild(makeButton('New Game', startNewGame));
-				buttons.appendChild(makeButton('Menu', goToMenu));
+				buttons.appendChild(makeButton('Try Again', replayGame, 'primary'));
+				buttons.appendChild(makeButton('New Game', startNewGame, 'primary'));
+				buttons.appendChild(makeButton('Menu', goToMenu, 'secondary'));
 			}
 			prompt.style.display = '';
 		}
@@ -108,13 +109,14 @@
 			document.getElementById('endPrompt').style.display = 'none';
 		}
 
-		function makeButton(label, onClick){
+		function makeButton(label, onClick, variant){
 			const b = document.createElement('button');
-			b.className = 'promptButton';
+			b.className = 'promptButton ' + (variant || 'secondary');
 			b.textContent = label;
 			b.addEventListener('click', onClick);
 			return b;
 		}
+
 	</script>
 </head>
 <body>
@@ -143,25 +145,35 @@
 			</label>
 			<span class="toggleLabel">Three-Strikes Mode</span>
 		</div>
+		<div id="menuLinks">
+			<button id="aboutButton" class="menuLinkButton secondary">About</button>
+			<button id="exitSiteButton"  class="menuLinkButton secondary">Exit</button>
+		</div>
 	</div>
 
 	<div id="gameScreen" class="screen" style="display:none">
-		<div id="gameWrapper"></div>
 		<div id="gameControls">
-			<button id="restartButton" class="gameControlButton">Restart</button>
-			<button id="exitButton"    class="gameControlButton">Exit</button>
+			<button id="restartButton" class="gameControlButton secondary">Restart</button>
+			<button id="exitButton"    class="gameControlButton secondary">Menu</button>
 		</div>
+		<div id="gameWrapper"></div>
 		<div id="endPrompt" class="endPrompt" style="display:none">
 			<div class="promptTitle"></div>
 			<div class="promptButtons"></div>
 		</div>
 	</div>
 
-	<!--
-		credits to give:
-		 - wallpaper: publicdomainvectors.org
-		 - font:
-			"vanilla extract", Shara Weber, https://sharasfonts.com
-	-->
+	<div id="aboutPrompt" style="display:none">
+		<div class="promptTitle">About</div>
+		<div class="aboutContent">
+			<p style="margin-bottom: 2lh">Nonogram is logic puzzle in which you're presented with a grid of cells that have an unknown on/off state.  Numbers above and to the left of the grid indicate the lengths of segments that are active.</p>
+			<p>This version of the game is written and designed by Jacob Ewing<br/><a href="http://weirdly.net" target="_blank" rel="noopener">http://weirdly.net</a></p>
+			<p>Background image courtesy of<br/><a href="https://publicdomainvectors.org" target="_blank" rel="noopener">publicdomainvectors.org</a></p>
+			<p>Font &ldquo;Vanilla Extract&rdquo; by Shara Weber <br/><a href="https://www.fontspace.com/shara-weber" target="_blank" rel="noopener">https://www.fontspace.com/shara-weber</a></p>
+		</div>
+		<div class="promptButtons">
+			<button id="aboutCloseButton" class="promptButton secondary">Close</button>
+		</div>
+	</div>
 </body>
 </html>

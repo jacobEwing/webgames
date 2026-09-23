@@ -117,6 +117,7 @@ class Nonogram {
 		this.xOffset = ((this.maxGridSize - w) * this.cellSize) >> 1;
 
 		this.generate(w, h, this.difficulty);
+		this.updateTransformOrigin();
 		this.resetForNewGame();
 		this.drawCells();
 		this.initializeEvents();
@@ -235,10 +236,12 @@ class Nonogram {
 		const cur = this.state[x][y];
 		let next = null;
 		let strike = false;
+		let wrongFill = false;
 
 		if(ds.mode === 'fill'){
 			if(ds.set && cur === cs.unknown){
-				if(this.threeStrikes && this.map[x][y] !== 1){
+				wrongFill = this.map[x][y] !== 1;
+				if(this.threeStrikes && wrongFill){
 					next = cs.struck;
 					strike = true;
 				}else{
@@ -259,6 +262,10 @@ class Nonogram {
 
 		this.state[x][y] = next;
 		ds.lastCell = { x, y };
+
+		if(wrongFill && this.threeStrikes){
+			this.shakeCanvas();
+		}
 
 		if(strike){
 			this.registerStrike();
@@ -286,10 +293,14 @@ class Nonogram {
 		this.won   = won;
 		this.endDrag();
 		this.canvas.onmousedown = null;
-		this.canvas.classList.add('shaking');
+
+		if(won){
+			this.playAnimation('celebrating', 700);
+		}
+		// On loss: no animation. The strike counter and the modal do the talking.
+
 		this.notifyStateChange();
 	}
-
 	registerStrike(){
 		this.strikesRemaining--;
 		this.notifyStateChange();
@@ -1056,5 +1067,40 @@ class Nonogram {
 			firstPassFrac,
 			hardness: raw / norm
 		};
+	}
+
+	updateTransformOrigin(){
+		const w = this.map.length;
+		const h = this.map[0].length;
+		const total = this.maxGridSize + this.sideSpacing;
+
+		// Horizontal: independent of w, because xOffset compensates.
+		const xPct = ((this.sideSpacing + this.maxGridSize / 2) / total) * 100;
+		// Vertical: depends on h, since the grid is top-aligned in the canvas.
+		const yPct = ((this.sideSpacing + h / 2) / total) * 100;
+
+		this.canvas.style.transformOrigin = xPct + '% ' + yPct + '%';
+	}
+
+	shakeCanvas(){
+		this.playAnimation('shaking', 700);
+	}
+
+	playAnimation(className, duration){
+		if(!this.canvas) return;
+
+		// Restart the animation cleanly if it's already running.
+		this.canvas.classList.remove(className);
+		void this.canvas.offsetWidth;
+		this.canvas.classList.add(className);
+
+		document.documentElement.classList.add('no-scroll');
+
+		if(this.animationTimeout) clearTimeout(this.animationTimeout);
+		this.animationTimeout = setTimeout(() => {
+			this.canvas.classList.remove(className);
+			document.documentElement.classList.remove('no-scroll');
+			this.animationTimeout = null;
+		}, duration);
 	}
 }

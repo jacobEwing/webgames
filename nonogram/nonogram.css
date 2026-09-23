@@ -2,6 +2,14 @@
 	--menu-red : 239;
 	--menu-green : 221;
 	--menu-blue : 210;
+
+	--cell-empty-r : 239;
+	--cell-empty-g : 235;
+	--cell-empty-b : 207;
+	--cell-active-r : 239;
+	--cell-active-g : 221;
+	--cell-active-b : 115;
+	--cell-text : rgb(68, 67, 58);
 }
 
 @font-face {
@@ -10,6 +18,11 @@
 	     url('assets/fontsVanillaExtractRegular.woff') format('woff');
 	font-weight: 500;
 	font-style: normal;
+}
+
+
+html.no-scroll{
+	overflow: hidden;
 }
 
 body {
@@ -42,6 +55,22 @@ body {
 	100%	{ transform: rotate(0deg); }
 }
 
+.celebrating {
+	animation-name: celebrateWin;
+	animation-duration: .2s;
+	animation-iteration-count: 1;
+	animation-timing-function: ease-in-out;
+	animation-fill-mode: forwards;
+}
+
+@keyframes celebrateWin {
+	0%   { transform: scale(1)    rotate(0deg); }
+	25%  { transform: scale(.8) rotate(3deg); }
+	50%  { transform: scale(.6) rotate(0deg); }
+	75%  { transform: scale(.8) rotate(-3deg); }
+	100% { transform: scale(1)    rotate(0deg); }
+}
+
 .gameWrapper{
 	overflow:hidden;
 }
@@ -58,7 +87,7 @@ body {
 
 h1 {
 	margin-bottom: 0;
-	padding-bottom: 0.1lh;
+	padding-bottom: 1lh;
 	background-image: linear-gradient(rgb(239, 221, 115), brown);
 	background-clip: text;
 	-webkit-background-clip: text;
@@ -95,21 +124,26 @@ h1 {
 	height: 180px;
 	padding: 0;
 	border: none;
-	border-radius: 0.8em;
+	border-radius: .9em;
 	overflow: hidden;
 	cursor: pointer;
-	box-shadow: 0 4px 14px rgba(0, 0, 0, .25);
 	transition: transform .12s ease, box-shadow .12s ease;
-	background: rgba(80, 60, 40, .15);
 }
 
 .menuTile:hover {
 	transform: translateY(-2px) scale(1.03);
-	box-shadow: 0 8px 20px rgba(0, 0, 0, .3);
+	box-shadow:
+		inset 0 2px 4px rgba(255, 255, 255, .45),
+		inset 0 -2px 5px rgba(0, 0, 0, .15),
+		0 10px 22px rgba(0, 0, 0, .28);
 }
 
 .menuTile:active {
 	transform: translateY(0) scale(1.0);
+	box-shadow:
+		inset 0 3px 6px rgba(0, 0, 0, .18),
+		inset 0 -1px 2px rgba(255, 255, 255, .2),
+		0 3px 8px rgba(0, 0, 0, .2);
 }
 
 .tileIcon {
@@ -202,13 +236,19 @@ h1 {
 	transform: translate(-50%, -50%);
 	min-width: 15em;
 	padding: 1.4em 2em 1.6em 2em;
-	border-radius: .6em;
-	background: linear-gradient(
-		160deg,
-		rgba(239, 221, 210, .97) 5%,
-		rgba(180, 188, 180, .97) 100%
-	);
-	box-shadow: 0 10px 40px rgba(0, 0, 0, .45);
+	border-radius: .9em;
+	background:
+		linear-gradient(to bottom,
+			rgba(255, 255, 255, .45) 0%,
+			rgba(255, 255, 255, 0) 45%),
+		linear-gradient(to top,
+			rgba(0, 0, 0, .15) 0%,
+			rgba(0, 0, 0, 0) 45%),
+		rgb(var(--cell-empty-r), var(--cell-empty-g), var(--cell-empty-b));
+	box-shadow:
+		inset 0 2px 4px rgba(255, 255, 255, .5),
+		inset 0 -2px 6px rgba(0, 0, 0, .15),
+		0 12px 36px rgba(0, 0, 0, .35);
 	text-align: center;
 	z-index: 10;
 }
@@ -216,71 +256,141 @@ h1 {
 .promptTitle {
 	font-size: 1.6em;
 	margin-bottom: .8em;
-	color: rgb(80, 60, 40);
-	letter-spacing: .1ex;
+	color: var(--cell-text);
+	letter-spacing: .12ex;
+	text-shadow: 0 1px 0 rgba(255, 255, 255, .35);
 }
 
-.promptButton {
+.promptButton,
+.gameControlButton,
+.menuLinkButton {
 	font-family: inherit;
 	font-size: 1em;
-	letter-spacing: .1ex;
-	margin: .25em;
-	padding: .5em 1.1em;
+	letter-spacing: .12ex;
+	margin: .3em;
+	padding: .55em 1.3em;
 	border: none;
 	border-radius: .35em;
-	background: linear-gradient(
-		160deg,
-		rgb(239, 221, 210) 5%,
-		rgba(157, 168, 160, .8) 100%
-	);
-	color: rgb(80, 60, 40);
+	color: var(--cell-text);
 	cursor: pointer;
-	transition: background .15s ease, transform .1s ease;
+	transition: transform .1s ease, box-shadow .12s ease, filter .15s ease;
 }
 
-.promptButton:hover {
-	background: linear-gradient(
-		-45deg,
-		rgb(255, 240, 225),
-		rgba(180, 190, 178, .9)
-	);
+.promptButton.primary,
+.gameControlButton.primary,
+.menuLinkButton.primary  {
+	background:
+		linear-gradient(to bottom,
+			rgba(255, 255, 255, .45) 0%,
+			rgba(255, 255, 255, 0) 50%),
+		linear-gradient(to top,
+			rgba(0, 0, 0, .12) 0%,
+			rgba(0, 0, 0, 0) 50%),
+		rgb(var(--cell-active-r), var(--cell-active-g), var(--cell-active-b));
+	box-shadow:
+		inset 0 1px 2px rgba(255, 255, 255, .5),
+		inset 0 -1px 3px rgba(0, 0, 0, .12),
+		0 3px 7px rgba(0, 0, 0, .2);
 }
 
-.promptButton:active {
-	transform: scale(.97);
+.promptButton.secondary,
+.gameControlButton.secondary,
+.menuLinkButton.secondary  {
+	background:
+		linear-gradient(to bottom,
+			rgba(255, 255, 255, .4) 0%,
+			rgba(255, 255, 255, 0) 50%),
+		linear-gradient(to top,
+			rgba(0, 0, 0, .12) 0%,
+			rgba(0, 0, 0, 0) 50%),
+		rgb(var(--cell-empty-r), var(--cell-empty-g), var(--cell-empty-b));
+	box-shadow:
+		inset 0 1px 2px rgba(255, 255, 255, .45),
+		inset 0 -1px 3px rgba(0, 0, 0, .12),
+		0 3px 7px rgba(0, 0, 0, .2);
 }
 
-#gameControls {
-	margin-top: 1.2em;
-	display: flex;
-	justify-content: center;
-	gap: 1em;
+.promptButton:hover,
+.gameControlButton:hover,
+.menuLinkButton:hover  {
+	transform: translateY(-1px);
+	filter: brightness(1.06);
+	box-shadow:
+		inset 0 1px 2px rgba(255, 255, 255, .55),
+		inset 0 -1px 3px rgba(0, 0, 0, .12),
+		0 5px 12px rgba(0, 0, 0, .24);
+}
+
+.promptButton:active,
+.gameControlButton:active,
+.menuLinkButton:active  {
+	transform: translateY(0);
+	filter: brightness(.97);
+	box-shadow:
+		inset 0 2px 5px rgba(0, 0, 0, .18),
+		inset 0 -1px 2px rgba(255, 255, 255, .18),
+		0 2px 5px rgba(0, 0, 0, .18);
 }
 
 .gameControlButton {
-	font-family: inherit;
 	font-size: 4mm;
-	letter-spacing: .15ex;
-	padding: .55em 1.4em;
-	border: none;
-	border-radius: .4em;
-	cursor: pointer;
-	color: rgb(80, 60, 40);
-	background: linear-gradient(
-		160deg,
-		rgb(239, 221, 210) 5%,
-		rgba(157, 168, 160, .8) 100%
-	);
-	box-shadow: 0 3px 8px rgba(0, 0, 0, .2);
-	transition: transform .1s ease, box-shadow .12s ease;
+	padding: .55em 1.5em;
 }
 
-.gameControlButton:hover {
-	transform: translateY(-1px);
-	box-shadow: 0 5px 12px rgba(0, 0, 0, .25);
+#menuLinks {
+	margin-top: 1.2em;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: .3em;
 }
 
-.gameControlButton:active {
-	transform: translateY(0);
-	box-shadow: 0 2px 5px rgba(0, 0, 0, .2);
+.menuLinkButton {
+	font-size: 5mm;
+	padding: .5em 1.8em;
+	min-width: 7em;
+}
+
+#aboutPrompt {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	min-width: 18em;
+	max-width: 90vw;
+	padding: 1.4em 2em 1.6em 2em;
+	border-radius: .9em;
+	background:
+		linear-gradient(to bottom,
+			rgba(255, 255, 255, .45) 0%,
+			rgba(255, 255, 255, 0) 45%),
+		linear-gradient(to top,
+			rgba(0, 0, 0, .15) 0%,
+			rgba(0, 0, 0, 0) 45%),
+		rgb(var(--cell-empty-r), var(--cell-empty-g), var(--cell-empty-b));
+	box-shadow:
+		inset 0 2px 4px rgba(255, 255, 255, .5),
+		inset 0 -2px 6px rgba(0, 0, 0, .15),
+		0 12px 36px rgba(0, 0, 0, .35);
+	text-align: center;
+	z-index: 20;
+}
+
+.aboutContent {
+	font-size: 4mm;
+	line-height: 1.6;
+	color: var(--cell-text);
+}
+
+.aboutContent p {
+	margin: .55em 0;
+}
+
+.aboutContent a {
+	color: rgb(80, 100, 140);
+	text-decoration: none;
+}
+
+.aboutContent a:hover {
+	color: rgb(100, 130, 180);
 }
