@@ -254,7 +254,7 @@ body {
 }
 
 .cell.win {
-  background: var(--win-bg);
+  background: var(--win-bg) !important;
   color: var(--good-txt);
   font-weight: bold;
 }

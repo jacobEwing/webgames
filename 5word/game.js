@@ -8,7 +8,7 @@
   const STATE_NAMES = ['plain', 'excluded', 'included'];
   const WORD_LENGTH = 5;
 
-  const RECENT_KEY   = '5words.recentTargets';
+  const RECENT_KEY   = '5word.recentTargets';
   const RECENT_LIMIT = 100;
 
   // ---------- DOM ----------

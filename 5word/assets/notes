@@ -25,4 +25,4 @@ The knobs worth remembering, all at the top of styles.css:
 
 --bg, --panel, --ink, --line, --good-*, --bad-* — the palette
 
-In game.js: RECENT_LIMIT = 100 and RECENT_KEY = '5words.recentTargets' control the anti-repeat buffer.
+In game.js: RECENT_LIMIT = 100 and RECENT_KEY = '5word.recentTargets' control the anti-repeat buffer.
