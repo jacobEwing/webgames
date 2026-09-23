@@ -50,9 +50,12 @@
               enterkeyhint="go"
               aria-label="Your guess">
           </div>
+	  <div class="play-again-wrap" id="play-again-wrap" hidden>
+            <button type="button" id="play-again" class="play-again-btn">Play Again</button>
+          </div>
         </form>
 
-        <div class="reveal-wrap">
+        <div class="reveal-wrap" id="reveal-wrap">
           <button type="button" id="reveal" class="reveal-btn">Reveal</button>
         </div>
       </div>
@@ -69,24 +72,19 @@
         <button type="button" id="help-close" class="modal-close" aria-label="Close">×</button>
       </div>
       <div class="modal-body">
-        <p>Guess the hidden five-letter word. Type a word and press <kbd>Enter</kbd>.</p>
+        <p>Guess the hidden five-letter word by typing a word and pressing <kbd>Enter</kbd>. You can take as many guesses as you like</p>
 
-        <p>Each guess is scored by how many of its letters appear in the hidden word, counting duplicates correctly. For example:</p>
-        <ul>
-          <li>If the word is <code>poops</code> and you guess <code>poppy</code>, the score is <strong>3</strong> — the two <code>p</code>s and one <code>o</code> match.</li>
-          <li>If the word is <code>poppy</code> and you guess <code>poops</code>, the score is still <strong>3</strong>.</li>
-        </ul>
+        <p>Each guess is scored by how many of its letters appear in the hidden word - duplicates are only counted if they exist in both.</p>
 
         <p>A score of 5 does not necessarily mean you've won — the letters may be in the wrong order. You win only by guessing the exact word.</p>
 
-        <p>Use the letter tiles at the top to keep track. Click a letter to cycle it through three states:</p>
+        <p>You case the letter tiles at the top to keep track. Clicking a letter will cause it to cycle through three different states:</p>
         <ul>
           <li>Plain — no information yet.</li>
           <li>Red — you've ruled this letter out.</li>
           <li>Green — this letter is in the word.</li>
         </ul>
 
-        <p><strong>Reveal</strong> gives up and shows the answer. <strong>New game</strong> starts a fresh round.</p>
       </div>
     </div>
   </div>

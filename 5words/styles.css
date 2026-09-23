@@ -1,5 +1,4 @@
 :root {
-  --bg:        #f8f7f5;
   --panel:     #ffffff;
   --ink:       #4a3421;
   --ink-soft:  #7a6248;
@@ -10,6 +9,8 @@
   --good-txt:  #2e5d2e;
   --bad-bg:    #f4d4d4;
   --bad-txt:   #8b3a3a;
+  --win-bg:    #f2fdf0;
+  --button-bg: #fffa;
 
   /* Layout metrics */
   --app-width: 30rem;
@@ -23,33 +24,60 @@
 
 * { box-sizing: border-box; }
 
+[hidden] { display: none !important; }
+
+
 html, body {
   height: 100%;
   margin: 0;
   padding: 0;
 }
-
 body {
-  overflow: hidden;
-  background: var(--bg);
-  color: var(--ink);
-  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-  font-size: 16px;
-  -webkit-text-size-adjust: 100%;
+    overflow: hidden;
+    color: var(--ink);
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    background-color: rgb(206 201 187);
+    background-image: radial-gradient(rgb(240 230 211) 0.6138px, transparent 0.6138px), radial-gradient(rgb(233 232 231) 0.6138px, transparent 0.6138px);
+    background-size: 8.184px 8.184px, 8.184px 8.184px;
+    background-repeat: repeat, repeat;
+    background-position: 0px 0px, 4.092px 4.092px;
 }
-
 /* ---------- App shell ---------- */
 
 .app {
-  height: 100vh;
-  height: 100dvh;
+  height: 90dvh;
   max-width: var(--app-width);
-  margin: 0 auto;
+  margin: 5dvh auto;
   /* Bottom margin: one line of text between Reveal and the viewport edge. */
   padding: 0 .75rem 1.5rem;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  border: 2px solid var(--ink);
+  border-radius: 1rem;
+    --spacing: 1mm;
+    --lineWidth: 1px;
+    --c1: #fcf5c154;
+    --c2: #f9ebba70;
+    --c3: #47443b2b;
+    --c4: #00000047;
+    --c5: #fff0;
+    --c6: #ded6b83d;
+    --c7: #e9ddcb94;
+    --c8: #f8f2c95c;
+    background-image: repeating-linear-gradient(0deg, var(--c1) 0px, var(--c6) var(--lineWidth), var(--c7) var(--lineWidth), var(--c8) var(--spacing)), repeating-linear-gradient(45deg, var(--c2) 0px, var(--c3) var(--lineWidth), var(--c4) var(--lineWidth), var(--c5) var(--spacing));
+    background-position: 0px 0px;
+    background-color: #ffffff;
+    background-size: 1cm 1cm;
+    animation-name: bodyAnim;
+    animation-duration: 3s;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
 }
 
 /* ---------- Header ---------- */
@@ -83,7 +111,7 @@ body {
   padding: .28rem .65rem;
   border: 1.5px solid var(--line);
   border-radius: 4px;
-  background: transparent;
+  background-color: var(--button-bg);
   color: var(--ink);
   cursor: pointer;
   text-decoration: none;
@@ -112,7 +140,7 @@ body {
   line-height: 1;
   border: 1.5px solid var(--line);
   border-radius: 6px;
-  background: transparent;
+  background: var(--button-bg);
   color: var(--ink);
   cursor: pointer;
   transition: background .12s, color .12s;
@@ -173,6 +201,7 @@ body {
   border-radius: 6px;
   background: var(--panel);
   user-select: none;
+  transition: background .2s ease, color .2s ease;
 }
 
 .cell.active::after {
@@ -196,10 +225,14 @@ body {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  padding-left: .35rem;
+  padding-left: 2rem;
   font-size: 1.5rem;
   color: var(--ink-soft);
   font-variant-numeric: tabular-nums;
+}
+
+.row .score.conflict {
+  color: var(--bad-txt);
 }
 
 /* Transparent input stretched over the input row. */
@@ -218,6 +251,24 @@ body {
   font: inherit;
   font-size: 16px;
   outline: none;
+}
+
+.cell.win {
+  background: var(--win-bg);
+  color: var(--good-txt);
+  font-weight: bold;
+}
+/* Letter marked red on the alphabet — matches across all guesses. */
+.cell.marked-out {
+  background: var(--bad-bg);
+  color: var(--bad-txt);
+}
+
+/* Letter marked green on the alphabet — matches across all guesses. */
+.cell.marked-in {
+  background: var(--good-bg);
+  color: var(--good-txt);
+  font-weight: bold;
 }
 
 /* ---------- Bottom dock ---------- */
@@ -251,7 +302,7 @@ body {
   padding: .35rem 1.1rem;
   border: 1.5px solid var(--line);
   border-radius: 4px;
-  background: transparent;
+  background-color: var(--button-bg);
   color: var(--ink);
   cursor: pointer;
 }
@@ -271,7 +322,6 @@ body {
   padding: 1rem;
   animation: fade-in .15s ease-out;
 }
-.modal-backdrop[hidden] { display: none; }
 
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
 
@@ -339,7 +389,6 @@ body {
   border-bottom-width: 2px;
   border-radius: 3px;
   padding: 0 .35em;
-  background: var(--bg);
 }
 
 /* ---------- Small screens ---------- */
@@ -355,4 +404,27 @@ body {
   .cell { font-size: 1.3rem; border-width: 1.5px; }
   .row .score { font-size: 1.2rem; }
   .header-btn { font-size: .7rem; padding: .22rem .5rem; }
+}
+
+.play-again-wrap {
+  display: flex;
+  justify-content: center;
+}
+
+.play-again-btn {
+  font: inherit;
+  font-size: .95rem;
+  letter-spacing: .05em;
+  height: var(--cell);
+  padding: 0 2rem;
+  border: 2px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+  color: var(--ink);
+  cursor: pointer;
+}
+.play-again-btn:hover { background: rgba(74,52,33,.08); }
+.play-again-btn:focus-visible {
+  outline: 2px solid var(--ink-soft);
+  outline-offset: 2px;
 }
