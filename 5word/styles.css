@@ -409,6 +409,7 @@ body {
 .play-again-wrap {
   display: flex;
   justify-content: center;
+  height: 3lh;
 }
 
 .play-again-btn {
