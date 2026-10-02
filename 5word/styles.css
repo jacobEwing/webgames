@@ -187,6 +187,12 @@ body {
   flex-shrink: 0;
 }
 
+/* Past guesses: letters are clickable to cycle their state. */
+.row:not(.final) .cell { cursor: pointer; }
+
+/* The winning guess / revealed answer are locked. */
+.row.final .cell { cursor: default; }
+
 .cell {
   position: relative;
   width: var(--cell);

@@ -368,9 +368,24 @@
   playAgainBtn.addEventListener('click', newGame);
 
   boardEl.addEventListener('click', (ev) => {
-    if (gameOver) return;
-    if (ev.target === inputEl) return;
-    inputEl.focus();
+    // Clicking a letter in a past guess cycles its state, exactly as
+    // clicking that letter in the alphabet above would.
+    const cell = ev.target.closest('.cell');
+    if (cell) {
+      const row = cell.closest('.row');
+      if (row && row !== inputRowEl && !row.classList.contains('final')) {
+        const ch = cell.textContent;
+        if (ch) cycleLetter(ch);
+      }
+    }
+
+    // Clicking anywhere on the board returns focus to the input, so
+    // you can keep typing straight away.
+    if (ev.target !== inputEl) inputEl.focus();
+  });
+
+  boardEl.addEventListener('pointerdown', (ev) => {
+    if (ev.target.closest('.cell')) ev.preventDefault();
   });
 
   helpBtn.addEventListener('click', openHelp);
