@@ -8,7 +8,7 @@
   --good-bg:   #d6ecd2;
   --good-txt:  #2e5d2e;
   --bad-bg:    #f4d4d4;
-  --bad-txt:   #8b3a3a;
+  --bad-txt:   #de4242;
   --win-bg:    #f2fdf0;
   --button-bg: #fffa;
 
@@ -233,6 +233,7 @@ body {
 
 .row .score.conflict {
   color: var(--bad-txt);
+  font-weight: bold;
 }
 
 /* Transparent input stretched over the input row. */
