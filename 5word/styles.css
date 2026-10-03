@@ -185,6 +185,7 @@ body {
   gap: var(--cell-gap);
   justify-content: center;
   flex-shrink: 0;
+  padding-left: var(--cell);
 }
 
 /* Past guesses: letters are clickable to cycle their state. */
