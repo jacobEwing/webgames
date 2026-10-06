@@ -26,3 +26,12 @@ The knobs worth remembering, all at the top of styles.css:
 --bg, --panel, --ink, --line, --good-*, --bad-* — the palette
 
 In game.js: RECENT_LIMIT = 100 and RECENT_KEY = '5word.recentTargets' control the anti-repeat buffer.
+
+--------
+If words need to be scrubbed from the common source (any that aren't in words.txt), a list can be grabbed like so:
+
+grep -F -x -f words.txt common.txt > common.filtered.txt
+
+common.filtered.txt now contains the words in common.txt that are also in words.txt.  If that looks good swap it in and run convert-words.php:
+
+./convert-words.php common.txt ../common.js COMMON
